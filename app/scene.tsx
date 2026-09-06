@@ -6,22 +6,38 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 import { createExplosionLayout } from "./explosion-layout";
 import { decodeModelResponse } from "./model-download";
 import { PointerTap } from "./pointer-tap";
-import { SYSTEMS, type Atlas, type SceneState } from "./anatomy";
+import { SYSTEMS, type Atlas, type SceneState, type RulerMeasurement } from "./anatomy";
 import { getStudyEntry } from "./study";
 import { createPulpCavityGeometry, loadPulpData } from "./pulp-generator";
+import { FASCIAL_SPACES, INFECTION_PATHWAYS } from "./fascial-spaces";
+
 interface Props {
   atlas: Atlas;
   state: SceneState;
   onSelect: (id: string) => void;
   onProgress: (n: number) => void;
   onError: (s: string) => void;
+  onMeasure?: (measurement: RulerMeasurement | null) => void;
+  onSelectFascialSpace?: (spaceId: string) => void;
 }
-export default function AnatomyScene({ atlas, state, onSelect, onProgress, onError }: Props) {
+export default function AnatomyScene({
+  atlas,
+  state,
+  onSelect,
+  onProgress,
+  onError,
+  onMeasure,
+  onSelectFascialSpace,
+}: Props) {
   const host = useRef<HTMLDivElement>(null),
     latest = useRef(state),
-    select = useRef(onSelect);
+    select = useRef(onSelect),
+    measure = useRef(onMeasure),
+    selectFascial = useRef(onSelectFascialSpace);
   latest.current = state;
   select.current = onSelect;
+  measure.current = onMeasure;
+  selectFascial.current = onSelectFascialSpace;
   useEffect(() => {
     const el = host.current!;
     let disposed = false,
@@ -183,6 +199,175 @@ export default function AnatomyScene({ atlas, state, onSelect, onProgress, onErr
     hover.setAttribute("role", "tooltip");
     hover.hidden = true;
     el.appendChild(hover);
+
+    // Stencil Solid Clipping Caps Setup
+    const stencilBackMat = new T.MeshBasicMaterial({
+      depthWrite: false,
+      depthTest: false,
+      colorWrite: false,
+      stencilWrite: true,
+      stencilFunc: T.AlwaysStencilFunc,
+      side: T.BackSide,
+      stencilFail: T.KeepStencilOp,
+      stencilZFail: T.IncrementWrapStencilOp,
+      stencilZPass: T.IncrementWrapStencilOp,
+    });
+    const stencilFrontMat = new T.MeshBasicMaterial({
+      depthWrite: false,
+      depthTest: false,
+      colorWrite: false,
+      stencilWrite: true,
+      stencilFunc: T.AlwaysStencilFunc,
+      side: T.FrontSide,
+      stencilFail: T.KeepStencilOp,
+      stencilZFail: T.DecrementWrapStencilOp,
+      stencilZPass: T.DecrementWrapStencilOp,
+    });
+    const injectStencilShader = (mat: T.MeshBasicMaterial) => {
+      mat.onBeforeCompile = (shader) => {
+        shader.uniforms.partState = { value: partTexture };
+        shader.uniforms.stateWidth = { value: width };
+        shader.vertexShader =
+          "attribute float partIndex; uniform sampler2D partState; uniform float stateWidth; varying float partVisible;\n" +
+          shader.vertexShader;
+        shader.vertexShader = shader.vertexShader.replace(
+          "#include <begin_vertex>",
+          "#include <begin_vertex>\nvec2 stateUv = vec2((partIndex + 0.5) / stateWidth, 0.5); vec4 state = texture2D(partState, stateUv); transformed += state.xyz; partVisible = state.w;",
+        );
+        shader.fragmentShader = "varying float partVisible;\n" + shader.fragmentShader;
+        shader.fragmentShader = shader.fragmentShader.replace(
+          "#include <clipping_planes_fragment>",
+          "#include <clipping_planes_fragment>\nif (partVisible < 0.5) discard;",
+        );
+      };
+    };
+    injectStencilShader(stencilBackMat);
+    injectStencilShader(stencilFrontMat);
+
+    const capGeo = new T.PlaneGeometry(3, 3);
+    const capMat = new T.MeshStandardMaterial({
+      color: 0xeadcc9,
+      roughness: 0.68,
+      metalness: 0.05,
+      stencilWrite: true,
+      stencilRef: 0,
+      stencilFunc: T.NotEqualStencilFunc,
+      stencilFail: T.ReplaceStencilOp,
+      stencilZFail: T.ReplaceStencilOp,
+      stencilZPass: T.ReplaceStencilOp,
+      side: T.DoubleSide,
+    });
+    const capMesh = new T.Mesh(capGeo, capMat);
+    capMesh.renderOrder = 2;
+    capMesh.frustumCulled = false;
+    capMesh.visible = false;
+    capMesh.onAfterRender = (r) => {
+      r.clearStencil();
+    };
+    scene.add(capMesh);
+    const stencilGroup = new T.Group();
+    stencilGroup.visible = false;
+    scene.add(stencilGroup);
+
+    // 3D Interactive Ruler Setup
+    const rulerGroup = new T.Group();
+    rulerGroup.visible = false;
+    scene.add(rulerGroup);
+
+    const sphereGeoA = new T.SphereGeometry(0.0022, 16, 16);
+    const sphereMatA = new T.MeshBasicMaterial({ color: 0x06b6d4, depthTest: false });
+    const markerA = new T.Mesh(sphereGeoA, sphereMatA);
+    markerA.renderOrder = 20;
+    markerA.visible = false;
+    rulerGroup.add(markerA);
+
+    const sphereGeoB = new T.SphereGeometry(0.0022, 16, 16);
+    const sphereMatB = new T.MeshBasicMaterial({ color: 0x10b981, depthTest: false });
+    const markerB = new T.Mesh(sphereGeoB, sphereMatB);
+    markerB.renderOrder = 20;
+    markerB.visible = false;
+    rulerGroup.add(markerB);
+
+    const lineGeo = new T.BufferGeometry();
+    lineGeo.setAttribute("position", new T.BufferAttribute(new Float32Array(6), 3));
+    const lineMat = new T.LineBasicMaterial({
+      color: 0x00f2fe,
+      depthTest: false,
+      transparent: true,
+      opacity: 0.95,
+      linewidth: 2,
+    });
+    const rulerLine = new T.Line(lineGeo, lineMat);
+    rulerLine.renderOrder = 19;
+    rulerLine.visible = false;
+    rulerGroup.add(rulerLine);
+
+    let rulerPointA: T.Vector3 | null = null;
+    let rulerPointB: T.Vector3 | null = null;
+    let rulerPartA: Atlas["parts"][number] | null = null;
+    let rulerPartB: Atlas["parts"][number] | null = null;
+
+    const rulerBadge = document.createElement("div");
+    rulerBadge.className = "ruler-3d-badge";
+    rulerBadge.hidden = true;
+    el.appendChild(rulerBadge);
+
+    // Fascial Spaces & Clinical Infection Spread Setup
+    const fascialGroup = new T.Group();
+    fascialGroup.visible = false;
+    scene.add(fascialGroup);
+
+    const fascialMeshes = new Map<string, T.Mesh>();
+    FASCIAL_SPACES.forEach((space) => {
+      const geo = new T.SphereGeometry(1, 24, 16);
+      geo.scale(space.size[0], space.size[1], space.size[2]);
+      const mat = new T.MeshStandardMaterial({
+        color: new T.Color(space.color),
+        transparent: true,
+        opacity: 0.38,
+        roughness: 0.4,
+        metalness: 0.08,
+        side: T.DoubleSide,
+        depthWrite: false,
+      });
+      const mesh = new T.Mesh(geo, mat);
+      mesh.position.fromArray(space.center);
+      if (space.rotation) mesh.rotation.fromArray(space.rotation);
+      mesh.renderOrder = 5;
+      mesh.userData = { spaceId: space.id };
+      fascialGroup.add(mesh);
+      fascialMeshes.set(space.id, mesh);
+    });
+
+    let flowTubeMesh: T.Mesh | null = null;
+    const flowMat = new T.ShaderMaterial({
+      transparent: true,
+      side: T.DoubleSide,
+      depthWrite: false,
+      uniforms: {
+        time: { value: 0 },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        varying vec2 vUv;
+        void main() {
+          float pulse = sin(vUv.x * 24.0 - time * 8.0) * 0.5 + 0.5;
+          vec3 col = mix(vec3(1.0, 0.25, 0.1), vec3(1.0, 0.85, 0.2), pulse);
+          float alpha = smoothstep(0.08, 0.92, pulse) * 0.85 + 0.15;
+          gl_FragColor = vec4(col, alpha);
+        }
+      `,
+    });
+    let lastFascialMode = false;
+    let lastFascialPathId = "";
+    let lastFascialSpaceId = "";
     type Target = {
       index: number;
       x: number;
@@ -287,7 +472,18 @@ export default function AnatomyScene({ atlas, state, onSelect, onProgress, onErr
         geometries.push(geometry);
         const mesh = new T.Mesh(geometry, mats.get(system as never));
         mesh.frustumCulled = false;
+        mesh.renderOrder = 3;
         scene.add(mesh);
+
+        const backMesh = new T.Mesh(geometry, stencilBackMat);
+        backMesh.frustumCulled = false;
+        backMesh.renderOrder = 1;
+        stencilGroup.add(backMesh);
+
+        const frontMesh = new T.Mesh(geometry, stencilFrontMat);
+        frontMesh.frustumCulled = false;
+        frontMesh.renderOrder = 1;
+        stencilGroup.add(frontMesh);
       });
       lastState = null;
       loaded++;
@@ -387,6 +583,45 @@ export default function AnatomyScene({ atlas, state, onSelect, onProgress, onErr
     };
     const move = (e: PointerEvent) => {
       tap.move(e.pointerId, e.clientX, e.clientY);
+      if (latest.current.rulerMode) {
+        hover.hidden = true;
+        renderer.domElement.style.cursor = "crosshair";
+        if (rulerPointA && !rulerPointB) {
+          const rect = renderer.domElement.getBoundingClientRect();
+          pointer.set(
+            ((e.clientX - rect.left) / rect.width) * 2 - 1,
+            (-(e.clientY - rect.top) / rect.height) * 2 + 1,
+          );
+          raycaster.setFromCamera(pointer, camera);
+          let nearest = Infinity,
+            hoverHit: T.Vector3 | null = null;
+          pickers.forEach((mesh, i) => {
+            if (!mesh || data[i * 4 + 3] < 0.5) return;
+            worldBox.copy(bounds[i]).translate(mesh.position);
+            if (!raycaster.ray.intersectBox(worldBox, hitPoint)) return;
+            const hits = raycaster.intersectObject(mesh, false);
+            if (hits[0] && hits[0].distance < nearest) {
+              nearest = hits[0].distance;
+              hoverHit = hits[0].point;
+            }
+          });
+          if (hoverHit) {
+            const posAttr = rulerLine.geometry.attributes.position as T.BufferAttribute;
+            posAttr.setXYZ(0, rulerPointA.x, rulerPointA.y, rulerPointA.z);
+            posAttr.setXYZ(1, (hoverHit as T.Vector3).x, (hoverHit as T.Vector3).y, (hoverHit as T.Vector3).z);
+            posAttr.needsUpdate = true;
+            rulerLine.visible = true;
+            const dist = rulerPointA.distanceTo(hoverHit) * 1000;
+            rulerBadge.hidden = false;
+            rulerBadge.innerHTML = `<span class="ruler-pill-badge">${dist.toFixed(1)} mm</span>`;
+            projected.copy(rulerPointA).add(hoverHit).multiplyScalar(0.5).project(camera);
+            rulerBadge.style.left = `${((projected.x + 1) * el.clientWidth) / 2}px`;
+            rulerBadge.style.top = `${((1 - projected.y) * el.clientHeight) / 2}px`;
+            dirty = true;
+          }
+        }
+        return;
+      }
       if (e.buttons || amount < 0.5 || e.pointerType === "touch") {
         hover.hidden = true;
         return;
@@ -417,6 +652,107 @@ export default function AnatomyScene({ atlas, state, onSelect, onProgress, onErr
         (-(e.clientY - rect.top) / rect.height) * 2 + 1,
       );
       raycaster.setFromCamera(pointer, camera);
+
+      if (latest.current.rulerMode) {
+        let nearestHit = Infinity,
+          hitTarget: T.Vector3 | null = null,
+          foundIdx = -1;
+        pickers.forEach((mesh, i) => {
+          if (!mesh || data[i * 4 + 3] < 0.5) return;
+          worldBox.copy(bounds[i]).translate(mesh.position);
+          if (!raycaster.ray.intersectBox(worldBox, hitPoint)) return;
+          const hits = raycaster.intersectObject(mesh, false);
+          if (hits[0] && hits[0].distance < nearestHit) {
+            nearestHit = hits[0].distance;
+            hitTarget = hits[0].point;
+            foundIdx = i;
+          }
+        });
+        if (hitTarget && foundIdx >= 0) {
+          const pt = (hitTarget as T.Vector3).clone();
+          if (!rulerPointA) {
+            rulerPointA = pt;
+            rulerPartA = atlas.parts[foundIdx];
+            markerA.position.copy(rulerPointA);
+            markerA.visible = true;
+            markerB.visible = false;
+            rulerLine.visible = false;
+            rulerBadge.hidden = false;
+            rulerBadge.innerHTML = `<span class="ruler-pill-badge hint">点 A 已固定，请点击点 B</span>`;
+            projected.copy(rulerPointA).project(camera);
+            rulerBadge.style.left = `${((projected.x + 1) * el.clientWidth) / 2}px`;
+            rulerBadge.style.top = `${((1 - projected.y) * el.clientHeight) / 2}px`;
+            measure.current?.({
+              pointA: rulerPointA.toArray(),
+              pointB: rulerPointA.toArray(),
+              distanceMm: 0,
+              deltaMm: [0, 0, 0],
+              partA: { id: rulerPartA.id, name: rulerPartA.name },
+            });
+          } else if (!rulerPointB) {
+            rulerPointB = pt;
+            rulerPartB = atlas.parts[foundIdx];
+            markerB.position.copy(rulerPointB);
+            markerB.visible = true;
+            const posAttr = rulerLine.geometry.attributes.position as T.BufferAttribute;
+            posAttr.setXYZ(0, rulerPointA.x, rulerPointA.y, rulerPointA.z);
+            posAttr.setXYZ(1, rulerPointB.x, rulerPointB.y, rulerPointB.z);
+            posAttr.needsUpdate = true;
+            rulerLine.visible = true;
+            const dist = rulerPointA.distanceTo(rulerPointB) * 1000;
+            const delta: [number, number, number] = [
+              Math.abs(rulerPointB.x - rulerPointA.x) * 1000,
+              Math.abs(rulerPointB.y - rulerPointA.y) * 1000,
+              Math.abs(rulerPointB.z - rulerPointA.z) * 1000,
+            ];
+            rulerBadge.hidden = false;
+            rulerBadge.innerHTML = `<span class="ruler-pill-badge active">${dist.toFixed(1)} mm</span>`;
+            projected.copy(rulerPointA).add(rulerPointB).multiplyScalar(0.5).project(camera);
+            rulerBadge.style.left = `${((projected.x + 1) * el.clientWidth) / 2}px`;
+            rulerBadge.style.top = `${((1 - projected.y) * el.clientHeight) / 2}px`;
+            measure.current?.({
+              pointA: rulerPointA.toArray(),
+              pointB: rulerPointB.toArray(),
+              distanceMm: dist,
+              deltaMm: delta,
+              partA: rulerPartA ? { id: rulerPartA.id, name: rulerPartA.name } : undefined,
+              partB: rulerPartB ? { id: rulerPartB.id, name: rulerPartB.name } : undefined,
+            });
+          } else {
+            rulerPointA = pt;
+            rulerPointB = null;
+            rulerPartA = atlas.parts[foundIdx];
+            rulerPartB = null;
+            markerA.position.copy(rulerPointA);
+            markerA.visible = true;
+            markerB.visible = false;
+            rulerLine.visible = false;
+            rulerBadge.innerHTML = `<span class="ruler-pill-badge hint">点 A 已固定，请点击点 B</span>`;
+            projected.copy(rulerPointA).project(camera);
+            rulerBadge.style.left = `${((projected.x + 1) * el.clientWidth) / 2}px`;
+            rulerBadge.style.top = `${((1 - projected.y) * el.clientHeight) / 2}px`;
+            measure.current?.({
+              pointA: rulerPointA.toArray(),
+              pointB: rulerPointA.toArray(),
+              distanceMm: 0,
+              deltaMm: [0, 0, 0],
+              partA: { id: rulerPartA.id, name: rulerPartA.name },
+            });
+          }
+          dirty = true;
+        }
+        return;
+      }
+
+      if (latest.current.fascialMode) {
+        const fascialHits = raycaster.intersectObjects(fascialGroup.children, false);
+        const hitSpace = fascialHits.find((h) => h.object.userData?.spaceId);
+        if (hitSpace?.object.userData?.spaceId) {
+          selectFascial.current?.(hitSpace.object.userData.spaceId);
+          return;
+        }
+      }
+
       let nearest = Infinity,
         found = -1;
       const hasSolid = atlas.parts.some(
@@ -557,7 +893,7 @@ export default function AnatomyScene({ atlas, state, onSelect, onProgress, onErr
       // Update Clipping Plane
       const clipping = s.clipping;
       const clippingKey = clipping?.enabled
-        ? `${clipping.axis}:${clipping.offset}:${clipping.inverted}`
+        ? `${clipping.axis}:${clipping.offset}:${clipping.inverted}:${clipping.solidCap !== false}`
         : "disabled";
       if (clippingKey !== lastClippingKey) {
         lastClippingKey = clippingKey;
@@ -595,6 +931,17 @@ export default function AnatomyScene({ atlas, state, onSelect, onProgress, onErr
             m.clippingPlanes = [clipPlane];
             m.clipIntersection = false;
           });
+          stencilBackMat.clippingPlanes = [clipPlane];
+          stencilFrontMat.clippingPlanes = [clipPlane];
+
+          const planePoint = clipPlane.normal.clone().multiplyScalar(-clipPlane.constant);
+          capMesh.position.copy(planePoint);
+          capMesh.lookAt(planePoint.clone().add(clipPlane.normal));
+
+          const solid = clipping.solidCap !== false;
+          capMesh.visible = solid;
+          stencilGroup.visible = solid;
+
           pulpGroups.forEach((g) => {
             g?.traverse((child) => {
               if (child instanceof T.Mesh && child.material) {
@@ -606,6 +953,10 @@ export default function AnatomyScene({ atlas, state, onSelect, onProgress, onErr
           materials.forEach((m) => {
             m.clippingPlanes = [];
           });
+          stencilBackMat.clippingPlanes = [];
+          stencilFrontMat.clippingPlanes = [];
+          capMesh.visible = false;
+          stencilGroup.visible = false;
           pulpGroups.forEach((g) => {
             g?.traverse((child) => {
               if (child instanceof T.Mesh && child.material) {
@@ -614,6 +965,77 @@ export default function AnatomyScene({ atlas, state, onSelect, onProgress, onErr
             });
           });
         }
+        dirty = true;
+      }
+
+      // Update Ruler visibility & 3D badge projection
+      if (!s.rulerMode && rulerGroup.visible) {
+        rulerGroup.visible = false;
+        markerA.visible = false;
+        markerB.visible = false;
+        rulerLine.visible = false;
+        rulerBadge.hidden = true;
+        rulerPointA = null;
+        rulerPointB = null;
+        dirty = true;
+      } else if (s.rulerMode && !rulerGroup.visible) {
+        rulerGroup.visible = true;
+        dirty = true;
+      }
+      if (s.rulerMode && rulerPointA && !rulerBadge.hidden) {
+        const mid = rulerPointB
+          ? rulerPointA.clone().add(rulerPointB).multiplyScalar(0.5)
+          : rulerPointA;
+        projected.copy(mid).project(camera);
+        if (projected.z >= -1 && projected.z <= 1) {
+          rulerBadge.style.left = `${((projected.x + 1) * el.clientWidth) / 2}px`;
+          rulerBadge.style.top = `${((1 - projected.y) * el.clientHeight) / 2}px`;
+        }
+      }
+
+      // Update Fascial Spaces & Infection Pathway
+      if (
+        s.fascialMode !== lastFascialMode ||
+        s.fascialPathId !== lastFascialPathId ||
+        s.fascialActiveSpaceId !== lastFascialSpaceId
+      ) {
+        lastFascialMode = !!s.fascialMode;
+        lastFascialPathId = s.fascialPathId || "";
+        lastFascialSpaceId = s.fascialActiveSpaceId || "";
+        fascialGroup.visible = !!s.fascialMode;
+
+        if (s.fascialMode) {
+          fascialMeshes.forEach((mesh, id) => {
+            const isAct = id === s.fascialActiveSpaceId;
+            const mat = mesh.material as T.MeshStandardMaterial;
+            mat.opacity = isAct ? 0.8 : 0.35;
+            mesh.scale.setScalar(isAct ? 1.08 : 1.0);
+          });
+          const pathway = INFECTION_PATHWAYS.find(
+            (p) => p.id === (s.fascialPathId || "wisdom-tooth-ramus"),
+          );
+          if (pathway && pathway.flowPoints.length >= 2) {
+            const curve = new T.CatmullRomCurve3(
+              pathway.flowPoints.map((pt) => new T.Vector3(...pt)),
+            );
+            const tubeGeo = new T.TubeGeometry(curve, 64, 0.0014, 8, false);
+            if (flowTubeMesh) {
+              flowTubeMesh.geometry.dispose();
+              flowTubeMesh.geometry = tubeGeo;
+            } else {
+              flowTubeMesh = new T.Mesh(tubeGeo, flowMat);
+              flowTubeMesh.renderOrder = 8;
+              fascialGroup.add(flowTubeMesh);
+            }
+            flowTubeMesh.visible = true;
+          } else if (flowTubeMesh) {
+            flowTubeMesh.visible = false;
+          }
+        }
+        dirty = true;
+      }
+      if (s.fascialMode) {
+        flowMat.uniforms.time.value += dt;
         dirty = true;
       }
 
@@ -737,6 +1159,25 @@ export default function AnatomyScene({ atlas, state, onSelect, onProgress, onErr
       markerGeometry.dispose();
       markerMaterial.dispose();
       hover.remove();
+      capGeo.dispose();
+      capMat.dispose();
+      stencilBackMat.dispose();
+      stencilFrontMat.dispose();
+      sphereGeoA.dispose();
+      sphereMatA.dispose();
+      sphereGeoB.dispose();
+      sphereMatB.dispose();
+      lineGeo.dispose();
+      lineMat.dispose();
+      rulerBadge.remove();
+      flowMat.dispose();
+      if (flowTubeMesh) {
+        flowTubeMesh.geometry.dispose();
+      }
+      fascialMeshes.forEach((m) => {
+        m.geometry.dispose();
+        (m.material as T.Material).dispose();
+      });
       renderer.dispose();
       renderer.domElement.remove();
     };

@@ -163,6 +163,15 @@ export interface ClippingState {
   axis: "x" | "y" | "z";
   offset: number; // -100 to 100
   inverted: boolean;
+  solidCap?: boolean;
+}
+export interface RulerMeasurement {
+  pointA: [number, number, number];
+  pointB: [number, number, number];
+  distanceMm: number;
+  deltaMm: [number, number, number]; // [dx, dy, dz]
+  partA?: { id: string; name: string };
+  partB?: { id: string; name: string };
 }
 export interface SceneState {
   scope?: string[];
@@ -177,6 +186,11 @@ export interface SceneState {
   reset: number;
   clipping?: ClippingState;
   rctMode?: boolean;
+  rulerMode?: boolean;
+  fascialMode?: boolean;
+  fascialPathId?: string;
+  fascialActiveSpaceId?: string;
+  fascialStageIndex?: number;
 }
 export const DEFAULT_VISIBLE: SystemId[] = [
   "cardiac",

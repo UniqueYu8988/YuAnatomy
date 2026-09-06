@@ -8,6 +8,7 @@ import {
   Layers3,
   Info,
   ChevronRight,
+  ChevronLeft,
   ChevronUp,
   ChevronDown,
   ArrowUpRight,
@@ -15,6 +16,9 @@ import {
   Scissors,
   PanelLeftClose,
   PanelLeftOpen,
+  Ruler,
+  Activity,
+  Layers,
 } from "lucide-react";
 import AnatomyScene from "./scene";
 import ToothPointMatrix from "./tooth-point-matrix";
@@ -24,8 +28,21 @@ import {
   getDentalToothByMesh,
   type ToothCategory,
 } from "./dental-data";
-import { SYSTEMS, type Atlas, type Concept, type SceneState, type View } from "./anatomy";
+import {
+  SYSTEMS,
+  type Atlas,
+  type Concept,
+  type SceneState,
+  type View,
+  type RulerMeasurement,
+} from "./anatomy";
 import { inPreset, PRESETS, getStudyEntry, type PresetId } from "./study";
+import {
+  FASCIAL_SPACES,
+  INFECTION_PATHWAYS,
+  type FascialSpace,
+  type InfectionPathway,
+} from "./fascial-spaces";
 
 const JAW_BONE_IDS = ["FJ3269", "FJ3289", "FJ3375"]; // Left maxilla, Mandible, Right maxilla
 
@@ -43,8 +60,13 @@ const initial: SceneState = {
     axis: "y",
     offset: 0,
     inverted: false,
+    solidCap: true,
   },
   rctMode: false,
+  rulerMode: false,
+  fascialMode: false,
+  fascialPathId: "wisdom-tooth-ramus",
+  fascialStageIndex: 0,
 };
 
 export default function YuAnatomy() {
@@ -67,6 +89,22 @@ export default function YuAnatomy() {
     [error, setError] = useState(""),
     [drawer, setDrawer] = useState(false),
     [about, setAbout] = useState(false);
+  const [rulerMeasurement, setRulerMeasurement] = useState<RulerMeasurement | null>(null);
+
+  const currentPathway = useMemo(
+    () => INFECTION_PATHWAYS.find((p) => p.id === (state.fascialPathId || "wisdom-tooth-ramus")),
+    [state.fascialPathId],
+  );
+  const currentStage = useMemo(
+    () => currentPathway?.stages[state.fascialStageIndex ?? 0],
+    [currentPathway, state.fascialStageIndex],
+  );
+  const activeFascialSpace = useMemo(
+    () =>
+      FASCIAL_SPACES.find((s) => s.id === state.fascialActiveSpaceId) ??
+      (currentStage?.spaceId ? FASCIAL_SPACES.find((s) => s.id === currentStage.spaceId) : null),
+    [state.fascialActiveSpaceId, currentStage],
+  );
   useEffect(() => {
     const c = new AbortController();
     fetch("/head-neck/atlas.json", { signal: c.signal })
@@ -380,6 +418,10 @@ export default function YuAnatomy() {
               }}
               onProgress={setProgress}
               onError={setError}
+              onMeasure={setRulerMeasurement}
+              onSelectFascialSpace={(spaceId) =>
+                setState((s) => ({ ...s, fascialActiveSpaceId: spaceId }))
+              }
             />
           )}
           {chosen && (
@@ -444,6 +486,147 @@ export default function YuAnatomy() {
                 <span>进入 00 FDI 牙位系统</span>
                 <ChevronRight size={14} />
               </button>
+            </div>
+          )}
+
+          {/* 3D Interactive Ruler Floating HUD */}
+          {state.rulerMode && (
+            <div className="ruler-hud-bar" role="region" aria-label="三维测距标尺控制面板">
+              <div className="ruler-hud-left">
+                <Ruler size={16} className="ruler-icon" />
+                <span className="ruler-hud-title">3D 交互测距标尺</span>
+              </div>
+              <div className="ruler-hud-center">
+                {!rulerMeasurement || rulerMeasurement.distanceMm === 0 ? (
+                  <span className="ruler-hint">
+                    {rulerMeasurement ? "已锚定起点 A，请在模型表面点击选取终点 B" : "请在模型任意解剖结构表面点击选取起点 A"}
+                  </span>
+                ) : (
+                  <div className="ruler-summary">
+                    <strong className="ruler-dist">{rulerMeasurement.distanceMm.toFixed(1)} mm</strong>
+                    <span className="ruler-deltas">
+                      ΔX: {rulerMeasurement.deltaMm[0].toFixed(1)} mm · ΔY: {rulerMeasurement.deltaMm[1].toFixed(1)} mm · ΔZ: {rulerMeasurement.deltaMm[2].toFixed(1)} mm
+                    </span>
+                    {rulerMeasurement.partA && rulerMeasurement.partB && (
+                      <span className="ruler-parts">
+                        ({rulerMeasurement.partA.name} ↔ {rulerMeasurement.partB.name})
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="ruler-hud-right">
+                {rulerMeasurement && (
+                  <button
+                    type="button"
+                    className="ruler-btn reset"
+                    onClick={() => setRulerMeasurement(null)}
+                  >
+                    重新测量
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="ruler-btn close"
+                  onClick={() => {
+                    setState((s) => ({ ...s, rulerMode: false }));
+                    setRulerMeasurement(null);
+                  }}
+                >
+                  退出标尺
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Fascial Space Infection Controller Bar */}
+          {state.fascialMode && (
+            <div className="fascial-controller-bar" role="region" aria-label="颌面间隙感染路径控制器">
+              <div className="fascial-bar-row top">
+                <div className="fascial-title-group">
+                  <Activity size={16} className="fascial-icon" />
+                  <span className="fascial-label">间隙感染扩散链：</span>
+                </div>
+                <div className="fascial-pathway-tabs">
+                  {INFECTION_PATHWAYS.map((p) => {
+                    const active = (state.fascialPathId || "wisdom-tooth-ramus") === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        className={`fascial-pathway-btn ${active ? "active" : ""}`}
+                        onClick={() =>
+                          setState((s) => ({
+                            ...s,
+                            fascialPathId: p.id,
+                            fascialStageIndex: 0,
+                            fascialActiveSpaceId: p.stages[0]?.spaceId,
+                          }))
+                        }
+                      >
+                        {p.title.split("（")[0]}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  className="fascial-close-btn"
+                  onClick={() => setState((s) => ({ ...s, fascialMode: false }))}
+                  title="退出间隙感染模式"
+                  aria-label="退出间隙感染模式"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {currentPathway && (
+                <div className="fascial-bar-row bottom">
+                  <button
+                    type="button"
+                    className="fascial-nav-btn"
+                    disabled={(state.fascialStageIndex ?? 0) <= 0}
+                    onClick={() =>
+                      setState((s) => {
+                        const prev = Math.max(0, (s.fascialStageIndex ?? 0) - 1);
+                        return {
+                          ...s,
+                          fascialStageIndex: prev,
+                          fascialActiveSpaceId: currentPathway.stages[prev]?.spaceId,
+                        };
+                      })
+                    }
+                  >
+                    <ChevronLeft size={14} />
+                    <span>上一步</span>
+                  </button>
+
+                  <div className="fascial-stage-pill">
+                    <span className="stage-num">阶段 {(state.fascialStageIndex ?? 0) + 1} / {currentPathway.stages.length}</span>
+                    <strong className="stage-title">{currentStage?.title}</strong>
+                    <span className="stage-desc">{currentStage?.sourceDesc}</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="fascial-nav-btn"
+                    disabled={(state.fascialStageIndex ?? 0) >= currentPathway.stages.length - 1}
+                    onClick={() =>
+                      setState((s) => {
+                        const next = Math.min(currentPathway.stages.length - 1, (s.fascialStageIndex ?? 0) + 1);
+                        return {
+                          ...s,
+                          fascialStageIndex: next,
+                          fascialActiveSpaceId: currentPathway.stages[next]?.spaceId,
+                        };
+                      })
+                    }
+                  >
+                    <span>下一步</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -626,6 +809,20 @@ export default function YuAnatomy() {
             >
               <RotateCcw size={16} />
             </button>
+            <button
+              type="button"
+              className={`icon-button solid-cap-toggle ${state.clipping.solidCap !== false ? "active" : ""}`}
+              title={state.clipping.solidCap !== false ? "实体截面已开启 (Stencil 封口)" : "截面镂空 (点击开启实体截面)"}
+              aria-label="切换实体截面"
+              onClick={() =>
+                setState((s) => ({
+                  ...s,
+                  clipping: { ...s.clipping!, solidCap: s.clipping?.solidCap === false },
+                }))
+              }
+            >
+              <Layers size={16} />
+            </button>
           </div>
         )}
 
@@ -716,6 +913,43 @@ export default function YuAnatomy() {
 
             <button
               type="button"
+              className={`toolbar-tool-btn ${state.rulerMode ? "active" : ""}`}
+              title="三维空间交互测距标尺：在模型表面点选两点测量解剖毫米距离"
+              aria-pressed={state.rulerMode}
+              onClick={() =>
+                setState((s) => ({
+                  ...s,
+                  rulerMode: !s.rulerMode,
+                  fascialMode: false,
+                }))
+              }
+            >
+              <Ruler size={15} />
+              <span>测距标尺</span>
+            </button>
+
+            <button
+              type="button"
+              className={`toolbar-tool-btn ${state.fascialMode ? "active" : ""}`}
+              title="口腔颌面部筋膜间隙与经典感染扩散路径"
+              aria-pressed={state.fascialMode}
+              onClick={() =>
+                setState((s) => ({
+                  ...s,
+                  fascialMode: !s.fascialMode,
+                  rulerMode: false,
+                  fascialPathId: s.fascialPathId || "wisdom-tooth-ramus",
+                  fascialStageIndex: 0,
+                  fascialActiveSpaceId: INFECTION_PATHWAYS[0].stages[0]?.spaceId,
+                }))
+              }
+            >
+              <Activity size={15} />
+              <span>间隙感染</span>
+            </button>
+
+            <button
+              type="button"
               className={`toolbar-tool-btn ${state.rctMode ? "active" : ""}`}
               title="显示依据牙体外形生成的髓腔示意；非真实扫描根管"
               aria-pressed={state.rctMode}
@@ -737,6 +971,7 @@ export default function YuAnatomy() {
                     axis: s.clipping?.axis ?? "y",
                     offset: s.clipping?.offset ?? 0,
                     inverted: s.clipping?.inverted ?? false,
+                    solidCap: s.clipping?.solidCap ?? true,
                   },
                 }))
               }
@@ -776,7 +1011,149 @@ export default function YuAnatomy() {
       </section>
       <aside className="inspector" aria-label="结构详情">
         <section className="detail-panel" aria-label="结构详情">
-          {chosen ? (
+          {state.fascialMode && activeFascialSpace ? (
+            <div className="fascial-detail-card">
+              <div className="detail-top">
+                <span className="eyebrow">颌面筋膜间隙 · 专科考点</span>
+                <button
+                  className="icon-button"
+                  aria-label="关闭间隙详情"
+                  onClick={() => setState((s) => ({ ...s, fascialActiveSpaceId: undefined }))}
+                >
+                  <X size={17} />
+                </button>
+              </div>
+              <h2>{activeFascialSpace.name}</h2>
+              <p className="latin-subtitle">{activeFascialSpace.latinName}</p>
+              <div className="fascial-badge-row">
+                <span className="fascial-tag trismus">张口受限：{activeFascialSpace.clinical.trismus}</span>
+                {currentPathway && (
+                  <span className="fascial-tag pathway">扩散链：{currentPathway.title.split("（")[0]}</span>
+                )}
+              </div>
+
+              <div className="fascial-section">
+                <h4 className="fascial-section-title">解剖境界（六界）</h4>
+                <div className="fascial-boundaries-grid">
+                  <div className="boundary-item">
+                    <span className="boundary-label">前界</span>
+                    <span className="boundary-val">{activeFascialSpace.boundaries.anterior}</span>
+                  </div>
+                  <div className="boundary-item">
+                    <span className="boundary-label">后界</span>
+                    <span className="boundary-val">{activeFascialSpace.boundaries.posterior}</span>
+                  </div>
+                  <div className="boundary-item">
+                    <span className="boundary-label">内界</span>
+                    <span className="boundary-val">{activeFascialSpace.boundaries.medial}</span>
+                  </div>
+                  <div className="boundary-item">
+                    <span className="boundary-label">外界</span>
+                    <span className="boundary-val">{activeFascialSpace.boundaries.lateral}</span>
+                  </div>
+                  <div className="boundary-item">
+                    <span className="boundary-label">上界</span>
+                    <span className="boundary-val">{activeFascialSpace.boundaries.superior}</span>
+                  </div>
+                  <div className="boundary-item">
+                    <span className="boundary-label">下界</span>
+                    <span className="boundary-val">{activeFascialSpace.boundaries.inferior}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="fascial-section">
+                <h4 className="fascial-section-title">临床特征与感染源</h4>
+                <div className="fascial-info-item">
+                  <strong>常见来源：</strong>
+                  <span>{activeFascialSpace.clinical.source}</span>
+                </div>
+                <div className="fascial-info-item">
+                  <strong>典型体征：</strong>
+                  <span>{activeFascialSpace.clinical.symptoms}</span>
+                </div>
+              </div>
+
+              <div className="fascial-section highlight">
+                <h4 className="fascial-section-title">脓肿切开引流路径</h4>
+                <p className="fascial-drainage-text">{activeFascialSpace.clinical.drainage}</p>
+                <div className="fascial-danger-alert">
+                  <strong>避障危险区：</strong>
+                  <span>{activeFascialSpace.clinical.dangerZones}</span>
+                </div>
+              </div>
+            </div>
+          ) : state.rulerMode && rulerMeasurement && rulerMeasurement.distanceMm > 0 ? (
+            <div className="ruler-detail-card">
+              <div className="detail-top">
+                <span className="eyebrow">三维解剖测量结果</span>
+                <button
+                  className="icon-button"
+                  aria-label="清除测距"
+                  onClick={() => setRulerMeasurement(null)}
+                >
+                  <X size={17} />
+                </button>
+              </div>
+              <div className="ruler-hero-value">
+                <span className="val">{rulerMeasurement.distanceMm.toFixed(1)}</span>
+                <span className="unit">mm</span>
+              </div>
+              <p className="muted" style={{ marginBottom: "1rem" }}>
+                两点间真实三维欧氏空间直线距离
+              </p>
+
+              <div className="ruler-axes-grid">
+                <div className="axis-item">
+                  <span className="axis-name">左右跨度 (ΔX)</span>
+                  <span className="axis-val">{rulerMeasurement.deltaMm[0].toFixed(1)} mm</span>
+                </div>
+                <div className="axis-item">
+                  <span className="axis-name">垂直高度 (ΔY)</span>
+                  <span className="axis-val">{rulerMeasurement.deltaMm[1].toFixed(1)} mm</span>
+                </div>
+                <div className="axis-item">
+                  <span className="axis-name">前后深度 (ΔZ)</span>
+                  <span className="axis-val">{rulerMeasurement.deltaMm[2].toFixed(1)} mm</span>
+                </div>
+              </div>
+
+              <div className="ruler-landmarks-list">
+                <div className="landmark-row">
+                  <span className="point-badge a">点 A</span>
+                  <span className="landmark-text">
+                    {rulerMeasurement.partA?.name ?? "解剖表面锚点"}
+                  </span>
+                </div>
+                <div className="landmark-row">
+                  <span className="point-badge b">点 B</span>
+                  <span className="landmark-text">
+                    {rulerMeasurement.partB?.name ?? "解剖表面锚点"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="ruler-actions-row">
+                <button
+                  type="button"
+                  className="ruler-btn reset"
+                  onClick={() => setRulerMeasurement(null)}
+                >
+                  清除重测
+                </button>
+                <button
+                  type="button"
+                  className="ruler-btn close"
+                  onClick={() => {
+                    setState((s) => ({ ...s, rulerMode: false }));
+                    setRulerMeasurement(null);
+                  }}
+                >
+                  退出标尺
+                </button>
+              </div>
+            </div>
+          ) : chosen ? (
             <>
               <div className="detail-top">
                 <span className="eyebrow">当前选中</span>
