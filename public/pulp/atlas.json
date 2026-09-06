@@ -1,0 +1,433 @@
+{
+  "schema": 1,
+  "kind": "surface-constrained-schematic",
+  "apices": "closed-schematic-ends-not-anatomical-foramina",
+  "pitchMm": 0.12,
+  "minimumComputationalMarginMm": 0.3,
+  "url": "/pulp/pulp-ff178a62ab01.bin",
+  "gzip": "/pulp/pulp-ff178a62ab01.bin.gz",
+  "bytes": 12005664,
+  "sha256": "ff178a62ab01281423178dae8be97bdcfc8992551f8e030e7473d676e00ab9ec",
+  "parts": [
+    {
+      "id": "FJ1254",
+      "sourceSha256": "ee1121be9c0c287d3f6247edcd27ac3c0ab8fb79dfeb435f322c4c28d5d7521b",
+      "center": [
+        0.022588000632822514,
+        0.22707120329141617,
+        0.046525001525878906
+      ],
+      "vertexCount": 14800,
+      "indexCount": 88788,
+      "positions": 0,
+      "certifiedClearanceMm": 0.057898618942812924,
+      "discardedVoxels": 0,
+      "indices": 177600
+    },
+    {
+      "id": "FJ1255",
+      "sourceSha256": "ed9583265d81a94574bbb54cd0a93c9b99f578ec56b06be959d9a5d7c1e01023",
+      "center": [
+        0.016542799770832062,
+        0.22143620252609253,
+        0.060438500717282295
+      ],
+      "vertexCount": 9638,
+      "indexCount": 57816,
+      "positions": 532752,
+      "certifiedClearanceMm": 0.4257547770687281,
+      "discardedVoxels": 0,
+      "indices": 648408
+    },
+    {
+      "id": "FJ1256",
+      "sourceSha256": "60c7e94c6e6e5eccf2e328b0d841476ec3a13f862c31ecc5833826c5df309aa9",
+      "center": [
+        0.026108750142157078,
+        0.2319311946630478,
+        0.034590499475598335
+      ],
+      "vertexCount": 12788,
+      "indexCount": 76716,
+      "positions": 879672,
+      "certifiedClearanceMm": 0.0686931176518795,
+      "discardedVoxels": 0,
+      "indices": 1033128
+    },
+    {
+      "id": "FJ1257",
+      "sourceSha256": "85c0813ecaca4d548ff358c0e0947334c370e48cf28286407ca0ce3560e5bc17",
+      "center": [
+        0.019638399593532085,
+        0.2222611978650093,
+        0.05400699935853481
+      ],
+      "vertexCount": 9052,
+      "indexCount": 54300,
+      "positions": 1339992,
+      "certifiedClearanceMm": 0.4551029603955048,
+      "discardedVoxels": 0,
+      "indices": 1448616
+    },
+    {
+      "id": "FJ1258",
+      "sourceSha256": "a5af1dbcd5b9c58d5c3d5cb0e2ce0efacd30f3954d5cb715bceacbd5a49ab460",
+      "center": [
+        0.0024498374841641635,
+        0.21892619878053665,
+        0.06937949731945992
+      ],
+      "vertexCount": 8698,
+      "indexCount": 52176,
+      "positions": 1665816,
+      "certifiedClearanceMm": 0.39436977903621107,
+      "discardedVoxels": 0,
+      "indices": 1770192
+    },
+    {
+      "id": "FJ1259",
+      "sourceSha256": "684377f3742dff194fecaad3571bbe4afab4db139e9f83c74cbf8c11f55c9303",
+      "center": [
+        0.007457150029949844,
+        0.2190612033009529,
+        0.06938949972391129
+      ],
+      "vertexCount": 9024,
+      "indexCount": 54132,
+      "positions": 1978896,
+      "certifiedClearanceMm": 0.3496139014348576,
+      "discardedVoxels": 0,
+      "indices": 2087184
+    },
+    {
+      "id": "FJ1260",
+      "sourceSha256": "0bfe4e9c9d3bb17abccccce86ca8437b198a796352cb2514299094d765318015",
+      "center": [
+        0.01199697027914226,
+        0.21867620199918747,
+        0.06605800241231918
+      ],
+      "vertexCount": 10722,
+      "indexCount": 64320,
+      "positions": 2303712,
+      "certifiedClearanceMm": 0.43596383389257687,
+      "discardedVoxels": 0,
+      "indices": 2432376
+    },
+    {
+      "id": "FJ1261",
+      "sourceSha256": "25b3abde84320e5a82283ac4ffa861e5b36afea201b7c45285b2c5cc6328d392",
+      "center": [
+        0.024098949506878853,
+        0.24826620519161224,
+        0.048415498808026314
+      ],
+      "vertexCount": 17612,
+      "indexCount": 105660,
+      "positions": 2689656,
+      "certifiedClearanceMm": 0.17730504473645453,
+      "discardedVoxels": 0,
+      "indices": 2901000
+    },
+    {
+      "id": "FJ1262",
+      "sourceSha256": "c0801407a72f76c02f78396b2f1fe752bbe1670a1528eb19ba028536788ee1c3",
+      "center": [
+        0.01989714941009879,
+        0.24705619364976883,
+        0.06350200064480305
+      ],
+      "vertexCount": 13028,
+      "indexCount": 78156,
+      "positions": 3323640,
+      "certifiedClearanceMm": 0.42228125817872547,
+      "discardedVoxels": 0,
+      "indices": 3479976
+    },
+    {
+      "id": "FJ1263",
+      "sourceSha256": "60454f135a7fe67902611b8f56deb50e64835c1847c53d6c287607510a216d2c",
+      "center": [
+        0.023597699590027332,
+        0.2509112060070038,
+        0.03974050097167492
+      ],
+      "vertexCount": 16962,
+      "indexCount": 101760,
+      "positions": 3792600,
+      "certifiedClearanceMm": 0.4556371662956446,
+      "discardedVoxels": 0,
+      "indices": 3996144
+    },
+    {
+      "id": "FJ1264",
+      "sourceSha256": "511662a97952f3d1f0561d0efa44d4d440235e9e9d1cf729d66ffd33baba0663",
+      "center": [
+        0.022977350279688835,
+        0.24693119525909424,
+        0.05738000012934208
+      ],
+      "vertexCount": 12464,
+      "indexCount": 74772,
+      "positions": 4403184,
+      "certifiedClearanceMm": 0.3778733904966617,
+      "discardedVoxels": 0,
+      "indices": 4552752
+    },
+    {
+      "id": "FJ1265",
+      "sourceSha256": "99d3acad6f12e906f1c4e2e55756bfc1e38b2bd8ce56dec76d737ffdbaca62cb",
+      "center": [
+        0.003941309405490756,
+        0.24368619918823242,
+        0.07690949738025665
+      ],
+      "vertexCount": 10084,
+      "indexCount": 60492,
+      "positions": 4851840,
+      "certifiedClearanceMm": 0.37358997678476624,
+      "discardedVoxels": 0,
+      "indices": 4972848
+    },
+    {
+      "id": "FJ1266",
+      "sourceSha256": "333831f7e55983828c9c931a9491622855cba36603f557b3bc09842f1347f0e2",
+      "center": [
+        0.010793410241603851,
+        0.2442461922764778,
+        0.07477400079369545
+      ],
+      "vertexCount": 10256,
+      "indexCount": 61524,
+      "positions": 5214816,
+      "certifiedClearanceMm": 0.40800323211110034,
+      "discardedVoxels": 0,
+      "indices": 5337888
+    },
+    {
+      "id": "FJ1267",
+      "sourceSha256": "9eb77d29747d533db7ba95c5ab422ffecb92750be019584b9baa5030e2620951",
+      "center": [
+        0.016827150247991085,
+        0.2469412013888359,
+        0.07127749919891357
+      ],
+      "vertexCount": 11878,
+      "indexCount": 71256,
+      "positions": 5583984,
+      "certifiedClearanceMm": 0.36386294160836113,
+      "discardedVoxels": 0,
+      "indices": 5726520
+    },
+    {
+      "id": "FJ1268",
+      "sourceSha256": "0bed63fa786a6c2a7f187b0e4159434d065b72558d8d02de2461029b9326d1b9",
+      "center": [
+        -0.023896349593997,
+        0.22708120197057724,
+        0.046520501375198364
+      ],
+      "vertexCount": 14690,
+      "indexCount": 88128,
+      "positions": 6011544,
+      "certifiedClearanceMm": 0.09732627021153756,
+      "discardedVoxels": 0,
+      "indices": 6187824
+    },
+    {
+      "id": "FJ1269",
+      "sourceSha256": "24062de95bbe14c033cfe77afb276f09ae478e4a849192143f22788065f506e5",
+      "center": [
+        -0.017807749565690756,
+        0.22144120186567307,
+        0.06044950149953365
+      ],
+      "vertexCount": 9582,
+      "indexCount": 57480,
+      "positions": 6540336,
+      "certifiedClearanceMm": 0.4599552973576655,
+      "discardedVoxels": 0,
+      "indices": 6655320
+    },
+    {
+      "id": "FJ1270",
+      "sourceSha256": "094d50be379d7280aa8519fb4db42f83e0ed58d763107369a28358a0dc60cc0c",
+      "center": [
+        -0.027411499992012978,
+        0.23194120079278946,
+        0.03460200037807226
+      ],
+      "vertexCount": 12750,
+      "indexCount": 76488,
+      "positions": 6885240,
+      "certifiedClearanceMm": 0.09204366606640794,
+      "discardedVoxels": 0,
+      "indices": 7038240
+    },
+    {
+      "id": "FJ1271",
+      "sourceSha256": "b22f90d8d847673364581d5b9b084b081e941374cd834aa9bddcec9710c12c5b",
+      "center": [
+        -0.020948249846696854,
+        0.22225119918584824,
+        0.05398849956691265
+      ],
+      "vertexCount": 9022,
+      "indexCount": 54120,
+      "positions": 7344192,
+      "certifiedClearanceMm": 0.4457393159533438,
+      "discardedVoxels": 0,
+      "indices": 7452456
+    },
+    {
+      "id": "FJ1272",
+      "sourceSha256": "b28a7c64d58a208e3dc591c8fae888c149d691030bb03498d902e87fabe7cbe7",
+      "center": [
+        -0.003764920897083357,
+        0.21894119679927826,
+        0.06937899999320507
+      ],
+      "vertexCount": 8714,
+      "indexCount": 52272,
+      "positions": 7668936,
+      "certifiedClearanceMm": 0.38281655049810986,
+      "discardedVoxels": 0,
+      "indices": 7773504
+    },
+    {
+      "id": "FJ1273",
+      "sourceSha256": "03db2311625aa7aea63d10c41b954b590b9fe1e127a42cf0ca0a07770e9a92d1",
+      "center": [
+        -0.00876893475651741,
+        0.2190612033009529,
+        0.06940099969506264
+      ],
+      "vertexCount": 9036,
+      "indexCount": 54204,
+      "positions": 7982592,
+      "certifiedClearanceMm": 0.36923013870207244,
+      "discardedVoxels": 0,
+      "indices": 8091024
+    },
+    {
+      "id": "FJ1274",
+      "sourceSha256": "1c657c7e866cc3737ae8bd76c7afef4d0c5ffb591b3db880e12b48ebf3d2b86e",
+      "center": [
+        -0.013307964894920588,
+        0.21867620199918747,
+        0.0660570003092289
+      ],
+      "vertexCount": 10774,
+      "indexCount": 64632,
+      "positions": 8307840,
+      "certifiedClearanceMm": 0.40184987851544884,
+      "discardedVoxels": 0,
+      "indices": 8437128
+    },
+    {
+      "id": "FJ1275",
+      "sourceSha256": "99e7529e8b37ab47b9490fbec8259be91c95bd993535208079a441a7cd39a792",
+      "center": [
+        -0.02490605041384697,
+        0.2509161978960037,
+        0.03973750025033951
+      ],
+      "vertexCount": 16926,
+      "indexCount": 101544,
+      "positions": 8695656,
+      "certifiedClearanceMm": 0.39714296975501173,
+      "discardedVoxels": 0,
+      "indices": 8898768
+    },
+    {
+      "id": "FJ1276",
+      "sourceSha256": "877c45b40d6c35bcf97cafbcf1f206793da67939a7227269331b92d9838232b9",
+      "center": [
+        -0.025409200228750706,
+        0.24825619161128998,
+        0.048414500430226326
+      ],
+      "vertexCount": 17686,
+      "indexCount": 106104,
+      "positions": 9304944,
+      "certifiedClearanceMm": 0.1904408541495234,
+      "discardedVoxels": 0,
+      "indices": 9517176
+    },
+    {
+      "id": "FJ1277",
+      "sourceSha256": "b53e7edf9b4faf048bc8356250ab9ff77b2f2400bd8cb923ef20ac4cd1503aef",
+      "center": [
+        -0.021194600500166416,
+        0.24707120656967163,
+        0.06351549923419952
+      ],
+      "vertexCount": 12954,
+      "indexCount": 77712,
+      "positions": 9941592,
+      "certifiedClearanceMm": 0.3985971286913867,
+      "discardedVoxels": 0,
+      "indices": 10097040
+    },
+    {
+      "id": "FJ1278",
+      "sourceSha256": "33bf383be07a6b8030a8a1e09ffcea214145caf136f5b845c665fdaebf82514d",
+      "center": [
+        -0.024294099770486355,
+        0.2469261959195137,
+        0.057374000549316406
+      ],
+      "vertexCount": 12164,
+      "indexCount": 72972,
+      "positions": 10407888,
+      "certifiedClearanceMm": 0.36591233112814103,
+      "discardedVoxels": 0,
+      "indices": 10553856
+    },
+    {
+      "id": "FJ1279",
+      "sourceSha256": "ffb34acd7215208cb1682de671015a2927f8f57efb1d27a430b02b1e4315132d",
+      "center": [
+        -0.005244178726570681,
+        0.24367620050907135,
+        0.07689649984240532
+      ],
+      "vertexCount": 10072,
+      "indexCount": 60420,
+      "positions": 10845744,
+      "certifiedClearanceMm": 0.3614641225802997,
+      "discardedVoxels": 0,
+      "indices": 10966608
+    },
+    {
+      "id": "FJ1280",
+      "sourceSha256": "7d0d4e3c50eed6c2626c9073c52bba16e5c6ea63a650b600ff1cecf1f6ff6564",
+      "center": [
+        -0.012088249903172255,
+        0.24424120038747787,
+        0.07459200173616409
+      ],
+      "vertexCount": 10270,
+      "indexCount": 61608,
+      "positions": 11208288,
+      "certifiedClearanceMm": 0.4592221732056574,
+      "discardedVoxels": 0,
+      "indices": 11331528
+    },
+    {
+      "id": "FJ1281",
+      "sourceSha256": "d038789ec16585aa652c08473c459b3a4013ca2471928de6b9a2f4da9d95f2fc",
+      "center": [
+        -0.01812464976683259,
+        0.24693119525909424,
+        0.07127250358462334
+      ],
+      "vertexCount": 11882,
+      "indexCount": 71280,
+      "positions": 11577960,
+      "certifiedClearanceMm": 0.36035092348429887,
+      "discardedVoxels": 0,
+      "indices": 11720544
+    }
+  ]
+}

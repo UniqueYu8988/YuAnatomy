@@ -1,0 +1,3133 @@
+{
+  "sourceParts": 2234,
+  "parts": 591,
+  "concepts": 1181,
+  "triangles": 1970872,
+  "gzipBytes": 25504846,
+  "selectionRule": "minY >= 1.435m in source coordinates, plus named crossing neck structures; full meshes only",
+  "included": [
+    {
+      "id": "FJ1252",
+      "name": "Gingiva of upper jaw",
+      "system": "digestive"
+    },
+    {
+      "id": "FJ1253",
+      "name": "Gingiva of lower jaw",
+      "system": "digestive"
+    },
+    {
+      "id": "FJ1254",
+      "name": "Left lower first secondary molar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1255",
+      "name": "Left lower first secondary premolar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1256",
+      "name": "Left lower second secondary molar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1257",
+      "name": "Left lower second secondary premolar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1258",
+      "name": "Left lower central secondary incisor tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1259",
+      "name": "Left lower lateral secondary incisor tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1260",
+      "name": "Left lower secondary canine tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1261",
+      "name": "Left upper first secondary molar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1262",
+      "name": "Left upper first secondary premolar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1263",
+      "name": "Left upper second secondary molar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1264",
+      "name": "Left upper second secondary premolar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1265",
+      "name": "Left upper central secondary incisor tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1266",
+      "name": "Left upper lateral secondary incisor tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1267",
+      "name": "Left upper secondary canine tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1268",
+      "name": "Right lower first secondary molar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1269",
+      "name": "Right lower first secondary premolar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1270",
+      "name": "Right lower second secondary molar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1271",
+      "name": "Right lower second secondary premolar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1272",
+      "name": "Right lower central secondary incisor tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1273",
+      "name": "Right lower lateral secondary incisor tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1274",
+      "name": "Right lower secondary canine tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1275",
+      "name": "Right upper second secondary molar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1276",
+      "name": "Right upper first secondary molar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1277",
+      "name": "Right upper first secondary premolar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1278",
+      "name": "Right upper second secondary premolar tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1279",
+      "name": "Right upper central secondary incisor tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1280",
+      "name": "Right upper lateral secondary incisor tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1281",
+      "name": "Right upper secondary canine tooth",
+      "system": "dental"
+    },
+    {
+      "id": "FJ1282",
+      "name": "Anterior chamber of left eyeball",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1283",
+      "name": "Left anterior ethmoidal nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1284",
+      "name": "Check ligament of left lateral rectus",
+      "system": "connective"
+    },
+    {
+      "id": "FJ1285",
+      "name": "Left choroid",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1286",
+      "name": "Left choroid",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1287",
+      "name": "Left corona ciliaris",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1288",
+      "name": "Left ciliary ganglion",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1289",
+      "name": "Left cornea",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1290",
+      "name": "Left frontal nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1291",
+      "name": "Left common tendinous ring",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1292",
+      "name": "Check ligament of left medial rectus",
+      "system": "connective"
+    },
+    {
+      "id": "FJ1293",
+      "name": "Inferior branch of left oculomotor nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1294",
+      "name": "Left inferior oblique",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1295",
+      "name": "Left inferior rectus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1296",
+      "name": "Left infratrochlear nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1297",
+      "name": "Left iris",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1298",
+      "name": "Left lacrimal canaliculus",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1299",
+      "name": "Left lacrimal gland",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1300",
+      "name": "Left lacrimal nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1301",
+      "name": "Left lacrimal lake",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1302",
+      "name": "Left nasolacrimal duct",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1304",
+      "name": "Left lateral rectus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1305",
+      "name": "Left lens",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1306",
+      "name": "Left levator palpebrae superioris",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1308",
+      "name": "Left medial rectus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1309",
+      "name": "Left lacrimal sac",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1310",
+      "name": "Left nasociliary nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1311",
+      "name": "Communicating branch of left nasociliary nerve with left ciliary ganglion",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1312",
+      "name": "Left ophthalmic nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1313",
+      "name": "Left optic nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1315",
+      "name": "Left posterior ethmoidal nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1316",
+      "name": "Optic part of left retina",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1317",
+      "name": "Left sclera",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1318",
+      "name": "Left long ciliary nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1319",
+      "name": "Short ciliary nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1320",
+      "name": "Suspensory ligament of left lens",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1321",
+      "name": "Superior branch of left oculomotor nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1322",
+      "name": "Left superior oblique",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1323",
+      "name": "Left superior rectus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1324",
+      "name": "Tarsal plate of left upper eyelid",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1325",
+      "name": "Left supra-orbital nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1326",
+      "name": "Left supratrochlear nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1328",
+      "name": "Tarsal plate of left lower eyelid",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1329",
+      "name": "Trochlea of left superior oblique",
+      "system": "connective"
+    },
+    {
+      "id": "FJ1330",
+      "name": "Left trochlear nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1331",
+      "name": "Left vitreous body",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1332",
+      "name": "Anterior chamber of right eyeball",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1333",
+      "name": "Right anterior ethmoidal nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1334",
+      "name": "Check ligament of right lateral rectus",
+      "system": "connective"
+    },
+    {
+      "id": "FJ1335",
+      "name": "Check ligament of right medial rectus",
+      "system": "connective"
+    },
+    {
+      "id": "FJ1336",
+      "name": "Right choroid",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1337",
+      "name": "Right choroid",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1338",
+      "name": "Right corona ciliaris",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1339",
+      "name": "Right ciliary ganglion",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1340",
+      "name": "Right cornea",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1341",
+      "name": "Right frontal nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1342",
+      "name": "Right common tendinous ring",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1343",
+      "name": "Tendon of right levator palpebrae superioris",
+      "system": "connective"
+    },
+    {
+      "id": "FJ1344",
+      "name": "Inferior branch of right oculomotor nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1345",
+      "name": "Right inferior oblique",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1346",
+      "name": "Right inferior rectus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1347",
+      "name": "Right infratrochlear nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1348",
+      "name": "Right iris",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1349",
+      "name": "Right lacrimal canaliculus",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1350",
+      "name": "Right lacrimal gland",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1351",
+      "name": "Right lacrimal nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1352",
+      "name": "Right lacrimal lake",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1353",
+      "name": "Right nasolacrimal duct",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1355",
+      "name": "Right lateral rectus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1356",
+      "name": "Right lens",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1357",
+      "name": "Right levator palpebrae superioris",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1359",
+      "name": "Right medial rectus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1360",
+      "name": "Right lacrimal sac",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1361",
+      "name": "Right nasociliary nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1362",
+      "name": "Communicating branch of right nasociliary nerve with right ciliary ganglion",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1363",
+      "name": "Right ophthalmic nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1364",
+      "name": "Right optic nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1366",
+      "name": "Right posterior ethmoidal nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1367",
+      "name": "Optic part of right retina",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1368",
+      "name": "Right sclera",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1369",
+      "name": "Right long ciliary nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1370",
+      "name": "Short ciliary nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1371",
+      "name": "Suspensory ligament of right lens",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1372",
+      "name": "Superior branch of right oculomotor nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1373",
+      "name": "Right superior oblique",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1374",
+      "name": "Right superior rectus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1375",
+      "name": "Tarsal plate of right upper eyelid",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1376",
+      "name": "Right supra-orbital nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1377",
+      "name": "Right supratrochlear nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1379",
+      "name": "Tarsal plate of right lower eyelid",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1380",
+      "name": "Trochlea of right superior oblique",
+      "system": "connective"
+    },
+    {
+      "id": "FJ1381",
+      "name": "Right trochlear nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1382",
+      "name": "Right vitreous body",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1521",
+      "name": "Descending part of right trapezius",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1521M",
+      "name": "Descending part of left trapezius",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1524",
+      "name": "Right cervical rotator",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1524M",
+      "name": "Left cervical rotator",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1526",
+      "name": "Right iliocostalis cervicis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1526M",
+      "name": "Left iliocostalis cervicis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1532",
+      "name": "Right levator scapulae",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1532M",
+      "name": "Left levator scapulae",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1533",
+      "name": "Right longissimus capitis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1533M",
+      "name": "Left longissimus capitis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1534",
+      "name": "Right longissimus cervicis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1534M",
+      "name": "Left longissimus cervicis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1538",
+      "name": "Right semispinalis capitis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1538M",
+      "name": "Left semispinalis capitis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1539",
+      "name": "Right semispinalis cervicis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1539M",
+      "name": "Left semispinalis cervicis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1545",
+      "name": "Right splenius capitis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1545M",
+      "name": "Left splenius capitis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1546",
+      "name": "Right splenius cervicis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1546M",
+      "name": "Left splenius cervicis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1549",
+      "name": "set of anterior cervical intertransversarii",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1549M",
+      "name": "Set of anterior cervical intertransversarii",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1552",
+      "name": "set of interspinales cervicis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1552M",
+      "name": "Set of interspinales cervicis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1553",
+      "name": "set of posterior cervical intertransversarii",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1553M",
+      "name": "Set of posterior cervical intertransversarii",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1555",
+      "name": "Left digastric",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1556",
+      "name": "Right digastric",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1557",
+      "name": "Inferior oblique part of left longus colli",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1558",
+      "name": "Left platysma",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1559",
+      "name": "Left geniohyoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1560",
+      "name": "Left digastric",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1561",
+      "name": "Left longus capitis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1562",
+      "name": "Left mylohyoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1563",
+      "name": "Left obliquus capitis inferior",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1564",
+      "name": "Left obliquus capitis superior",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1565",
+      "name": "Left omohyoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1566",
+      "name": "Left rectus capitis anterior",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1567",
+      "name": "Left rectus capitis posterior major",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1568",
+      "name": "Left rectus capitis posterior minor",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1569",
+      "name": "Left rectus capitis lateralis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1570",
+      "name": "Left scalenus anterior",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1571",
+      "name": "Left scalenus medius",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1572",
+      "name": "Left scalenus posterior",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1573",
+      "name": "Left sternocleidomastoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1574",
+      "name": "Left sternohyoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1575",
+      "name": "Left sternothyroid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1576",
+      "name": "Left stylohyoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1577",
+      "name": "Left thyrohyoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1578",
+      "name": "Left digastric",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1579",
+      "name": "Right digastric",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1580",
+      "name": "Right geniohyoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1581",
+      "name": "Right intermediate tendon",
+      "system": "connective"
+    },
+    {
+      "id": "FJ1582",
+      "name": "Right longus capitis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1583",
+      "name": "Right mylohyoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1584",
+      "name": "Right obliquus capitis inferior",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1585",
+      "name": "Right obliquus capitis superior",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1586",
+      "name": "Right omohyoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1587",
+      "name": "Right platysma",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1588",
+      "name": "Right rectus capitis anterior",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1589",
+      "name": "Right rectus capitis posterior major",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1590",
+      "name": "Right rectus capitis posterior minor",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1591",
+      "name": "Right rectus capitis lateralis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1592",
+      "name": "Right scalenus anterior",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1593",
+      "name": "Right scalenus medius",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1594",
+      "name": "Right scalenus posterior",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1595",
+      "name": "Right sternocleidomastoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1596",
+      "name": "Right sternohyoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1597",
+      "name": "Right sternothyroid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1598",
+      "name": "Right stylohyoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1599",
+      "name": "Right thyrohyoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1600",
+      "name": "Superior oblique part of left longus colli",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1601",
+      "name": "Vertical intermediate part of left longus colli",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ1654",
+      "name": "Right anterior cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1654M",
+      "name": "Left anterior cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1655",
+      "name": "Anterior communicating artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1656",
+      "name": "anterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1656M",
+      "name": "Anterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1657",
+      "name": "Right anterior spinal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1657M",
+      "name": "Left anterior spinal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1658",
+      "name": "Right anterior choroidal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1658M",
+      "name": "Left anterior choroidal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1659",
+      "name": "Right anterior temporal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1659M",
+      "name": "Left anterior temporal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1660",
+      "name": "Insular part of right middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1660M",
+      "name": "Insular part of left middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1661",
+      "name": "Anterior temporal branch of right lateral occipital artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1661M",
+      "name": "Anterior temporal branch of left lateral occipital artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1662",
+      "name": "Anterolateral central branch of right middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1662M",
+      "name": "Anterolateral central branch of left middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1663",
+      "name": "Anterolateral central branch of right middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1663M",
+      "name": "Anterolateral central branch of left middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1664",
+      "name": "artery of central sulcus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1664M",
+      "name": "Artery of central sulcus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1665",
+      "name": "artery of central sulcus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1665M",
+      "name": "Artery of central sulcus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1666",
+      "name": "Artery of right postcentral sulcus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1666M",
+      "name": "Artery of left postcentral sulcus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1667",
+      "name": "Right anterior parietal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1667M",
+      "name": "Left anterior parietal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1668",
+      "name": "Artery of right precentral sulcus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1668M",
+      "name": "Artery of left precentral sulcus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1669",
+      "name": "Artery of right precentral sulcus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1669M",
+      "name": "Artery of left precentral sulcus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1670",
+      "name": "Artery of right precentral sulcus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1670M",
+      "name": "Artery of left precentral sulcus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1671",
+      "name": "Precuneal branch of right pericallosal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1671M",
+      "name": "Precuneal branch of left pericallosal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1672",
+      "name": "Basilar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1673",
+      "name": "Branch of right middle cerebral artery to right angular gyrus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1673M",
+      "name": "Branch of left middle cerebral artery to left angular gyrus",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1674",
+      "name": "Branch of right anterior choroidal artery to posterior limb of right internal capsule",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1674M",
+      "name": "Branch of left anterior choroidal artery to posterior limb of left internal capsule",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1675",
+      "name": "Right thalamogeniculate artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1675M",
+      "name": "Left thalamogeniculate artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1676",
+      "name": "Right callosomarginal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1676M",
+      "name": "Left callosomarginal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1677",
+      "name": "Right splenial artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1677M",
+      "name": "Left splenial artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1678",
+      "name": "Right splenial artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1678M",
+      "name": "Left splenial artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1679",
+      "name": "Hypothalamic branch of right posterior communicating artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1679M",
+      "name": "Hypothalamic branch of left posterior communicating artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1680",
+      "name": "Middle temporal branch of right lateral occipital artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1680M",
+      "name": "Middle temporal branch of left lateral occipital artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1681",
+      "name": "Intermediomedial branch of right callosomarginal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1681M",
+      "name": "Intermediomedial branch of left callosomarginal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1682",
+      "name": "Right internal carotid artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1682M",
+      "name": "Left internal carotid artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1683",
+      "name": "Lateral branch of right superior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1683M",
+      "name": "Lateral branch of left superior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1684",
+      "name": "Lateral branch of right pontine artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1684M",
+      "name": "Lateral branch of left pontine artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1685",
+      "name": "Right lateral frontobasal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1685M",
+      "name": "Left lateral frontobasal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1686",
+      "name": "Right lateral frontobasal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1686M",
+      "name": "Left lateral frontobasal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1687",
+      "name": "Right lateral occipital artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1687M",
+      "name": "Left lateral occipital artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1688",
+      "name": "Medial branch of right superior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1688M",
+      "name": "Medial branch of left superior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1689",
+      "name": "Medial branch of right pontine artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1689M",
+      "name": "Medial branch of left pontine artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1690",
+      "name": "Right medial frontobasal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1690M",
+      "name": "Left medial frontobasal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1691",
+      "name": "Right medial occipital artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1691M",
+      "name": "Left medial occipital artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1692",
+      "name": "Sphenoid part of right middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1692M",
+      "name": "Sphenoid part of left middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1693",
+      "name": "Middle temporal branch of right middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1693M",
+      "name": "Middle temporal branch of left middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1694",
+      "name": "Insular part of right middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1694M",
+      "name": "Insular part of left middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1695",
+      "name": "Right ophthalmic artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1695M",
+      "name": "Left ophthalmic artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1696",
+      "name": "Paracentral branch of right callosomarginal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1696M",
+      "name": "Paracentral branch of left callosomarginal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1697",
+      "name": "Paracentral branch of right callosomarginal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1697M",
+      "name": "Paracentral branch of left callosomarginal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1698",
+      "name": "Paracentral branch of right callosomarginal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1698M",
+      "name": "Paracentral branch of left callosomarginal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1699",
+      "name": "Right pericallosal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1699M",
+      "name": "Left pericallosal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1700",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1700M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1701",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1701M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1702",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1702M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1703",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1703M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1704",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1704M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1705",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1705M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1706",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1706M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1707",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1707M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1708",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1708M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1709",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1709M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1710",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1710M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1711",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1711M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1712",
+      "name": "Right polar temporal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1712M",
+      "name": "Left polar temporal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1713",
+      "name": "Right posterior communicating artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1713M",
+      "name": "Left posterior communicating artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1714",
+      "name": "Postcommunicating part of right posterior cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1714M",
+      "name": "Postcommunicating part of left posterior cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1715",
+      "name": "Right posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1715M",
+      "name": "Left posterior inferior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1716",
+      "name": "Right posterior parietal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1716M",
+      "name": "Left posterior parietal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1717",
+      "name": "Posterior temporal branch of right middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1717M",
+      "name": "Posterior temporal branch of left middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1718",
+      "name": "Trunk of inferior terminal branch of right middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1718M",
+      "name": "Trunk of inferior terminal branch of left middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1719",
+      "name": "set of posterior temporal branches of lateral occipital artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1719M",
+      "name": "Set of posterior temporal branches of lateral occipital artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1720",
+      "name": "Right thalamoperforating artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1720M",
+      "name": "Left thalamoperforating artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1721",
+      "name": "Posteromedial central branch of right posterior cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1721M",
+      "name": "Posteromedial central branch of left posterior cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1722",
+      "name": "Posteromedial branch of right callosomarginal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1722M",
+      "name": "Posteromedial branch of left callosomarginal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1723",
+      "name": "Precommunicating part of right posterior cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1723M",
+      "name": "Precommunicating part of left posterior cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1724",
+      "name": "Right prefrontal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1724M",
+      "name": "Left prefrontal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1725",
+      "name": "Right vertebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1725M",
+      "name": "Left vertebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1726",
+      "name": "Right superior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1726M",
+      "name": "Left superior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1727",
+      "name": "Right posterior medial choroidal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1727M",
+      "name": "Left posterior medial choroidal artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1728",
+      "name": "Superior vermian branch of medial branch of right superior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1728M",
+      "name": "Superior vermian branch of medial branch of left superior cerebellar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1729",
+      "name": "Temporo-occipital branch of right middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1729M",
+      "name": "Temporo-occipital branch of left middle cerebral artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ1730",
+      "name": "Third ventricle",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1731",
+      "name": "Fourth ventricle",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1732",
+      "name": "Left angular gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1733",
+      "name": "Right angular gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1734",
+      "name": "Anterior commissure",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1735",
+      "name": "Brachium of left superior colliculus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1736",
+      "name": "Brachium of right superior colliculus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1737",
+      "name": "Central canal of spinal cord",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1738",
+      "name": "Cerebral aqueduct",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1739",
+      "name": "Left cingulate gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1740",
+      "name": "Right cingulate gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1741",
+      "name": "Commissure of fornix of forebrain",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1742",
+      "name": "Corpus callosum",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1743",
+      "name": "Habenula",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1744",
+      "name": "Left inferior frontal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1745",
+      "name": "Right inferior frontal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1746",
+      "name": "Left inferior temporal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1747",
+      "name": "Right inferior temporal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1748",
+      "name": "Left insula",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1749",
+      "name": "Right insula",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1750",
+      "name": "Left internal capsule",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1751",
+      "name": "Right internal capsule",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1752",
+      "name": "Interventricular foramen",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1753",
+      "name": "Left amygdala",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1754",
+      "name": "Left caudate nucleus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1755",
+      "name": "Choroid plexus of cerebral hemisphere",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1756",
+      "name": "Left fornix of forebrain",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1757",
+      "name": "Left globus pallidus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1758",
+      "name": "White matter of left cerebral hemisphere",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1759",
+      "name": "Left hippocampus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1760",
+      "name": "Hypothalamus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1761",
+      "name": "Brachium of left inferior colliculus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1762",
+      "name": "Left inferior colliculus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1763",
+      "name": "Interpeduncular fossa",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1764",
+      "name": "Lamina terminalis",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1766",
+      "name": "Left lateral geniculate body",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1767",
+      "name": "Left lateral ventricle",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1768",
+      "name": "Mammillary body",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1769",
+      "name": "Medulla oblongata",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1770",
+      "name": "Midbrain",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1771",
+      "name": "Optic chiasm",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1772",
+      "name": "Left optic nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1773",
+      "name": "Left optic tract",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1774",
+      "name": "Peduncle of midbrain",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1775",
+      "name": "Pons",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1776",
+      "name": "Left putamen",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1777",
+      "name": "Left stria medullaris of thalamus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1778",
+      "name": "Left stria terminalis",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1779",
+      "name": "Left superior colliculus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1780",
+      "name": "Tuber cinereum",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1781",
+      "name": "Cerebellum",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1782",
+      "name": "Left thalamus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1783",
+      "name": "Left fusiform gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1784",
+      "name": "Right fusiform gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1785",
+      "name": "Left parahippocampal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1786",
+      "name": "Right parahippocampal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1787",
+      "name": "Left middle frontal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1788",
+      "name": "Right middle frontal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1789",
+      "name": "Left middle temporal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1790",
+      "name": "Right middle temporal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1791",
+      "name": "Left occipital lobe",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1792",
+      "name": "Right occipital lobe",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1793",
+      "name": "Orbital gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1794",
+      "name": "Orbital gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1795",
+      "name": "Pineal body",
+      "system": "endocrine"
+    },
+    {
+      "id": "FJ1796",
+      "name": "Pituitary gland",
+      "system": "endocrine"
+    },
+    {
+      "id": "FJ1797",
+      "name": "Left postcentral gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1798",
+      "name": "Right postcentral gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1799",
+      "name": "Posterior commissure",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1800",
+      "name": "Left precentral gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1801",
+      "name": "Right precentral gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1802",
+      "name": "Right caudate nucleus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1803",
+      "name": "Choroid plexus of cerebral hemisphere",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ1804",
+      "name": "Right fornix of forebrain",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1805",
+      "name": "Right globus pallidus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1806",
+      "name": "White matter of right cerebral hemisphere",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1807",
+      "name": "Right hippocampus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1808",
+      "name": "Hypothalamus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1809",
+      "name": "Brachium of right inferior colliculus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1810",
+      "name": "Right inferior colliculus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1811",
+      "name": "Interpeduncular fossa",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1812",
+      "name": "Lamina terminalis",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1813",
+      "name": "Right lateral geniculate body",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1814",
+      "name": "Right lateral ventricle",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1815",
+      "name": "Mammillary body",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1816",
+      "name": "Right medial geniculate body",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1816M",
+      "name": "Left medial geniculate body",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1817",
+      "name": "Midbrain",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1818",
+      "name": "Optic chiasm",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1819",
+      "name": "Right optic nerve",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1820",
+      "name": "Right optic tract",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1821",
+      "name": "Peduncle of midbrain",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1822",
+      "name": "Pons",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1823",
+      "name": "Right putamen",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1824",
+      "name": "Right stria medullaris of thalamus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1825",
+      "name": "Stria terminalis",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1826",
+      "name": "Right superior colliculus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1827",
+      "name": "Right thalamus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1828",
+      "name": "Tuber cinereum",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1829",
+      "name": "Right amygdala",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1830",
+      "name": "Cerebellum",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1831",
+      "name": "Medulla oblongata",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1832",
+      "name": "Septum of telencephalon",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1833",
+      "name": "Left superior frontal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1834",
+      "name": "Right superior frontal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1835",
+      "name": "Left superior parietal lobule",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1836",
+      "name": "Right superior parietal lobule",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1837",
+      "name": "Anterior part of left superior temporal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1838",
+      "name": "Anterior part of right superior temporal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1839",
+      "name": "Posterior part of left superior temporal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1840",
+      "name": "Posterior part of right superior temporal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1841",
+      "name": "Left supramarginal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1842",
+      "name": "Right supramarginal gyrus",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1843",
+      "name": "Tentorium cerebelli",
+      "system": "nervous"
+    },
+    {
+      "id": "FJ1844",
+      "name": "Basilar artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ2209",
+      "name": "Right inferior thyroid artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ2210",
+      "name": "Left inferior thyroid artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ2226",
+      "name": "Left deep cervical artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ2255",
+      "name": "Left thyrocervical trunk",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ2256",
+      "name": "Left superficial cervical artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ2257",
+      "name": "Left transverse cervical artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ2278",
+      "name": "Right deep cervical artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ2307",
+      "name": "Right thyrocervical trunk",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ2308",
+      "name": "Right superficial cervical artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ2309",
+      "name": "Right transverse cervical artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ2440",
+      "name": "Cricoid cartilage",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ2556",
+      "name": "Left lateral nasal cartilage",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2557",
+      "name": "Septal nasal cartilage",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2558",
+      "name": "Right lateral nasal cartilage",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2738",
+      "name": "Left genioglossus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2739",
+      "name": "Left hyoglossus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2740",
+      "name": "Left inferior pharyngeal constrictor",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2741",
+      "name": "Left levator veli palatini",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2742",
+      "name": "Right middle pharyngeal constrictor",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2743",
+      "name": "Left palatopharyngeus",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2744",
+      "name": "Left pterygomandibular raphe",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2745",
+      "name": "Left salpingopharyngeus",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2746",
+      "name": "Left stylopharyngeus",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2747",
+      "name": "Left superior pharyngeal constrictor",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2748",
+      "name": "Left tensor veli palatini",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2749",
+      "name": "Pharyngeal raphe",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2750",
+      "name": "Right genioglossus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2751",
+      "name": "Right hyoglossus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2752",
+      "name": "Right inferior pharyngeal constrictor",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2753",
+      "name": "Right levator veli palatini",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2754",
+      "name": "Left middle pharyngeal constrictor",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2755",
+      "name": "Right palatopharyngeus",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2756",
+      "name": "Right pterygomandibular raphe",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2757",
+      "name": "Right salpingopharyngeus",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2758",
+      "name": "Right stylopharyngeus",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2759",
+      "name": "Right superior pharyngeal constrictor",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2760",
+      "name": "Right tensor veli palatini",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2761",
+      "name": "Tongue",
+      "system": "digestive"
+    },
+    {
+      "id": "FJ2762",
+      "name": "Uvular muscle",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2763",
+      "name": "Left stylohyoid ligament",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2764",
+      "name": "Right stylohyoid ligament",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2765",
+      "name": "Left sublingual gland",
+      "system": "digestive"
+    },
+    {
+      "id": "FJ2766",
+      "name": "Left submandibular gland",
+      "system": "digestive"
+    },
+    {
+      "id": "FJ2767",
+      "name": "Right sublingual gland",
+      "system": "digestive"
+    },
+    {
+      "id": "FJ2768",
+      "name": "Right submandibular gland",
+      "system": "digestive"
+    },
+    {
+      "id": "FJ2769",
+      "name": "Cricoid cartilage",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ2770",
+      "name": "Epiglottis",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ2771",
+      "name": "Hyo-epiglottic ligament",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2772",
+      "name": "Hyoid bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ2773",
+      "name": "Left cuneiform cartilage",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ2774",
+      "name": "Left aryepiglotticus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2775",
+      "name": "Left arytenoid cartilage",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ2776",
+      "name": "Left corniculate cartilage",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ2777",
+      "name": "Left conus elasticus",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2778",
+      "name": "Left lateral crico-arytenoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2779",
+      "name": "Left lateral thyrohyoid ligament",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2780",
+      "name": "Left oblique arytenoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2781",
+      "name": "Oblique part of left cricothyroid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2782",
+      "name": "Left posterior crico-arytenoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2783",
+      "name": "Straight part of left cricothyroid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2784",
+      "name": "Left thyro-arytenoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2785",
+      "name": "Left thyro-arytenoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2786",
+      "name": "Left thyrohyoid membrane",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2787",
+      "name": "Left vocal ligament",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2788",
+      "name": "Left vocalis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2789",
+      "name": "Median cricothyroid ligament",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2790",
+      "name": "Median thyrohyoid ligament",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2791",
+      "name": "Right aryepiglotticus",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2792",
+      "name": "Right arytenoid cartilage",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ2793",
+      "name": "Right corniculate cartilage",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ2794",
+      "name": "Right conus elasticus",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2795",
+      "name": "Right cuneiform cartilage",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ2796",
+      "name": "Right lateral crico-arytenoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2797",
+      "name": "Right lateral thyrohyoid ligament",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2798",
+      "name": "Right oblique arytenoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2799",
+      "name": "Oblique part of right cricothyroid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2800",
+      "name": "Right posterior crico-arytenoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2801",
+      "name": "Straight part of right cricothyroid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2802",
+      "name": "Right thyro-arytenoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2803",
+      "name": "Right thyro-arytenoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2804",
+      "name": "Right thyrohyoid membrane",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2805",
+      "name": "Right vocal ligament",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2806",
+      "name": "Right vocalis",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2807",
+      "name": "Thyro-epiglottic ligament",
+      "system": "connective"
+    },
+    {
+      "id": "FJ2808",
+      "name": "Thyroid cartilage",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ2809",
+      "name": "Transverse arytenoid",
+      "system": "muscular"
+    },
+    {
+      "id": "FJ2811",
+      "name": "External ear",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ2812",
+      "name": "Eyebrow",
+      "system": "integumentary"
+    },
+    {
+      "id": "FJ2813",
+      "name": "Hair of head",
+      "system": "integumentary"
+    },
+    {
+      "id": "FJ2814",
+      "name": "Lip",
+      "system": "integumentary"
+    },
+    {
+      "id": "FJ3161",
+      "name": "Third cervical vertebra",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3164",
+      "name": "Fourth cervical vertebra",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3167",
+      "name": "Fifth cervical vertebra",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3170",
+      "name": "Sixth cervical vertebra",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3172",
+      "name": "Seventh cervical vertebra",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3176",
+      "name": "Atlas",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3177",
+      "name": "Axis",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3199",
+      "name": "Ethmoid",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3200",
+      "name": "Frontal bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3201",
+      "name": "Hyoid bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3202",
+      "name": "Intervertebral disk of axis",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3213",
+      "name": "Intervertebral disk of third cervical vertebra",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3218",
+      "name": "Intervertebral disk of fourth cervical vertebra",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3219",
+      "name": "Intervertebral disk of fifth cervical vertebra",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3220",
+      "name": "Intervertebral disk of sixth cervical vertebra",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3221",
+      "name": "Intervertebral disk of seventh cervical vertebra",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3263",
+      "name": "Left inferior nasal concha",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ3265",
+      "name": "Left lacrimal bone",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ3269",
+      "name": "Left maxilla",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3272",
+      "name": "Left nasal bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3273",
+      "name": "Left palatine bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3274",
+      "name": "Left parietal bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3281",
+      "name": "Left temporal bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3287",
+      "name": "Left zygomatic bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3289",
+      "name": "Mandible",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3309",
+      "name": "Occipital bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3369",
+      "name": "Right inferior nasal concha",
+      "system": "respiratory"
+    },
+    {
+      "id": "FJ3371",
+      "name": "Right lacrimal bone",
+      "system": "sensory"
+    },
+    {
+      "id": "FJ3375",
+      "name": "Right maxilla",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3378",
+      "name": "Right nasal bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3379",
+      "name": "Right palatine bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3380",
+      "name": "Right parietal bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3386",
+      "name": "Right temporal bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3392",
+      "name": "Right zygomatic bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3394",
+      "name": "Sphenoid bone",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3395",
+      "name": "Vomer",
+      "system": "skeletal"
+    },
+    {
+      "id": "FJ3483",
+      "name": "Left common carotid artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ3485",
+      "name": "Left internal jugular vein",
+      "system": "venous"
+    },
+    {
+      "id": "FJ3564",
+      "name": "Right common carotid artery",
+      "system": "arterial"
+    },
+    {
+      "id": "FJ3585",
+      "name": "Right internal jugular vein",
+      "system": "venous"
+    }
+  ],
+  "excludedCrossing": [
+    {
+      "id": "FJ1451",
+      "name": "external intercostal muscle"
+    },
+    {
+      "id": "FJ1451M",
+      "name": "External intercostal muscle"
+    },
+    {
+      "id": "FJ1462",
+      "name": "Set of right levatores costarum breves"
+    },
+    {
+      "id": "FJ1462M",
+      "name": "Set of left levatores costarum breves"
+    },
+    {
+      "id": "FJ1463",
+      "name": "Set of right levatores costarum longi"
+    },
+    {
+      "id": "FJ1463M",
+      "name": "Set of left levatores costarum longi"
+    },
+    {
+      "id": "FJ1525",
+      "name": "thoracic rotator"
+    },
+    {
+      "id": "FJ1525M",
+      "name": "Thoracic rotator"
+    },
+    {
+      "id": "FJ1528",
+      "name": "Right iliocostalis thoracis"
+    },
+    {
+      "id": "FJ1528M",
+      "name": "Left iliocostalis thoracis"
+    },
+    {
+      "id": "FJ1535",
+      "name": "Right longissimus thoracis"
+    },
+    {
+      "id": "FJ1535M",
+      "name": "Left longissimus thoracis"
+    },
+    {
+      "id": "FJ1536",
+      "name": "Right rhomboid major"
+    },
+    {
+      "id": "FJ1536M",
+      "name": "Left rhomboid major"
+    },
+    {
+      "id": "FJ1537",
+      "name": "Right rhomboid minor"
+    },
+    {
+      "id": "FJ1537M",
+      "name": "Left rhomboid minor"
+    },
+    {
+      "id": "FJ1540",
+      "name": "Right semispinalis thoracis"
+    },
+    {
+      "id": "FJ1540M",
+      "name": "Left semispinalis thoracis"
+    },
+    {
+      "id": "FJ1542",
+      "name": "Right serratus posterior superior"
+    },
+    {
+      "id": "FJ1542M",
+      "name": "Left serratus posterior superior"
+    },
+    {
+      "id": "FJ1543",
+      "name": "spinalis"
+    },
+    {
+      "id": "FJ1543M",
+      "name": "Spinalis"
+    },
+    {
+      "id": "FJ1554",
+      "name": "Transverse part of right trapezius"
+    },
+    {
+      "id": "FJ1554M",
+      "name": "Transverse part of left trapezius"
+    },
+    {
+      "id": "FJ2232",
+      "name": "Left dorsal scapular artery"
+    },
+    {
+      "id": "FJ2284",
+      "name": "Right dorsal scapular artery"
+    },
+    {
+      "id": "FJ2541",
+      "name": "Trachea"
+    },
+    {
+      "id": "FJ2554",
+      "name": "Right major alar cartilage"
+    },
+    {
+      "id": "FJ2555",
+      "name": "Left major alar cartilage"
+    },
+    {
+      "id": "FJ2563",
+      "name": "Esophagus"
+    },
+    {
+      "id": "FJ2810",
+      "name": "Skin"
+    },
+    {
+      "id": "FJ3158",
+      "name": "First thoracic vertebra"
+    },
+    {
+      "id": "FJ3160",
+      "name": "Second thoracic vertebra"
+    },
+    {
+      "id": "FJ3228",
+      "name": "Left first rib"
+    },
+    {
+      "id": "FJ3229",
+      "name": "Left second rib"
+    },
+    {
+      "id": "FJ3334",
+      "name": "Right first rib"
+    },
+    {
+      "id": "FJ3336",
+      "name": "Right second rib"
+    }
+  ],
+  "explicitExclusions": [
+    {
+      "id": "FJ2554",
+      "name": "Right major alar cartilage",
+      "reason": "Removed from YuAnatomy at user request"
+    },
+    {
+      "id": "FJ2555",
+      "name": "Left major alar cartilage",
+      "reason": "Removed from YuAnatomy at user request"
+    }
+  ],
+  "geometry": {
+    "quality": "published-obj",
+    "additionalSimplification": false,
+    "sourceArchive": "isa_BP3D_4.0_obj_99.zip",
+    "note": "All triangles from the published OBJ are retained. The official release itself is pre-reduced."
+  }
+}

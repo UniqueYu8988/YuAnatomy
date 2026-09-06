@@ -1,0 +1,35 @@
+{
+  "name": "yuanatomy",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 3016",
+    "build": "vite build",
+    "build:vercel": "vite build",
+    "check": "tsc --noEmit",
+    "validate": "node scripts/validate-head-neck.mjs",
+    "preview": "vite preview --host 127.0.0.1 --port 3016"
+  },
+  "dependencies": {
+    "lucide-react": "1.31.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "three": "^0.159.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.19",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.2",
+    "meshoptimizer": "^1.2.0",
+    "oxfmt": "0.61.0",
+    "typescript": "5.9.3",
+    "vite": "8.0.13",
+    "@types/three": "^0.159.0"
+  },
+  "type": "module",
+  "license": "MIT"
+}
