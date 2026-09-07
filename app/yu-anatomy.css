@@ -584,6 +584,37 @@ p {
   font-weight: 600;
 }
 
+.view-rotate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 10px;
+  border-radius: var(--border-btn);
+  color: #354d43;
+  transition: all 0.15s ease;
+}
+
+.view-rotate-btn.active {
+  background: var(--green-light);
+  color: var(--green);
+  font-weight: 600;
+}
+
+.view-rotate-btn.active svg {
+  animation: spin-cw 4s linear infinite;
+}
+
+@keyframes spin-cw {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .explode-control {
   display: flex;
   align-items: center;
@@ -1535,6 +1566,10 @@ p {
 
 .fdi-tooth-btn.selected .fdi-btn-sub {
   color: rgba(255, 255, 255, 0.8);
+}
+
+.fdi-tooth-btn.dimmed {
+  opacity: 0.35;
 }
 
 .fdi-btn-num {

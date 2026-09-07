@@ -2,7 +2,7 @@ import type { Part } from "./anatomy";
 import { ANATOMY_DICT } from "./anatomy-dict.ts";
 export const PRESETS = [
   { id: "dental", name: "恒牙列与 FDI 牙位" },
-  { id: "overview", name: "头颈总览" },
+  { id: "overview", name: "头颈总览（全系）" },
   { id: "bones", name: "颅骨与颈椎" },
   { id: "oral", name: "口腔结构" },
   { id: "mastication", name: "咀嚼肌" },

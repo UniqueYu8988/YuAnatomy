@@ -19,6 +19,7 @@ import {
   Activity,
   Layers,
   HelpCircle,
+  RotateCw,
 } from "lucide-react";
 import AnatomyScene from "./scene";
 import ToothPointMatrix from "./tooth-point-matrix";
@@ -66,6 +67,7 @@ const initial: SceneState = {
   fascialMode: false,
   fascialPathId: "wisdom-tooth-ramus",
   fascialStageIndex: 0,
+  canalMode: false,
 };
 
 export default function YuAnatomy() {
@@ -252,6 +254,10 @@ export default function YuAnatomy() {
       reset: s.reset + 1,
       rctMode: s.rctMode,
       clipping: s.clipping,
+      canalMode: false,
+      rulerMode: false,
+      fascialMode: false,
+      rotate: false,
     }));
   };
 
@@ -500,7 +506,7 @@ export default function YuAnatomy() {
           {atlas && (
             <AnatomyScene
               atlas={atlas}
-              state={state}
+              state={{ ...state, scope }}
               onError={setError}
               onSelect={(id) => {
                 const concept = atlas.concepts.find((c) => c.elements.includes(id));
@@ -740,6 +746,17 @@ export default function YuAnatomy() {
                   {["斜视", "正面", "侧面", "背面"][i]}
                 </button>
               ))}
+              <button
+                type="button"
+                className={`view-rotate-btn ${state.rotate ? "active" : ""}`}
+                title={state.rotate ? "停止旋转" : "开启 360° 全景旋转观察"}
+                aria-label={state.rotate ? "停止旋转" : "开启 360° 全景旋转观察"}
+                aria-pressed={state.rotate}
+                onClick={() => setState((s) => ({ ...s, rotate: !s.rotate }))}
+              >
+                <RotateCw size={14} />
+                <span>全景旋转</span>
+              </button>
               <button
                 type="button"
                 className="icon-button"
