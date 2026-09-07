@@ -1,3 +1,4 @@
+import { loadCanalModel, CANAL_MODEL_BOUNDS, type CanalModel } from "./canal-model";
 import { measurePoints, retainedByPlane } from "./measurement";
 import { useEffect, useRef } from "react";
 import * as T from "three";
@@ -52,7 +53,7 @@ export default function AnatomyScene({
       amount = 0;
     let lastState: SceneState | null = null;
     const isVisible = (p: Atlas["parts"][number], s: SceneState) =>
-      s.fascialMode ? (p.system === "dental" || (p.system === "skeletal" && /mandible|maxilla|zygomatic|temporal bone|sphenoid/i.test(p.name)) || /BP3-FMA490/.test(p.id) || /mylohyoid|geniohyoid|genioglossus|hyoglossus|sublingual|submandibular gland/i.test(p.name)) : s.isolate
+      s.canalMode ? false : s.fascialMode ? (p.system === "dental" || (p.system === "skeletal" && /mandible|maxilla|zygomatic|temporal bone|sphenoid/i.test(p.name)) || /BP3-FMA490/.test(p.id) || /mylohyoid|geniohyoid|genioglossus|hyoglossus|sublingual|submandibular gland/i.test(p.name)) : s.isolate
         ? s.selected.includes(p.id)
         : !s.hidden?.includes(p.id) &&
           (s.selected.includes(p.id) ||
@@ -344,6 +345,13 @@ export default function AnatomyScene({
       }
       dirty = true;
     }).catch((error) => { if (!disposed && error.name !== "AbortError") onError("间隙示意加载失败，请刷新重试。"); });
+    let canalModel: CanalModel | null = null;
+    let lastCanalKey = "";
+    let lastCanalMode = false;
+    const canalLoading = loadCanalModel(abort.signal).then((model) => {
+      if (disposed) { model.dispose(); return; }
+      canalModel = model; scene.add(model.group); lastCanalKey = ""; dirty = true;
+    });
     const fascialUniform = { value: 0 };
     let lastFascialClip = "";
     let lastFascialMode = false;
@@ -477,6 +485,7 @@ export default function AnatomyScene({
         let cursor = 0;
         const [pulpData] = await Promise.all([
           loadPulpData(atlas, abort.signal),
+          canalLoading,
           ...Array.from({ length: 3 }, async () => {
             while (cursor < atlas.chunks.length) {
               const i = cursor++;
@@ -505,6 +514,7 @@ export default function AnatomyScene({
       atlas.parts.forEach((p, i) => {
         if (isVisible(p, latest.current)) box.union(bounds[i]);
       });
+      if (latest.current.canalMode) box.set(new T.Vector3(...CANAL_MODEL_BOUNDS[0]), new T.Vector3(...CANAL_MODEL_BOUNDS[1]));
       if (latest.current.fascialMode && !box.isEmpty()) { box.max.y = Math.min(box.max.y, .305); box.min.y = Math.max(box.min.y, .19); }
       if (box.isEmpty()) box.set(new T.Vector3(-0.15, 0, -0.15), new T.Vector3(0.15, 0.42, 0.15));
       const center = box.getCenter(new T.Vector3()),
@@ -518,7 +528,7 @@ export default function AnatomyScene({
           (2 * Math.tan(T.MathUtils.degToRad(camera.fov / 2)))) *
         1.2;
       const distance = T.MathUtils.lerp(
-        Math.max(0.07, normalDistance),
+        Math.max(latest.current.canalMode ? .04 : .07, normalDistance),
         Math.max(0.2, atlasDistance),
         extent,
       );
@@ -633,7 +643,7 @@ export default function AnatomyScene({
     const cancel = (e: PointerEvent) => tap.cancel(e.pointerId);
     const up = (e: PointerEvent) => {
       const validTap = tap.up(e.pointerId, e.clientX, e.clientY);
-      if (!validTap || !ready) return;
+      if (!validTap || !ready || latest.current.canalMode) return;
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.set(
         ((e.clientX - rect.left) / rect.width) * 2 - 1,
@@ -722,7 +732,7 @@ export default function AnatomyScene({
         lastState?.selected !== s.selected ||
         lastState?.isolate !== s.isolate ||
         lastState?.scope !== s.scope ||
-        lastState?.hidden !== s.hidden || lastState?.fascialMode !== s.fascialMode || lastState?.fascialActiveSpaceId !== s.fascialActiveSpaceId;
+        lastState?.hidden !== s.hidden || lastState?.canalMode !== s.canalMode || lastState?.fascialMode !== s.fascialMode || lastState?.fascialActiveSpaceId !== s.fascialActiveSpaceId;
       const moving = Math.abs(amount - s.explode) > 0.0001;
       if (moving) {
         amount = T.MathUtils.damp(amount, s.explode, 8, dt);
@@ -802,6 +812,7 @@ export default function AnatomyScene({
         fit(s.view, 0);
         lastIsolate = isolateKey;
       }
+      controls.minDistance = s.canalMode ? .028 : .07;
       controls.enableRotate = amount < 0.8;
       controls.mouseButtons.LEFT = amount < 0.8 ? T.MOUSE.ROTATE : T.MOUSE.PAN;
       controls.touches.ONE = amount < 0.8 ? T.TOUCH.ROTATE : T.TOUCH.PAN;
@@ -815,7 +826,7 @@ export default function AnatomyScene({
       // Update Clipping Plane
       const clipping = s.clipping;
       const clippingKey = clipping?.enabled
-        ? `${clipping.axis}:${clipping.offset}:${clipping.inverted}:${clipping.solidCap !== false}`
+        ? `${s.canalMode}:${clipping.axis}:${clipping.offset}:${clipping.inverted}:${clipping.solidCap !== false}`
         : "disabled";
       if (clippingKey !== lastClippingKey) {
         lastClippingKey = clippingKey;
@@ -824,6 +835,7 @@ export default function AnatomyScene({
           atlas.parts.forEach((p, i) => {
             if (isVisible(p, s)) targetBox.union(bounds[i]);
           });
+          if (s.canalMode) targetBox.set(new T.Vector3(...CANAL_MODEL_BOUNDS[0]), new T.Vector3(...CANAL_MODEL_BOUNDS[1]));
           if (targetBox.isEmpty()) {
             targetBox.set(new T.Vector3(-0.15, 0, -0.15), new T.Vector3(0.15, 0.42, 0.15));
           }
@@ -860,7 +872,7 @@ export default function AnatomyScene({
           capMesh.position.copy(planePoint);
           capMesh.lookAt(planePoint.clone().add(clipPlane.normal));
 
-          const solid = clipping.solidCap !== false;
+          const solid = !s.canalMode && clipping.solidCap !== false;
           capMesh.visible = solid;
           stencilGroup.visible = solid;
 
@@ -890,6 +902,12 @@ export default function AnatomyScene({
         dirty = true;
       }
 
+      const canalKey = JSON.stringify([s.canalMode, s.canalType, s.canalSection, s.canalShell, s.canalShellOpacity, clippingKey]);
+      if (canalKey !== lastCanalKey) {
+        lastCanalKey = canalKey; canalModel?.update(s, clipPlane);
+        if (!!s.canalMode !== lastCanalMode) { lastCanalMode = !!s.canalMode; fit(s.view, amount); }
+        dirty = true;
+      }
       const nextRulerContext = JSON.stringify([s.rulerMode, s.rulerReset, s.scope, s.hidden, s.visible, s.isolate, s.isolate ? s.selected : [], s.clipping]);
       if (nextRulerContext !== rulerContext) {
         rulerContext = nextRulerContext;
@@ -1063,6 +1081,7 @@ export default function AnatomyScene({
           });
         }
       });
+      canalModel?.dispose();
       scene.traverse((o) => {
         if (o instanceof T.Mesh && !geometries.includes(o.geometry)) {
           o.geometry.dispose();

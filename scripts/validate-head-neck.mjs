@@ -1,5 +1,6 @@
 import "./validate-fascial-ruler.mjs";
 import "./validate-additions.mjs";
+import "./validate-canal-types.mjs";
 import fs from "node:fs";
 import assert from "node:assert/strict";
 import { gunzipSync } from "node:zlib";

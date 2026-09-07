@@ -1,3 +1,4 @@
+import { CANAL_PATTERNS } from "./canal-patterns";
 import { loadAtlas } from "./atlas-loader";
 import { CanalClassification } from "./canal-classification";
 import { useEffect, useMemo, useState, useRef } from "react";
@@ -91,7 +92,18 @@ export default function YuAnatomy() {
     [error, setError] = useState(""),
     [drawer, setDrawer] = useState(false),
     [about, setAbout] = useState(false);
-  const [canalOpen, setCanalOpen] = useState(false);
+  const priorCanalState = useRef<SceneState | null>(null);
+  const openCanals = () => {
+    if (state.canalMode) return;
+    priorCanalState.current = state;
+    setState((s) => ({ ...s, canalMode: true, canalType: 0, canalSection: -1,
+      canalShell: "transparent", canalShellOpacity: .19, explode: 0, isolate: false,
+      rotate: false, view: "three-quarter", rulerMode: false, fascialMode: false, rctMode: false,
+      clipping: { enabled: false, axis: "y", offset: 0, inverted: false, solidCap: false }, reset: s.reset + 1 }));
+    setDrawer(false);
+  };
+  const closeCanals = () => setState((s) => ({ ...(priorCanalState.current ?? s), hidden: priorCanalState.current?.hidden ?? s.hidden, canalMode: false, reset: s.reset + 1 }));
+  const updateCanals = (patch: Partial<SceneState>) => setState((s) => ({ ...s, ...patch }));
   const [rulerMeasurement, setRulerMeasurement] = useState<RulerMeasurement | null>(null);
   const selectSpace = (spaceId: string) => {
     const path = INFECTION_PATHWAYS.find((p) => p.stages.some((step) => step.spaceId === spaceId));
@@ -178,6 +190,7 @@ export default function YuAnatomy() {
     setChosen(c);
     setState((s) => ({
       ...s,
+      canalMode: false,
       visible: Array.from(
         new Set([
           ...s.visible,
@@ -343,8 +356,8 @@ export default function YuAnatomy() {
           {PRESETS.map((p, i) => (
             <button
               key={p.id}
-              aria-pressed={preset === p.id}
-              className={preset === p.id ? "active" : ""}
+              aria-pressed={!state.canalMode && preset === p.id}
+              className={!state.canalMode && preset === p.id ? "active" : ""}
               onClick={() => changePreset(p.id)}
             >
               <span className="preset-number">{i === 0 ? "00" : `0${i}`}</span>
@@ -352,7 +365,7 @@ export default function YuAnatomy() {
               <ChevronRight size={15} />
             </button>
           ))}
-          <button onClick={() => setCanalOpen(true)}><span className="preset-number">学</span><span>根管分型</span><ChevronRight size={15} /></button>
+          <button onClick={openCanals} aria-pressed={!!state.canalMode} className={state.canalMode ? "active" : ""}><span className="preset-number">3D</span><span>根管分型</span><ChevronRight size={15} /></button>
         </nav>
 
         <label className="search-box">
@@ -428,7 +441,7 @@ export default function YuAnatomy() {
               onSelectFascialSpace={selectSpace}
             />
           )}
-          {chosen && (
+          {chosen && !state.canalMode && (
             <button
               className="mobile-only selection-chip"
               onClick={() =>
@@ -441,9 +454,13 @@ export default function YuAnatomy() {
               <ChevronRight size={14} />
             </button>
           )}
+          {state.canalMode && <>
+            <div className="canal-scene-caption"><strong>Vertucci {CANAL_PATTERNS[state.canalType ?? 0].type} 型 · {CANAL_PATTERNS[state.canalType ?? 0].stages.join("–")}</strong><span>通用三维教学模型 · 非当前牙位</span></div>
+            <nav className="canal-mobile-controls" aria-label="快速切换三维分型">{CANAL_PATTERNS.map((p,i) => <button key={p.type} aria-label={`切换 ${p.type} 型`} aria-pressed={i === (state.canalType ?? 0)} onClick={() => updateCanals({ canalType: i, canalSection: -1 })}>{p.type}</button>)}</nav>
+          </>}
           <div className="orientation">
             上 / 颅侧 (Superior)<span>↑</span>
-            <small>成年男性解剖参考</small>
+            <small>{state.canalMode ? "髓室侧在上 · 根尖侧在下" : "成年男性解剖参考"}</small>
           </div>
           {progress < 100 && !error && (
             <div className="loading" role="status">
@@ -458,7 +475,7 @@ export default function YuAnatomy() {
               <button onClick={() => location.reload()}>重试</button>
             </div>
           )}
-          {atlas && progress === 100 && visible === 0 && (
+          {atlas && progress === 100 && visible === 0 && !state.canalMode && (
             <div className="loading">
               <p>所有结构均已隐藏。</p>
               <button onClick={() => changePreset(preset)}>恢复当前视图</button>
@@ -466,7 +483,7 @@ export default function YuAnatomy() {
           )}
 
           {/* Top-Right Floating 3D Wireframe Closeup (Background-less) */}
-          {selectedTooth && !hideCornerPip && atlas && !state.fascialMode && !state.rulerMode && (
+          {selectedTooth && !hideCornerPip && atlas && !state.fascialMode && !state.rulerMode && !state.canalMode && (
             <ToothPointMatrix
               atlas={atlas}
               tooth={selectedTooth}
@@ -475,7 +492,7 @@ export default function YuAnatomy() {
           )}
 
           {/* Jump Banner in Viewer when selecting a tooth in other presets */}
-          {preset !== "dental" && selectedTooth && (
+          {preset !== "dental" && selectedTooth && !state.canalMode && (
             <div className="viewer-tooth-jump-banner">
               <div className="jump-banner-info">
                 <span className="jump-banner-sparkle">✦</span>
@@ -637,7 +654,7 @@ export default function YuAnatomy() {
           )}
 
           {/* Dedicated Bottom Center 28-Tooth FDI Dock when preset === "dental" */}
-          {preset === "dental" && !state.fascialMode && !state.rulerMode && (
+          {preset === "dental" && !state.fascialMode && !state.rulerMode && !state.canalMode && (
             <div
               className={`fdi-bottom-dock ${fdiDockMinimized ? "minimized" : ""}`}
               role="region"
@@ -870,7 +887,9 @@ export default function YuAnatomy() {
           </div>
 
           <div className="tool-buttons" aria-label="解剖操作与工具">
-            {chosen && (
+            {state.canalMode && <button className="toolbar-tool-btn" onClick={closeCanals}>返回解剖模型</button>}
+            {!state.canalMode && <>
+            {chosen && !state.canalMode && (
               <>
                 <button
                   type="button"
@@ -969,6 +988,7 @@ export default function YuAnatomy() {
               <Sparkles size={15} />
               <span>髓腔示意</span>
             </button>
+            </>}
             <button
               type="button"
               className={`toolbar-tool-btn ${state.clipping?.enabled ? "active" : ""}`}
@@ -998,7 +1018,7 @@ export default function YuAnatomy() {
             </span>
             <input
               aria-label="拆解程度"
-              disabled={state.rulerMode || state.fascialMode}
+              disabled={state.rulerMode || state.fascialMode || state.canalMode}
               type="range"
               min="0"
               max="100"
@@ -1023,7 +1043,7 @@ export default function YuAnatomy() {
       </section>
       <aside className="inspector" aria-label="结构详情">
         <section className="detail-panel" aria-label="结构详情">
-          {state.fascialMode && activeFascialSpace ? (
+          {state.canalMode ? <CanalClassification state={state} onChange={updateCanals} onClose={closeCanals} /> : state.fascialMode && activeFascialSpace ? (
             <div className="fascial-detail-card">
               <div className="detail-top">
                 <span className="eyebrow">颌面筋膜间隙 · 专科考点</span>
@@ -1275,7 +1295,7 @@ export default function YuAnatomy() {
 
                   {detailTab === "pulp" && (
                     <div className="dental-tab-body">
-                      <button className="text-button" onClick={() => setCanalOpen(true)}>查看 Vertucci 八型 ↗</button>
+                      <button className="text-button" onClick={openCanals}>查看 Vertucci 八型 ↗</button>
                       <p className="pulp-model-note">文字描述与三维示意分开阅读：本模型未重建实际内部解剖，不用于判断根管分型或操作长度。</p>
                       <div className="pulp-info-row">
                         <strong>髓室形态：</strong>
@@ -1338,7 +1358,6 @@ export default function YuAnatomy() {
           </button>
         </div>
       </aside>
-      {canalOpen && <CanalClassification onClose={() => setCanalOpen(false)} />}
       {about && (
         <dialog
           ref={dialog}

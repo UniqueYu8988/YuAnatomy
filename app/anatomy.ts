@@ -175,6 +175,11 @@ export interface RulerMeasurement {
   partB?: { id: string; name: string };
 }
 export interface SceneState {
+  canalMode?: boolean;
+  canalType?: number;
+  canalSection?: number;
+  canalShell?: "transparent" | "cutaway" | "hidden";
+  canalShellOpacity?: number;
   scope?: string[];
   hidden?: string[];
   inspectorOpen?: boolean;
