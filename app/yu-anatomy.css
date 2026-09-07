@@ -2123,3 +2123,24 @@ p {
 
 
 
+
+/* Space teaching controls stay within the canvas instead of spanning both sidebars. */
+.fascial-controller-bar{width:calc(100% - 32px);max-width:720px;box-sizing:border-box;max-height:42%;overflow:auto;bottom:110px}
+.fascial-space-tabs{display:flex;flex-wrap:wrap;gap:5px}.fascial-space-tabs button{font:inherit;font-size:12px;border:1px solid #cfddd6;background:#fff;border-radius:6px;padding:6px 8px;cursor:pointer;color:#365a50}.fascial-space-tabs button[aria-pressed=true]{background:#246c5c;color:white;border-color:#246c5c}.fascial-model-note{font-size:12px;line-height:1.65;margin:4px 0;color:#576e65}.fascial-space-tabs button:focus-visible{outline:2px solid #ab8437;outline-offset:2px}.fascial-bar-row.top{align-items:flex-start}.fascial-stage-pill{min-width:0}.fascial-stage-pill .stage-title,.fascial-stage-pill .stage-desc{white-space:normal}.ruler-hud-bar{width:calc(100% - 32px);max-width:680px;box-sizing:border-box}.ruler-3d-badge{pointer-events:none}.ruler-hud-center{min-width:0}.ruler-parts{overflow-wrap:anywhere}
+@media(max-width:700px){.fascial-controller-bar{bottom:126px;max-height:37%;padding:9px;width:calc(100% - 18px)}.fascial-title-group{display:none}.fascial-space-tabs{gap:4px}.fascial-space-tabs button{padding:5px;font-size:11px}.fascial-model-note{font-size:11px}.fascial-stage-pill .stage-desc{display:none}.ruler-hud-bar{bottom:128px;flex-wrap:wrap;gap:6px;padding:10px}.ruler-hud-left{display:none}.ruler-deltas{display:none}.ruler-hud-center{flex:1 1 100%}.ruler-hud-right{width:100%;justify-content:flex-end}}
+@media(min-width:701px){.fascial-controller-bar{top:16px;bottom:auto;max-height:28%}}
+@media(max-width:700px){.ruler-hud-bar{top:14px;bottom:auto}}
+.ruler-point-label{position:absolute;z-index:21;pointer-events:none;font:700 11px/1.4 sans-serif;color:#155e75;background:#fffffff0;border:1px solid #c6e1dc;border-radius:3px;padding:1px 4px}
+@media(max-width:700px){
+ .viewer:has(.fascial-controller-bar),.viewer:has(.ruler-hud-bar){height:100dvh;min-height:650px}
+ .viewer:has(.fascial-controller-bar) .viewer-toolbar,.viewer:has(.ruler-hud-bar) .viewer-toolbar{flex-wrap:wrap;gap:4px}
+ .viewer:has(.fascial-controller-bar) .camera-buttons,.viewer:has(.ruler-hud-bar) .camera-buttons{width:100%;justify-content:center}
+ .viewer:has(.fascial-controller-bar) .tool-buttons,.viewer:has(.ruler-hud-bar) .tool-buttons{width:100%;justify-content:center;gap:5px}
+ .viewer:has(.fascial-controller-bar) .explode,.viewer:has(.ruler-hud-bar) .explode{display:none}
+ .canvas-wrap:has(.fascial-controller-bar) .scene{bottom:220px}
+ .canvas-wrap:has(.fascial-controller-bar) .orientation{bottom:226px}
+ .fascial-controller-bar{bottom:4px;top:auto;height:208px;max-height:208px;box-shadow:none}
+ .fascial-pathway-tabs{gap:4px}.fascial-pathway-btn{font-size:10px;padding:4px 6px}
+ .fascial-space-tabs button{font-size:11px;padding:5px 6px}
+}
+@media(max-width:700px){.canvas-wrap:has(.fascial-controller-bar) .scene{bottom:250px}.canvas-wrap:has(.fascial-controller-bar) .orientation{bottom:256px}.fascial-controller-bar{height:238px;max-height:238px}.canvas-wrap:has(.fascial-controller-bar) .clipping-bar{bottom:252px}}

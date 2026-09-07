@@ -1,3 +1,5 @@
+import { loadAtlas } from "./atlas-loader";
+import { CanalClassification } from "./canal-classification";
 import { useEffect, useMemo, useState, useRef } from "react";
 import {
   Search,
@@ -38,7 +40,7 @@ import {
 } from "./anatomy";
 import { inPreset, PRESETS, getStudyEntry, type PresetId } from "./study";
 import {
-  FASCIAL_SPACES,
+  FASCIAL_SPACES, FASCIAL_SOURCES,
   INFECTION_PATHWAYS,
   type FascialSpace,
   type InfectionPathway,
@@ -89,7 +91,14 @@ export default function YuAnatomy() {
     [error, setError] = useState(""),
     [drawer, setDrawer] = useState(false),
     [about, setAbout] = useState(false);
+  const [canalOpen, setCanalOpen] = useState(false);
   const [rulerMeasurement, setRulerMeasurement] = useState<RulerMeasurement | null>(null);
+  const selectSpace = (spaceId: string) => {
+    const path = INFECTION_PATHWAYS.find((p) => p.stages.some((step) => step.spaceId === spaceId));
+    setState((s) => ({ ...s, fascialActiveSpaceId: spaceId, fascialPathId: path?.id ?? s.fascialPathId,
+      fascialStageIndex: path?.stages.findIndex((step) => step.spaceId === spaceId) ?? 0 }));
+  };
+
 
   const currentPathway = useMemo(
     () => INFECTION_PATHWAYS.find((p) => p.id === (state.fascialPathId || "wisdom-tooth-ramus")),
@@ -107,11 +116,7 @@ export default function YuAnatomy() {
   );
   useEffect(() => {
     const c = new AbortController();
-    fetch("/head-neck/atlas.json", { signal: c.signal })
-      .then((r) => {
-        if (!r.ok) throw Error("模型目录加载失败，请刷新后重试。");
-        return r.json();
-      })
+    loadAtlas(c.signal)
       .then((data) => setAtlas(data as Atlas))
       .catch((e) => {
         if (e.name !== "AbortError") setError("模型目录加载失败，请检查网络并刷新后重试。");
@@ -347,6 +352,7 @@ export default function YuAnatomy() {
               <ChevronRight size={15} />
             </button>
           ))}
+          <button onClick={() => setCanalOpen(true)}><span className="preset-number">学</span><span>根管分型</span><ChevronRight size={15} /></button>
         </nav>
 
         <label className="search-box">
@@ -419,9 +425,7 @@ export default function YuAnatomy() {
               onProgress={setProgress}
               onError={setError}
               onMeasure={setRulerMeasurement}
-              onSelectFascialSpace={(spaceId) =>
-                setState((s) => ({ ...s, fascialActiveSpaceId: spaceId }))
-              }
+              onSelectFascialSpace={selectSpace}
             />
           )}
           {chosen && (
@@ -462,7 +466,7 @@ export default function YuAnatomy() {
           )}
 
           {/* Top-Right Floating 3D Wireframe Closeup (Background-less) */}
-          {selectedTooth && !hideCornerPip && atlas && (
+          {selectedTooth && !hideCornerPip && atlas && !state.fascialMode && !state.rulerMode && (
             <ToothPointMatrix
               atlas={atlas}
               tooth={selectedTooth}
@@ -494,18 +498,18 @@ export default function YuAnatomy() {
             <div className="ruler-hud-bar" role="region" aria-label="三维测距标尺控制面板">
               <div className="ruler-hud-left">
                 <Ruler size={16} className="ruler-icon" />
-                <span className="ruler-hud-title">3D 交互测距标尺</span>
+                <span className="ruler-hud-title">表面两点直线距离</span>
               </div>
               <div className="ruler-hud-center">
-                {!rulerMeasurement || rulerMeasurement.distanceMm === 0 ? (
+                {!rulerMeasurement?.complete ? (
                   <span className="ruler-hint">
-                    {rulerMeasurement ? "已锚定起点 A，请在模型表面点击选取终点 B" : "请在模型任意解剖结构表面点击选取起点 A"}
+                    {rulerMeasurement ? "已锚定起点 A，请在模型表面点击选取终点 B" : "点击可见原始表面选 A，再选 B（非沿面距离）"}
                   </span>
                 ) : (
                   <div className="ruler-summary">
                     <strong className="ruler-dist">{rulerMeasurement.distanceMm.toFixed(1)} mm</strong>
                     <span className="ruler-deltas">
-                      ΔX: {rulerMeasurement.deltaMm[0].toFixed(1)} mm · ΔY: {rulerMeasurement.deltaMm[1].toFixed(1)} mm · ΔZ: {rulerMeasurement.deltaMm[2].toFixed(1)} mm
+                      左右: {rulerMeasurement.deltaMm[0].toFixed(1)} mm · 上下: {rulerMeasurement.deltaMm[1].toFixed(1)} mm · 前后: {rulerMeasurement.deltaMm[2].toFixed(1)} mm
                     </span>
                     {rulerMeasurement.partA && rulerMeasurement.partB && (
                       <span className="ruler-parts">
@@ -520,7 +524,7 @@ export default function YuAnatomy() {
                   <button
                     type="button"
                     className="ruler-btn reset"
-                    onClick={() => setRulerMeasurement(null)}
+                    onClick={() => { setRulerMeasurement(null); setState((s) => ({ ...s, rulerReset: (s.rulerReset ?? 0) + 1 })); }}
                   >
                     重新测量
                   </button>
@@ -545,7 +549,7 @@ export default function YuAnatomy() {
               <div className="fascial-bar-row top">
                 <div className="fascial-title-group">
                   <Activity size={16} className="fascial-icon" />
-                  <span className="fascial-label">间隙感染扩散链：</span>
+                  <span className="fascial-label">间隙与可能扩展：</span>
                 </div>
                 <div className="fascial-pathway-tabs">
                   {INFECTION_PATHWAYS.map((p) => {
@@ -580,6 +584,8 @@ export default function YuAnatomy() {
                 </button>
               </div>
 
+              <div className="fascial-space-tabs" aria-label="选择间隙">{FASCIAL_SPACES.map((space) => <button key={space.id} aria-pressed={state.fascialActiveSpaceId === space.id} onClick={() => selectSpace(space.id)}>{space.name}</button>)}</div>
+              <p className="fascial-model-note">彩色区域为局部间隙示意，绿色标出已有边界结构。扩展关系并非必然病程；未重建脓肿或完整筋膜。</p>
               {currentPathway && (
                 <div className="fascial-bar-row bottom">
                   <button
@@ -602,7 +608,7 @@ export default function YuAnatomy() {
                   </button>
 
                   <div className="fascial-stage-pill">
-                    <span className="stage-num">阶段 {(state.fascialStageIndex ?? 0) + 1} / {currentPathway.stages.length}</span>
+                    <span className="stage-num">观察点 {(state.fascialStageIndex ?? 0) + 1} / {currentPathway.stages.length}</span>
                     <strong className="stage-title">{currentStage?.title}</strong>
                     <span className="stage-desc">{currentStage?.sourceDesc}</span>
                   </div>
@@ -631,7 +637,7 @@ export default function YuAnatomy() {
           )}
 
           {/* Dedicated Bottom Center 28-Tooth FDI Dock when preset === "dental" */}
-          {preset === "dental" && (
+          {preset === "dental" && !state.fascialMode && !state.rulerMode && (
             <div
               className={`fdi-bottom-dock ${fdiDockMinimized ? "minimized" : ""}`}
               role="region"
@@ -920,6 +926,9 @@ export default function YuAnatomy() {
                 setState((s) => ({
                   ...s,
                   rulerMode: !s.rulerMode,
+                  rulerReset: (s.rulerReset ?? 0) + 1,
+                  explode: 0, rotate: false,
+                  clipping: s.clipping ? { ...s.clipping, solidCap: false } : s.clipping,
                   fascialMode: false,
                 }))
               }
@@ -937,10 +946,12 @@ export default function YuAnatomy() {
                 setState((s) => ({
                   ...s,
                   fascialMode: !s.fascialMode,
+                  explode: 0, rotate: false, rctMode: false,
+                  clipping: s.clipping ? { ...s.clipping, enabled: false } : s.clipping,
                   rulerMode: false,
                   fascialPathId: s.fascialPathId || "wisdom-tooth-ramus",
                   fascialStageIndex: 0,
-                  fascialActiveSpaceId: INFECTION_PATHWAYS[0].stages[0]?.spaceId,
+                  fascialActiveSpaceId: (INFECTION_PATHWAYS.find((p) => p.id === s.fascialPathId) ?? INFECTION_PATHWAYS[0]).stages[0]?.spaceId,
                 }))
               }
             >
@@ -987,6 +998,7 @@ export default function YuAnatomy() {
             </span>
             <input
               aria-label="拆解程度"
+              disabled={state.rulerMode || state.fascialMode}
               type="range"
               min="0"
               max="100"
@@ -1018,17 +1030,18 @@ export default function YuAnatomy() {
                 <button
                   className="icon-button"
                   aria-label="关闭间隙详情"
-                  onClick={() => setState((s) => ({ ...s, fascialActiveSpaceId: undefined }))}
+                  onClick={() => setState((s) => ({ ...s, fascialMode: false }))}
                 >
                   <X size={17} />
                 </button>
               </div>
               <h2>{activeFascialSpace.name}</h2>
               <p className="latin-subtitle">{activeFascialSpace.latinName}</p>
+              <p className="fascial-model-note">{activeFascialSpace.modelNote}</p>
               <div className="fascial-badge-row">
                 <span className="fascial-tag trismus">张口受限：{activeFascialSpace.clinical.trismus}</span>
                 {currentPathway && (
-                  <span className="fascial-tag pathway">扩散链：{currentPathway.title.split("（")[0]}</span>
+                  <span className="fascial-tag pathway">扩展关系：{currentPathway.title.split("（")[0]}</span>
                 )}
               </div>
 
@@ -1075,22 +1088,23 @@ export default function YuAnatomy() {
               </div>
 
               <div className="fascial-section highlight">
-                <h4 className="fascial-section-title">脓肿切开引流路径</h4>
-                <p className="fascial-drainage-text">{activeFascialSpace.clinical.drainage}</p>
+                <h4 className="fascial-section-title">邻接结构与适用范围</h4>
+                <p className="fascial-drainage-text">{currentPathway?.description}</p>
+                {FASCIAL_SOURCES.map((source) => <p key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.title} ↗</a></p>)}
                 <div className="fascial-danger-alert">
                   <strong>避障危险区：</strong>
                   <span>{activeFascialSpace.clinical.dangerZones}</span>
                 </div>
               </div>
             </div>
-          ) : state.rulerMode && rulerMeasurement && rulerMeasurement.distanceMm > 0 ? (
+          ) : state.rulerMode && rulerMeasurement && rulerMeasurement.complete ? (
             <div className="ruler-detail-card">
               <div className="detail-top">
                 <span className="eyebrow">三维解剖测量结果</span>
                 <button
                   className="icon-button"
                   aria-label="清除测距"
-                  onClick={() => setRulerMeasurement(null)}
+                  onClick={() => { setRulerMeasurement(null); setState((s) => ({ ...s, rulerReset: (s.rulerReset ?? 0) + 1 })); }}
                 >
                   <X size={17} />
                 </button>
@@ -1100,7 +1114,7 @@ export default function YuAnatomy() {
                 <span className="unit">mm</span>
               </div>
               <p className="muted" style={{ marginBottom: "1rem" }}>
-                两点间真实三维欧氏空间直线距离
+                模型原始表面两点直线距离，不是沿面长度或临床工作长度。剖切填充面不参与拾取。
               </p>
 
               <div className="ruler-axes-grid">
@@ -1137,7 +1151,7 @@ export default function YuAnatomy() {
                 <button
                   type="button"
                   className="ruler-btn reset"
-                  onClick={() => setRulerMeasurement(null)}
+                  onClick={() => { setRulerMeasurement(null); setState((s) => ({ ...s, rulerReset: (s.rulerReset ?? 0) + 1 })); }}
                 >
                   清除重测
                 </button>
@@ -1261,6 +1275,7 @@ export default function YuAnatomy() {
 
                   {detailTab === "pulp" && (
                     <div className="dental-tab-body">
+                      <button className="text-button" onClick={() => setCanalOpen(true)}>查看 Vertucci 八型 ↗</button>
                       <p className="pulp-model-note">文字描述与三维示意分开阅读：本模型未重建实际内部解剖，不用于判断根管分型或操作长度。</p>
                       <div className="pulp-info-row">
                         <strong>髓室形态：</strong>
@@ -1323,6 +1338,7 @@ export default function YuAnatomy() {
           </button>
         </div>
       </aside>
+      {canalOpen && <CanalClassification onClose={() => setCanalOpen(false)} />}
       {about && (
         <dialog
           ref={dialog}
@@ -1359,8 +1375,9 @@ export default function YuAnatomy() {
               包含 {atlas?.parts.length} 个高精度三维几何网格、{atlas?.concepts.length} 个解剖学概念。保留头颈部器官结构的完整拓扑，部分颈部肌群与血管向下自然延伸以呈现起止全貌；排除了全身躯干骨与胸腹脏器。本软件专为口腔医学教学与解剖复习设计。
             </p>
             <p>
-              几何数据保留 BodyParts3D 发布的全部原始三角面（197万余三角面，无额外减面）。已完成全量结构中文审定名与全拼/简拼检索汉化，恒牙支持 FDI 两位数牙位标记法检索，重点口腔颌面结构已对照人卫版《口腔解剖生理学》（第8版，何三纲/于海洋主编）录入专科考点与临床释义。
+              基础头颈包保留发布版的约197万三角面；新增12个咀嚼肌网格约28.5万三角面，均未额外减面。已完成全量结构中文审定名与全拼/简拼检索汉化，恒牙支持 FDI 两位数牙位标记法检索，重点口腔颌面结构已对照人卫版《口腔解剖生理学》（第8版，何三纲/于海洋主编）录入专科考点与临床释义。
             </p>
+            <p>新增咀嚼肌来自 BodyParts3D 3.0，按共同骨骼配准至当前坐标。BodyParts3D, © The Database Center for Life Science；该独立改编数据包采用 CC BY-SA 2.1 Japan。<a href="/mastication/ATTRIBUTION.md" target="_blank" rel="noreferrer">咀嚼肌来源与许可</a></p>
             <a href="/ATTRIBUTION.md" target="_blank" rel="noreferrer">
               完整署名与改编说明 ↗
             </a>

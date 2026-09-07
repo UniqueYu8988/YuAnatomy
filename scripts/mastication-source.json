@@ -1,0 +1,139 @@
+{
+  "source": "BodyParts3D 3.0, official 95% polygon-reduction archive",
+  "sourceUrl": "https://dbarchive.biosciencedbc.jp/data/bodyparts3d/20110915/BodyParts3D_3.0_obj_95.zip",
+  "license": "CC-BY-SA-2.1-JP",
+  "attribution": "BodyParts3D, Copyright© The Database Center for Life Science licensed by CC Attribution-Share Alike 2.1 Japan",
+  "registration": {
+    "scale": 1.059369874098004,
+    "rotation": [
+      [
+        0.9999999697814653,
+        -0.00022542358070208187,
+        9.808811509434028e-05
+      ],
+      [
+        0.00022540964137606034,
+        0.9999999644993117,
+        0.00014209810025212806
+      ],
+      [
+        -9.812014387505785e-05,
+        -0.000142075985950868,
+        0.9999999850934261
+      ]
+    ],
+    "translationMm": [
+      -0.15057996010419217,
+      15.397670982185474,
+      -99.29859059211003
+    ],
+    "trainingBones": [
+      "FMA52748",
+      "FMA52734",
+      "FMA53649"
+    ],
+    "heldOutBone": "FMA53650",
+    "heldOutSourceToTargetSurfaceRmsMm": 0.2583466353828061,
+    "heldOutTargetToSourceSurfaceRmsMm": 0.08919988835896876,
+    "report": "documentation/qa/FACIAL-SOURCE.md"
+  },
+  "parts": [
+    {
+      "id": "BP3-FMA49001",
+      "conceptId": "FMA49001",
+      "name": "Superficial part of right masseter",
+      "vertexCount": 6953,
+      "indexCount": 30264,
+      "sourceSha256": "0548003276232c506740d5ed3baf386707cfd37313bff83f254d63dac0eb6262"
+    },
+    {
+      "id": "BP3-FMA49002",
+      "conceptId": "FMA49002",
+      "name": "Superficial part of left masseter",
+      "vertexCount": 6410,
+      "indexCount": 30096,
+      "sourceSha256": "06c8e6f478247df53da23396ae7c2f6e0c4e4a3a31ead72ca11c5e3c4bbac522"
+    },
+    {
+      "id": "BP3-FMA49004",
+      "conceptId": "FMA49004",
+      "name": "Deep part of right masseter",
+      "vertexCount": 8491,
+      "indexCount": 42456,
+      "sourceSha256": "b590bf5b498e6d10f5b2b3b753f920f0bd9abe4f396c88fb74419bd427cbc39f"
+    },
+    {
+      "id": "BP3-FMA49005",
+      "conceptId": "FMA49005",
+      "name": "Deep part of left masseter",
+      "vertexCount": 8297,
+      "indexCount": 42342,
+      "sourceSha256": "a0d783fb221b2adff0f94d4c6345094d1608280d338938a8b69c401431cb414d"
+    },
+    {
+      "id": "BP3-FMA49007",
+      "conceptId": "FMA49007",
+      "name": "Right temporalis",
+      "vertexCount": 62210,
+      "indexCount": 318756,
+      "sourceSha256": "66c8234570a01e2268f3d83b9d7bc151f46d78b2bf413f9f502107e9c93a482e"
+    },
+    {
+      "id": "BP3-FMA49008",
+      "conceptId": "FMA49008",
+      "name": "Left temporalis",
+      "vertexCount": 61244,
+      "indexCount": 319068,
+      "sourceSha256": "9827d3141418c1eb635e4f5d08cf7c6cd4377c8df5b74146268a403268126738"
+    },
+    {
+      "id": "BP3-FMA49012",
+      "conceptId": "FMA49012",
+      "name": "Right medial pterygoid",
+      "vertexCount": 5673,
+      "indexCount": 22332,
+      "sourceSha256": "d8939ec976b48afad52d5c0adcd5e5b6b0225f467bb073a16dffb2a7cbe97546"
+    },
+    {
+      "id": "BP3-FMA49013",
+      "conceptId": "FMA49013",
+      "name": "Left medial pterygoid",
+      "vertexCount": 4850,
+      "indexCount": 22104,
+      "sourceSha256": "99d766a3c6ec526b2e688ce9ec83779343911665774d417ed56c0ee3e49f9da2"
+    },
+    {
+      "id": "BP3-FMA49022",
+      "conceptId": "FMA49022",
+      "name": "Lower head of right lateral pterygoid",
+      "vertexCount": 2054,
+      "indexCount": 7260,
+      "sourceSha256": "6ea2efc92c5339d2f1bf35c9379c94042f46109f6e0431559699230b4c9526de"
+    },
+    {
+      "id": "BP3-FMA49023",
+      "conceptId": "FMA49023",
+      "name": "Lower head of left lateral pterygoid",
+      "vertexCount": 1919,
+      "indexCount": 7170,
+      "sourceSha256": "ab5efbcf6e01bcc8a3abd615ae81d8caf4b46eb8529d64d41d1e94a5b977d8aa"
+    },
+    {
+      "id": "BP3-FMA49024",
+      "conceptId": "FMA49024",
+      "name": "Upper head of right lateral pterygoid",
+      "vertexCount": 1471,
+      "indexCount": 6984,
+      "sourceSha256": "f1afa956ca6084f98d9b14e8d8f14caa4882b8ef5b9b2834b7c8ec96b439d249"
+    },
+    {
+      "id": "BP3-FMA49025",
+      "conceptId": "FMA49025",
+      "name": "Upper head of left lateral pterygoid",
+      "vertexCount": 1419,
+      "indexCount": 6930,
+      "sourceSha256": "d726e95caf1a175e23a2fe63d946eaf4fb482f6954510b6abcaea4b7f800d85d"
+    }
+  ],
+  "registrationReference": "https://github.com/choxos/OMFAtlas/blob/main/documentation/qa/FACIAL-SOURCE.md"
+}

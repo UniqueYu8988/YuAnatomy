@@ -58,3 +58,19 @@ Created Desktop/YuAnatomy.lnk with the supplied rounded icon, absolute project w
 - 浏览器检查覆盖全牙列、16 与 36 单牙、剖切、拆解排列及 390×844 手机布局；页面错误列表为空。修复固定 16 mm 相机偏移造成单牙被底部工具栏遮挡的问题。
 - 本机截图位于 `outputs/pulp-all-teeth.png`、`outputs/pulp-16-final.png`、`outputs/pulp-36-final.png`、`outputs/pulp-section-final.png`、`outputs/pulp-exploded-final.png`、`outputs/pulp-mobile-final.png`。未进行真实手机硬件性能基准测试。
 - 页面、README、AGENTS.md 与 `docs/pulp-models.md` 明确区分外形推算示意和真实扫描解剖。当前模型不表达真实根管数量、分型、细小支管或根尖孔，也不支持临床操作长度判断。
+
+## 2026-09-07 根管分型与咀嚼肌
+- npm run check / validate / build 通过。基础591网格、1970872面与28个髓腔独立几何校验仍通过（完整三角面余量≥0.058mm）；新增12肌肉网格285254面，合并603网格1193概念。
+- 新数据gzip、SHA256、索引、bounds、原始面数、中文映射、chunk重定位与重复ID拒绝验证通过。
+- 四控制骨各方向1024顶点确定性抽样点到三角面距离：RMS 0.084–0.259mm；完整数据在 public/mastication/atlas.json。这不是肌肉附着部位的医学精度认证。
+- agent-browser：桌面1280×900与手机390×844；八个分型及全部20个观察段点击通过。中文翼外肌检索4条无重复；关闭学习窗口后仍选中同一肌肉；无浏览器运行异常。
+- 输出截图：outputs/mastication-desktop.png、outputs/canal-desktop.png、outputs/canal-mobile.png。SVG为独立绘制的连通示意。
+- Vite现有大主包警告仍存在，构建成功；本次未引入前端依赖。
+
+## 2026-09-07 间隙与测距修复验收
+
+- `npm run check`、`npm run validate`、`npm run build` 通过；原28个髓腔防穿模、基础几何、12个咀嚼肌及Vertucci检查继续通过。
+- 8个离线间隙曲面：588056个表面采样点未进入187个源组织网格生成的占据体素；源SHA、闭合边、二进制/gzip与关联ID通过。此检查是体素级避让验证，不是临床分割或逐三角面完整碰撞证明。
+- 浏览器1440×1000：8个间隙详情/选中态一致；模式退出恢复牙列。测距完成、A/B标记、清除重测后仅出现新A、再选B通过。开启剖切清掉旧结果；点击被裁掉的牙体原位置不产生锚点，点击保留表面产生A。浏览器无运行错误。
+- 手机390×844：间隙图与控制区分开，8个选项、步骤、退出按钮可见；标尺控制栏和工具栏不挤占模型。截图位于 outputs/fascial-repaired.png、outputs/fascial-floor-mobile.png、outputs/ruler-repaired.png、outputs/ruler-mobile.png。
+- 最终生产构建通过，主JS gzip约267.7kB。Vite原有大包提示仍存在。几何方法、边界局限与复建说明见 docs/fascial-ruler.md。

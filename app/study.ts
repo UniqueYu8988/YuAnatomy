@@ -5,6 +5,7 @@ export const PRESETS = [
   { id: "overview", name: "头颈总览" },
   { id: "bones", name: "颅骨与颈椎" },
   { id: "oral", name: "口腔结构" },
+  { id: "mastication", name: "咀嚼肌" },
   { id: "muscles", name: "肌肉视图" },
   { id: "nerves", name: "神经与血管" },
 ] as const;
@@ -18,6 +19,7 @@ export function inPreset(p: Part, id: PresetId) {
     return /tooth|gingiva|mandible|maxilla|palatine|tongue|gloss|geniohyoid|mylohyoid|digastric|masseter|pterygoid|temporalis|buccinator|parotid|sublingual|submandibular|soft palate|palatini|stylohyoid|^lip$|uvula/i.test(
       p.name,
     );
+  if (id === "mastication") return p.id.startsWith("BP3-FMA490") || p.system === "dental" || (p.system === "skeletal" && /mandible|maxilla|zygomatic bone|temporal bone|sphenoid|frontal bone|parietal bone/i.test(p.name));
   if (id === "muscles") return p.system === "muscular";
   if (id === "nerves") return ["nervous", "arterial", "venous"].includes(p.system);
   return true;
@@ -32,6 +34,272 @@ export interface StudyEntry {
 
 // 口腔专科与头颈核心解剖知识库（以人卫版《口腔解剖生理学》及全国高等医药教材为基准）
 export const STUDY_CONTENT: Record<string, StudyEntry> = {
+
+  "FMA49001": {
+    "displayName": "右侧咬肌浅部",
+    "aliases": [
+      "咬肌",
+      "咀嚼肌",
+      "右咬肌浅部"
+    ],
+    "summary": "颧弓至下颌支及下颌角外侧，主要上提下颌；浅部也参与前伸。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "BP3-FMA49001": {
+    "displayName": "右侧咬肌浅部",
+    "aliases": [
+      "咬肌",
+      "咀嚼肌",
+      "右咬肌浅部"
+    ],
+    "summary": "颧弓至下颌支及下颌角外侧，主要上提下颌；浅部也参与前伸。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "FMA49002": {
+    "displayName": "左侧咬肌浅部",
+    "aliases": [
+      "咬肌",
+      "咀嚼肌",
+      "左咬肌浅部"
+    ],
+    "summary": "颧弓至下颌支及下颌角外侧，主要上提下颌；浅部也参与前伸。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "BP3-FMA49002": {
+    "displayName": "左侧咬肌浅部",
+    "aliases": [
+      "咬肌",
+      "咀嚼肌",
+      "左咬肌浅部"
+    ],
+    "summary": "颧弓至下颌支及下颌角外侧，主要上提下颌；浅部也参与前伸。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "FMA49004": {
+    "displayName": "右侧咬肌深部",
+    "aliases": [
+      "咬肌",
+      "咀嚼肌",
+      "右咬肌深部"
+    ],
+    "summary": "颧弓至下颌支及下颌角外侧，主要上提下颌；浅部也参与前伸。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "BP3-FMA49004": {
+    "displayName": "右侧咬肌深部",
+    "aliases": [
+      "咬肌",
+      "咀嚼肌",
+      "右咬肌深部"
+    ],
+    "summary": "颧弓至下颌支及下颌角外侧，主要上提下颌；浅部也参与前伸。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "FMA49005": {
+    "displayName": "左侧咬肌深部",
+    "aliases": [
+      "咬肌",
+      "咀嚼肌",
+      "左咬肌深部"
+    ],
+    "summary": "颧弓至下颌支及下颌角外侧，主要上提下颌；浅部也参与前伸。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "BP3-FMA49005": {
+    "displayName": "左侧咬肌深部",
+    "aliases": [
+      "咬肌",
+      "咀嚼肌",
+      "左咬肌深部"
+    ],
+    "summary": "颧弓至下颌支及下颌角外侧，主要上提下颌；浅部也参与前伸。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "FMA49007": {
+    "displayName": "右侧颞肌",
+    "aliases": [
+      "颞肌",
+      "咀嚼肌",
+      "右颞肌"
+    ],
+    "summary": "起于颞窝及颞深筋膜，止于下颌骨冠突和下颌支前缘。上提下颌，后部纤维参与后退。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "BP3-FMA49007": {
+    "displayName": "右侧颞肌",
+    "aliases": [
+      "颞肌",
+      "咀嚼肌",
+      "右颞肌"
+    ],
+    "summary": "起于颞窝及颞深筋膜，止于下颌骨冠突和下颌支前缘。上提下颌，后部纤维参与后退。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "FMA49008": {
+    "displayName": "左侧颞肌",
+    "aliases": [
+      "颞肌",
+      "咀嚼肌",
+      "左颞肌"
+    ],
+    "summary": "起于颞窝及颞深筋膜，止于下颌骨冠突和下颌支前缘。上提下颌，后部纤维参与后退。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "BP3-FMA49008": {
+    "displayName": "左侧颞肌",
+    "aliases": [
+      "颞肌",
+      "咀嚼肌",
+      "左颞肌"
+    ],
+    "summary": "起于颞窝及颞深筋膜，止于下颌骨冠突和下颌支前缘。上提下颌，后部纤维参与后退。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "FMA49012": {
+    "displayName": "右侧翼内肌",
+    "aliases": [
+      "翼内肌",
+      "咀嚼肌",
+      "右翼内肌"
+    ],
+    "summary": "主要由翼突区至下颌支及下颌角内侧。参与上提、前伸与侧向研磨运动。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "BP3-FMA49012": {
+    "displayName": "右侧翼内肌",
+    "aliases": [
+      "翼内肌",
+      "咀嚼肌",
+      "右翼内肌"
+    ],
+    "summary": "主要由翼突区至下颌支及下颌角内侧。参与上提、前伸与侧向研磨运动。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "FMA49013": {
+    "displayName": "左侧翼内肌",
+    "aliases": [
+      "翼内肌",
+      "咀嚼肌",
+      "左翼内肌"
+    ],
+    "summary": "主要由翼突区至下颌支及下颌角内侧。参与上提、前伸与侧向研磨运动。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "BP3-FMA49013": {
+    "displayName": "左侧翼内肌",
+    "aliases": [
+      "翼内肌",
+      "咀嚼肌",
+      "左翼内肌"
+    ],
+    "summary": "主要由翼突区至下颌支及下颌角内侧。参与上提、前伸与侧向研磨运动。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "FMA49022": {
+    "displayName": "右侧翼外肌下头",
+    "aliases": [
+      "翼外肌",
+      "咀嚼肌",
+      "右翼外肌下头"
+    ],
+    "summary": "位于颞下窝，联系蝶骨与下颌髁突、关节盘及关节囊区域。参与前伸、张口及侧向运动，上下头作用随运动阶段而异。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "BP3-FMA49022": {
+    "displayName": "右侧翼外肌下头",
+    "aliases": [
+      "翼外肌",
+      "咀嚼肌",
+      "右翼外肌下头"
+    ],
+    "summary": "位于颞下窝，联系蝶骨与下颌髁突、关节盘及关节囊区域。参与前伸、张口及侧向运动，上下头作用随运动阶段而异。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "FMA49023": {
+    "displayName": "左侧翼外肌下头",
+    "aliases": [
+      "翼外肌",
+      "咀嚼肌",
+      "左翼外肌下头"
+    ],
+    "summary": "位于颞下窝，联系蝶骨与下颌髁突、关节盘及关节囊区域。参与前伸、张口及侧向运动，上下头作用随运动阶段而异。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "BP3-FMA49023": {
+    "displayName": "左侧翼外肌下头",
+    "aliases": [
+      "翼外肌",
+      "咀嚼肌",
+      "左翼外肌下头"
+    ],
+    "summary": "位于颞下窝，联系蝶骨与下颌髁突、关节盘及关节囊区域。参与前伸、张口及侧向运动，上下头作用随运动阶段而异。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "FMA49024": {
+    "displayName": "右侧翼外肌上头",
+    "aliases": [
+      "翼外肌",
+      "咀嚼肌",
+      "右翼外肌上头"
+    ],
+    "summary": "位于颞下窝，联系蝶骨与下颌髁突、关节盘及关节囊区域。参与前伸、张口及侧向运动，上下头作用随运动阶段而异。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "BP3-FMA49024": {
+    "displayName": "右侧翼外肌上头",
+    "aliases": [
+      "翼外肌",
+      "咀嚼肌",
+      "右翼外肌上头"
+    ],
+    "summary": "位于颞下窝，联系蝶骨与下颌髁突、关节盘及关节囊区域。参与前伸、张口及侧向运动，上下头作用随运动阶段而异。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "FMA49025": {
+    "displayName": "左侧翼外肌上头",
+    "aliases": [
+      "翼外肌",
+      "咀嚼肌",
+      "左翼外肌上头"
+    ],
+    "summary": "位于颞下窝，联系蝶骨与下颌髁突、关节盘及关节囊区域。参与前伸、张口及侧向运动，上下头作用随运动阶段而异。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  },
+  "BP3-FMA49025": {
+    "displayName": "左侧翼外肌上头",
+    "aliases": [
+      "翼外肌",
+      "咀嚼肌",
+      "左翼外肌上头"
+    ],
+    "summary": "位于颞下窝，联系蝶骨与下颌髁突、关节盘及关节囊区域。参与前伸、张口及侧向运动，上下头作用随运动阶段而异。 四组咀嚼肌均受三叉神经下颌支的运动分支支配。",
+    "chapter": "咀嚼肌",
+    "source": "StatPearls: Anatomy, Head and Neck, Mastication Muscles（NCBI Bookshelf NBK541027）；BodyParts3D 3.0 几何，跨版本配准示意。"
+  }
+,
   // ==================== 恒牙牙列（28颗恒牙，FDI 两位数标记法） ====================
   // --- 右上颌（第一象限，11~17） ---
   FMA55681: {

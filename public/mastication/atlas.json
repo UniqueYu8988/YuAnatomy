@@ -1,0 +1,507 @@
+{
+  "source": "BodyParts3D 3.0, official 95% polygon-reduction archive",
+  "sourceUrl": "https://dbarchive.biosciencedbc.jp/data/bodyparts3d/20110915/BodyParts3D_3.0_obj_95.zip",
+  "license": "CC-BY-SA-2.1-JP",
+  "attribution": "BodyParts3D, Copyright© The Database Center for Life Science licensed by CC Attribution-Share Alike 2.1 Japan",
+  "registration": {
+    "scale": 1.059369874098004,
+    "rotation": [
+      [
+        0.9999999697814653,
+        -0.00022542358070208187,
+        9.808811509434028e-05
+      ],
+      [
+        0.00022540964137606034,
+        0.9999999644993117,
+        0.00014209810025212806
+      ],
+      [
+        -9.812014387505785e-05,
+        -0.000142075985950868,
+        0.9999999850934261
+      ]
+    ],
+    "translationMm": [
+      -0.15057996010419217,
+      15.397670982185474,
+      -99.29859059211003
+    ],
+    "trainingBones": [
+      "FMA52748",
+      "FMA52734",
+      "FMA53649"
+    ],
+    "heldOutBone": "FMA53650",
+    "heldOutSourceToTargetSurfaceRmsMm": 0.2583466353828061,
+    "heldOutTargetToSourceSurfaceRmsMm": 0.08919988835896876,
+    "report": "documentation/qa/FACIAL-SOURCE.md"
+  },
+  "parts": [
+    {
+      "id": "BP3-FMA49001",
+      "conceptId": "FMA49001",
+      "name": "Superficial part of right masseter",
+      "vertexCount": 6953,
+      "indexCount": 30264,
+      "sourceSha256": "0548003276232c506740d5ed3baf386707cfd37313bff83f254d63dac0eb6262",
+      "system": "muscular",
+      "chunk": 0,
+      "bounds": [
+        [
+          -0.06405600905418396,
+          0.21738137304782867,
+          -0.0022679681424051523
+        ],
+        [
+          -0.03631919249892235,
+          0.28454315662384033,
+          0.03337445855140686
+        ]
+      ],
+      "sourceTriangleCount": 10088,
+      "positions": 0,
+      "normals": 83436,
+      "indices": 125156
+    },
+    {
+      "id": "BP3-FMA49002",
+      "conceptId": "FMA49002",
+      "name": "Superficial part of left masseter",
+      "vertexCount": 6410,
+      "indexCount": 30096,
+      "sourceSha256": "06c8e6f478247df53da23396ae7c2f6e0c4e4a3a31ead72ca11c5e3c4bbac522",
+      "system": "muscular",
+      "chunk": 0,
+      "bounds": [
+        [
+          0.03497977554798126,
+          0.2173953652381897,
+          -0.0022526346147060394
+        ],
+        [
+          0.06264803558588028,
+          0.2844993472099304,
+          0.03335779160261154
+        ]
+      ],
+      "sourceTriangleCount": 10032,
+      "positions": 246212,
+      "normals": 323132,
+      "indices": 361592
+    },
+    {
+      "id": "BP3-FMA49004",
+      "conceptId": "FMA49004",
+      "name": "Deep part of right masseter",
+      "vertexCount": 8491,
+      "indexCount": 42456,
+      "sourceSha256": "b590bf5b498e6d10f5b2b3b753f920f0bd9abe4f396c88fb74419bd427cbc39f",
+      "system": "muscular",
+      "chunk": 0,
+      "bounds": [
+        [
+          -0.06496682018041611,
+          0.2161315679550171,
+          0.005710556171834469
+        ],
+        [
+          -0.03763572871685028,
+          0.280023455619812,
+          0.04620828479528427
+        ]
+      ],
+      "sourceTriangleCount": 14152,
+      "positions": 481976,
+      "normals": 583868,
+      "indices": 634816
+    },
+    {
+      "id": "BP3-FMA49005",
+      "conceptId": "FMA49005",
+      "name": "Deep part of left masseter",
+      "vertexCount": 8297,
+      "indexCount": 42342,
+      "sourceSha256": "a0d783fb221b2adff0f94d4c6345094d1608280d338938a8b69c401431cb414d",
+      "system": "muscular",
+      "chunk": 0,
+      "bounds": [
+        [
+          0.036314960569143295,
+          0.21629385650157928,
+          0.005705800838768482
+        ],
+        [
+          0.06364072114229202,
+          0.27992621064186096,
+          0.04618469998240471
+        ]
+      ],
+      "sourceTriangleCount": 14114,
+      "positions": 804640,
+      "normals": 904204,
+      "indices": 953988
+    },
+    {
+      "id": "BP3-FMA49007",
+      "conceptId": "FMA49007",
+      "name": "Right temporalis",
+      "vertexCount": 62210,
+      "indexCount": 318756,
+      "sourceSha256": "66c8234570a01e2268f3d83b9d7bc151f46d78b2bf413f9f502107e9c93a482e",
+      "system": "muscular",
+      "chunk": 0,
+      "bounds": [
+        [
+          -0.0794355571269989,
+          0.2506144344806671,
+          -0.063749760389328
+        ],
+        [
+          -0.039358485490083694,
+          0.3697063624858856,
+          0.053088556975126266
+        ]
+      ],
+      "sourceTriangleCount": 106252,
+      "positions": 1123356,
+      "normals": 1869876,
+      "indices": 2243136
+    },
+    {
+      "id": "BP3-FMA49008",
+      "conceptId": "FMA49008",
+      "name": "Left temporalis",
+      "vertexCount": 61244,
+      "indexCount": 319068,
+      "sourceSha256": "9827d3141418c1eb635e4f5d08cf7c6cd4377c8df5b74146268a403268126738",
+      "system": "muscular",
+      "chunk": 0,
+      "bounds": [
+        [
+          0.0380483977496624,
+          0.2507759928703308,
+          -0.06378135830163956
+        ],
+        [
+          0.07811422646045685,
+          0.3696938455104828,
+          0.053392309695482254
+        ]
+      ],
+      "sourceTriangleCount": 106356,
+      "positions": 3518160,
+      "normals": 4253088,
+      "indices": 4620552
+    },
+    {
+      "id": "BP3-FMA49012",
+      "conceptId": "FMA49012",
+      "name": "Right medial pterygoid",
+      "vertexCount": 5673,
+      "indexCount": 22332,
+      "sourceSha256": "d8939ec976b48afad52d5c0adcd5e5b6b0225f467bb073a16dffb2a7cbe97546",
+      "system": "muscular",
+      "chunk": 0,
+      "bounds": [
+        [
+          -0.038504306226968765,
+          0.23108577728271484,
+          -0.00047694239765405655
+        ],
+        [
+          0.03387797996401787,
+          0.28164878487586975,
+          0.03109799325466156
+        ]
+      ],
+      "sourceTriangleCount": 7444,
+      "positions": 5896824,
+      "normals": 5964900,
+      "indices": 5998940
+    },
+    {
+      "id": "BP3-FMA49013",
+      "conceptId": "FMA49013",
+      "name": "Left medial pterygoid",
+      "vertexCount": 4850,
+      "indexCount": 22104,
+      "sourceSha256": "99d766a3c6ec526b2e688ce9ec83779343911665774d417ed56c0ee3e49f9da2",
+      "system": "muscular",
+      "chunk": 0,
+      "bounds": [
+        [
+          0.01421902421861887,
+          0.23119524121284485,
+          -0.00025944176013581455
+        ],
+        [
+          0.03720231354236603,
+          0.28164494037628174,
+          0.031055089086294174
+        ]
+      ],
+      "sourceTriangleCount": 7368,
+      "positions": 6088268,
+      "normals": 6146468,
+      "indices": 6175568
+    },
+    {
+      "id": "BP3-FMA49022",
+      "conceptId": "FMA49022",
+      "name": "Lower head of right lateral pterygoid",
+      "vertexCount": 2054,
+      "indexCount": 7260,
+      "sourceSha256": "6ea2efc92c5339d2f1bf35c9379c94042f46109f6e0431559699230b4c9526de",
+      "system": "muscular",
+      "chunk": 0,
+      "bounds": [
+        [
+          -0.04483221098780632,
+          0.26015570759773254,
+          -0.0039449469186365604
+        ],
+        [
+          -0.026680031791329384,
+          0.2832484245300293,
+          0.01955207996070385
+        ]
+      ],
+      "sourceTriangleCount": 2420,
+      "positions": 6263984,
+      "normals": 6288632,
+      "indices": 6300956
+    },
+    {
+      "id": "BP3-FMA49023",
+      "conceptId": "FMA49023",
+      "name": "Lower head of left lateral pterygoid",
+      "vertexCount": 1919,
+      "indexCount": 7170,
+      "sourceSha256": "ab5efbcf6e01bcc8a3abd615ae81d8caf4b46eb8529d64d41d1e94a5b977d8aa",
+      "system": "muscular",
+      "chunk": 0,
+      "bounds": [
+        [
+          0.025370413437485695,
+          0.2601396143436432,
+          -0.003953712061047554
+        ],
+        [
+          0.04353057220578194,
+          0.28322964906692505,
+          0.019416483119130135
+        ]
+      ],
+      "sourceTriangleCount": 2390,
+      "positions": 6329996,
+      "normals": 6353024,
+      "indices": 6364540
+    },
+    {
+      "id": "BP3-FMA49024",
+      "conceptId": "FMA49024",
+      "name": "Upper head of right lateral pterygoid",
+      "vertexCount": 1471,
+      "indexCount": 6984,
+      "sourceSha256": "f1afa956ca6084f98d9b14e8d8f14caa4882b8ef5b9b2834b7c8ec96b439d249",
+      "system": "muscular",
+      "chunk": 0,
+      "bounds": [
+        [
+          -0.04466140270233154,
+          0.2747531235218048,
+          -0.0016604538541287184
+        ],
+        [
+          -0.022902462631464005,
+          0.2898178696632385,
+          0.021336102858185768
+        ]
+      ],
+      "sourceTriangleCount": 2328,
+      "positions": 6393220,
+      "normals": 6410872,
+      "indices": 6419700
+    },
+    {
+      "id": "BP3-FMA49025",
+      "conceptId": "FMA49025",
+      "name": "Upper head of left lateral pterygoid",
+      "vertexCount": 1419,
+      "indexCount": 6930,
+      "sourceSha256": "d726e95caf1a175e23a2fe63d946eaf4fb482f6954510b6abcaea4b7f800d85d",
+      "system": "muscular",
+      "chunk": 0,
+      "bounds": [
+        [
+          0.02160971611738205,
+          0.27474579215049744,
+          -0.00167973677162081
+        ],
+        [
+          0.04336373135447502,
+          0.28977054357528687,
+          0.02129887044429779
+        ]
+      ],
+      "sourceTriangleCount": 2310,
+      "positions": 6447636,
+      "normals": 6464664,
+      "indices": 6473180
+    }
+  ],
+  "registrationReference": "https://github.com/choxos/OMFAtlas/blob/main/documentation/qa/FACIAL-SOURCE.md",
+  "version": "YuAnatomy mastication 1",
+  "concepts": [
+    {
+      "id": "FMA49001",
+      "name": "Superficial part of right masseter",
+      "elements": [
+        "BP3-FMA49001"
+      ]
+    },
+    {
+      "id": "FMA49002",
+      "name": "Superficial part of left masseter",
+      "elements": [
+        "BP3-FMA49002"
+      ]
+    },
+    {
+      "id": "FMA49004",
+      "name": "Deep part of right masseter",
+      "elements": [
+        "BP3-FMA49004"
+      ]
+    },
+    {
+      "id": "FMA49005",
+      "name": "Deep part of left masseter",
+      "elements": [
+        "BP3-FMA49005"
+      ]
+    },
+    {
+      "id": "FMA49007",
+      "name": "Right temporalis",
+      "elements": [
+        "BP3-FMA49007"
+      ]
+    },
+    {
+      "id": "FMA49008",
+      "name": "Left temporalis",
+      "elements": [
+        "BP3-FMA49008"
+      ]
+    },
+    {
+      "id": "FMA49012",
+      "name": "Right medial pterygoid",
+      "elements": [
+        "BP3-FMA49012"
+      ]
+    },
+    {
+      "id": "FMA49013",
+      "name": "Left medial pterygoid",
+      "elements": [
+        "BP3-FMA49013"
+      ]
+    },
+    {
+      "id": "FMA49022",
+      "name": "Lower head of right lateral pterygoid",
+      "elements": [
+        "BP3-FMA49022"
+      ]
+    },
+    {
+      "id": "FMA49023",
+      "name": "Lower head of left lateral pterygoid",
+      "elements": [
+        "BP3-FMA49023"
+      ]
+    },
+    {
+      "id": "FMA49024",
+      "name": "Upper head of right lateral pterygoid",
+      "elements": [
+        "BP3-FMA49024"
+      ]
+    },
+    {
+      "id": "FMA49025",
+      "name": "Upper head of left lateral pterygoid",
+      "elements": [
+        "BP3-FMA49025"
+      ]
+    }
+  ],
+  "triangles": 285254,
+  "chunks": [
+    {
+      "url": "/mastication/mastication-d89683513533.bin",
+      "bytes": 6500900,
+      "gzip": "/mastication/mastication-d89683513533.bin.gz",
+      "gzipBytes": 3619994,
+      "sha256": "d896835135330d104a9887cda9e1ae1f7a288ee47efcab96fb93eb73e2ab7f80"
+    }
+  ],
+  "registrationChecks": [
+    {
+      "source": "FMA52748",
+      "target": "FJ3289",
+      "sourceSha256": "2209451591be74e1e77d0a6a65860a0f30950f08ea112c81140d398d7af5decd",
+      "sourceToTarget": {
+        "rmsMm": 0.10693120504180914,
+        "p95Mm": 0.19366663244242135
+      },
+      "targetToSource": {
+        "rmsMm": 0.08384202920221331,
+        "p95Mm": 0.1606029249733734
+      }
+    },
+    {
+      "source": "FMA52734",
+      "target": "FJ3200",
+      "sourceSha256": "fbe4c189c3df47f963110cf7c9a7944f11407e44175bed8d3a949fe88eef51af",
+      "sourceToTarget": {
+        "rmsMm": 0.1800782209498002,
+        "p95Mm": 0.31813010491273097
+      },
+      "targetToSource": {
+        "rmsMm": 0.10225850622768926,
+        "p95Mm": 0.18800151980641142
+      }
+    },
+    {
+      "source": "FMA53649",
+      "target": "FJ3375",
+      "sourceSha256": "2846a698036a5da1000772bdd54b0af9ecd3002eac049089fa8f05d6fe44632a",
+      "sourceToTarget": {
+        "rmsMm": 0.2587981264053771,
+        "p95Mm": 0.5144557971414275
+      },
+      "targetToSource": {
+        "rmsMm": 0.10378128368580848,
+        "p95Mm": 0.18789774508596038
+      }
+    },
+    {
+      "source": "FMA53650",
+      "target": "FJ3269",
+      "sourceSha256": "78fc992a213a7d0eb360314559cf8fd2b84f718a3caba27cd1ce96b2f2f3dcf7",
+      "sourceToTarget": {
+        "rmsMm": 0.2587952092064441,
+        "p95Mm": 0.4904994915700259
+      },
+      "targetToSource": {
+        "rmsMm": 0.10738700230314419,
+        "p95Mm": 0.1977811902453853
+      }
+    }
+  ],
+  "adaptation": "Similarity registration, YuAnatomy meter/Y-up conversion, Int16 normals, binary packing. No additional simplification."
+}

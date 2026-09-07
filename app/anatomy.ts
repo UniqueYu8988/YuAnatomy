@@ -166,6 +166,7 @@ export interface ClippingState {
   solidCap?: boolean;
 }
 export interface RulerMeasurement {
+  complete?: boolean;
   pointA: [number, number, number];
   pointB: [number, number, number];
   distanceMm: number;
@@ -187,6 +188,7 @@ export interface SceneState {
   clipping?: ClippingState;
   rctMode?: boolean;
   rulerMode?: boolean;
+  rulerReset?: number;
   fascialMode?: boolean;
   fascialPathId?: string;
   fascialActiveSpaceId?: string;

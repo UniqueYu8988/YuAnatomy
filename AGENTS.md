@@ -183,3 +183,19 @@ npm run preview
 - 更高医学精度的升级应使用**同一标本的牙体与髓腔配套数据**，记录来源、许可、分割方法和适用牙位。不能仅缩放其他标本的内部网格塞入现有牙体。
 - 交互验收覆盖：全牙列、单牙、旋转、拆解、隐藏/恢复、髓腔开关、剖切和手机布局。几何测试通过只证明工程约束，不证明临床解剖正确。
 - 修改前检查其他 agent 的工作；不覆盖无关的汉化、牙位资料和布局更新。用户已经授权的范围内直接完成，不增加例行确认步骤。
+
+## 10. 根管分型与咀嚼肌（2026-09-07）
+
+- 用户只要求增加这两项，勿据此扩展其他标本、发育牙列或示意神经血管。
+- `app/canal-patterns.ts` / `canal-classification.tsx`：Vertucci I–VIII 独立 SVG 连通示意；数字是根管顺序，不是牙根数。不可自动绑定当前牙的真实分型。依据 https://pubmed.ncbi.nlm.nih.gov/6595621/ 。
+- `public/mastication`：独立的 BodyParts3D 3.0 **CC BY-SA 2.1 Japan** 数据包，12个网格、285254面。许可与基础4.0的 CC BY4 分开保留。读取其 ATTRIBUTION.md。
+- `scripts/fetch-mastication-obj.py` 下载16个源OBJ（12肌肉+4控制骨），`scripts/import-mastication.py` 使用 `work/pulp-runtime` 中数值库验证配准并打包。安装依赖参见 `scripts/pulp-requirements.txt`。配置及原始哈希位于 `scripts/mastication-source.json`。
+- `app/atlas-loader.ts` 合并索引并重定位chunk索引；基础591网格与28颗牙保持原样，合并后603网格。BP3-FMA命名空间不能改成基础FJ号。中文映射仍在study.ts。
+- `scripts/validate-additions.mjs` 随 npm run validate 执行。四控制骨抽样双向RMS约0.08–0.26mm，仅为配准工程检查，非肌肉临床精度证明。
+- 保留已有测量、实心剖切、感染间隙演示等其他agent功能。新学习弹窗不得改变当前选牙和场景。
+
+## 11. 间隙感染与测距修复（2026-09-07）
+
+先读 `docs/fascial-ruler.md`。间隙已改为 `public/fascial` 离线骨肌约束的局部区域，不得恢复全局椭球或穿骨发光扩散管；知识条目是可发生的扩展关系，不是病程模拟。8个区域只表达左侧局部解剖；缺失筋膜等边界必须保留示意说明。
+
+测距复位使用 `SceneState.rulerReset`，同步清空Three.js与React；结果只表示原始模型表面两点直线距离。剖切拾取必须采用与渲染一致的半空间条件。不得在拆解状态读出解剖距离。修改后保留 `validate-fascial-ruler.mjs` 的模型与负例检查，以及既有髓腔独立验证。

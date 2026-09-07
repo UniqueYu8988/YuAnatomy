@@ -45,3 +45,7 @@ User-requested edition exclusion: Right major alar cartilage (FJ2554 / FMA59505)
 Current geometry: 591 meshes, 1,970,872 triangles from isa_BP3D_4.0_obj_99.zip. Every OBJ entry was verified against archive CRC32 and length. The source vertex/face data is retained, with coordinate conversion, Float32 positions and signed-16-bit normals. User-supplied YuAnatomy branding is used for application and shortcut icons.
 
 YuAnatomy pulp schematics (public/pulp) are new derived surfaces computed from the BodyParts3D tooth exteriors by the YuAnatomy project, distributed under CC BY 4.0 with the source attribution above. They are not supplied internal anatomy, scanned pulp, or clinically validated root canal reconstructions. Their computationally closed endpoints do not represent anatomical foramina. Geometry-generation code is MIT; see docs/pulp-models.md for methods and limitations.
+
+新增咀嚼肌的独立来源与 CC BY-SA 2.1 Japan 授权详见 [mastication/ATTRIBUTION.md](mastication/ATTRIBUTION.md)。原有基础模型许可不变。
+
+间隙教学包的改编和原始材料许可参见 [fascial/ATTRIBUTION.md](fascial/ATTRIBUTION.md)。
