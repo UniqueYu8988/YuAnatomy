@@ -646,8 +646,8 @@ export default function AnatomyScene({
       const targetCenter = center.clone();
       const isDental = latest.current.preset === "dental" && !latest.current.isolate;
       if (isDental) {
-        // 牙体模型视角向上提升：降低目标聚焦点，使牙列与拆解展台在视窗中自然上移，给底部 FDI 牙位盘与工具腾出舒适间距
-        targetCenter.y -= T.MathUtils.lerp(0.013, 0.018, extent);
+        // 微调牙体中心：适度轻移约 3~5mm，配合顶栏移除后的开阔视窗，上下留白匀称居中
+        targetCenter.y -= T.MathUtils.lerp(0.003, 0.005, extent);
       } else {
         // Keep the same center throughout expansion and collapse.
         targetCenter.y += Math.min(0.016, size.y * 0.03);

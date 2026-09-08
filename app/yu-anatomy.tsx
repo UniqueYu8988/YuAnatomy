@@ -540,9 +540,11 @@ export default function YuAnatomy() {
           Center Column (1fr): Viewer - Model Centered
          ===================================================================== */}
       <section className="viewer" aria-label="三维视窗">
-        <header className="viewer-heading">
-          <h1>{state.canalMode ? "根管分型" : state.fascialMode ? "颌面间隙" : PRESETS.find((p) => p.id === preset)?.name ?? "头颈解剖"}</h1>
-        </header>
+        {(state.canalMode || state.fascialMode || preset !== "dental") && (
+          <header className="viewer-heading">
+            <h1>{state.canalMode ? "根管分型" : state.fascialMode ? "颌面间隙" : PRESETS.find((p) => p.id === preset)?.name ?? "头颈解剖"}</h1>
+          </header>
+        )}
         <div className="canvas-wrap">
           {atlas && (
             <AnatomyScene
