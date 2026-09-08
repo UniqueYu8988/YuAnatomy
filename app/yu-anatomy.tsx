@@ -21,6 +21,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import AnatomyScene from "./scene";
+import NakedDock from "./naked-dock";
 import ToothPointMatrix from "./tooth-point-matrix";
 import {
   DENTAL_TEETH_DATA,
@@ -750,223 +751,41 @@ export default function YuAnatomy() {
                 )}
               </div>
             )}
-        </div>
 
-        {/* ===================================================================
-            Two-Tier Toolbar (Row 1: View Controls, Row 2: Learning Tools)
-           =================================================================== */}
-        <div className="viewer-toolbar" role="toolbar" aria-label="视窗与学习工具">
-          {/* Row 1: Fixed View Controls */}
-          <div className="toolbar-row view-row">
-            <div className="camera-buttons" aria-label="观察视角">
+          {/* Naked Dock on Left Wall */}
+          {!state.canalMode && (
+            <NakedDock
+              sidebarCollapsed={sidebarCollapsed}
+              onToggleSidebar={() => setSidebarCollapsed((c) => !c)}
+              state={state}
+              setState={setState}
+              preset={preset}
+              onFullReset={fullReset}
+              chosen={chosen}
+              onClearChosen={() => setChosen(null)}
+              setInspectorTab={setInspectorTab}
+              setFdiDockMinimized={setFdiDockMinimized}
+            />
+          )}
+
+          {/* When in canalMode, show minimal return button */}
+          {state.canalMode && (
+            <div className="canal-naked-return">
               <button
                 type="button"
-                className="icon-button desktop-only"
-                onClick={() => setSidebarCollapsed((c) => !c)}
-                title={sidebarCollapsed ? "展开左侧目录" : "收起左侧目录"}
-                aria-label={sidebarCollapsed ? "展开左侧目录" : "收起左侧目录"}
+                className="naked-dock-btn bloom-emerald active"
+                onClick={closeCanals}
+                title="返回解剖模型"
+                aria-label="返回解剖模型"
               >
-                {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+                <RotateCcw size={18} />
               </button>
-              <button
-                type="button"
-                className="icon-button mobile-only"
-                onClick={() => setDrawer(true)}
-                title="浏览解剖目录"
-                aria-label="浏览解剖目录"
-              >
-                <Search size={16} />
-              </button>
-              {(["three-quarter", "front", "side", "back"] as View[]).map((v, i) => (
-                <button
-                  key={v}
-                  type="button"
-                  aria-pressed={state.view === v}
-                  disabled={state.explode > 0.8 && v !== "front"}
-                  onClick={() => setState((s) => ({ ...s, view: v, reset: s.reset + 1 }))}
-                >
-                  {["斜视", "正面", "侧面", "背面"][i]}
-                </button>
-              ))}
             </div>
+          )}
 
-            <button
-              type="button"
-              className="toolbar-center-reset-btn"
-              onClick={fullReset}
-              title="复位视角并恢复所有施加的变量（剖切、髓腔示意、拆解等）"
-            >
-              <RotateCcw size={14} />
-              <span>重置</span>
-            </button>
-
-            <label className="explode-control">
-              <span>
-                拆解 <output>{Math.round(state.explode * 100)}%</output>
-              </span>
-              <input
-                aria-label="拆解程度"
-                disabled={state.rulerMode || state.fascialMode || state.canalMode}
-                type="range"
-                min="0"
-                max="100"
-                value={state.explode * 100}
-                onChange={(e) => {
-                  const explode = Number(e.target.value) / 100;
-                  if (explode > 0) setFdiDockMinimized(true);
-                  setState((s) => ({
-                    ...s,
-                    explode,
-                    isolate: false,
-                    view: preset === "dental" ? "front" : s.view,
-                  }));
-                }}
-              />
-            </label>
-          </div>
-
-          {/* Row 2: Learning Tools & Contextual Selection Actions */}
-          <div className="toolbar-row tool-row">
-            <div className="learning-tools" aria-label="学习工具">
-              {state.canalMode ? (
-                <button type="button" className="toolbar-tool-btn active" onClick={closeCanals}>
-                  返回解剖模型
-                </button>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    className={`toolbar-tool-btn ${state.rulerMode ? "active" : ""}`}
-                    aria-pressed={state.rulerMode}
-                    onClick={() =>
-                      setState((s) => ({
-                        ...s,
-                        rulerMode: !s.rulerMode,
-                        rulerReset: (s.rulerReset ?? 0) + 1,
-                        explode: 0,
-                        rotate: false,
-                        fascialMode: false,
-                        clipping: s.clipping ? { ...s.clipping, solidCap: false } : s.clipping,
-                      }))
-                    }
-                  >
-                    <Ruler size={15} />
-                    <span>测距标尺</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`toolbar-tool-btn ${state.clipping?.enabled ? "active" : ""}`}
-                    aria-pressed={state.clipping?.enabled}
-                    onClick={() => {
-                      const willEnable = !state.clipping?.enabled;
-                      const isUnfolded = preset === "dental" && state.explode > 0.85;
-                      setState((s) => ({
-                        ...s,
-                        clipping: {
-                          enabled: willEnable,
-                          axis: willEnable
-                            ? (isUnfolded ? "z" : (s.clipping?.axis ?? "y"))
-                            : (s.clipping?.axis ?? "y"),
-                          offset: s.clipping?.offset ?? 0,
-                          inverted: s.clipping?.inverted ?? false,
-                          solidCap: s.clipping?.solidCap ?? true,
-                        },
-                      }));
-                      if (willEnable) setInspectorTab("clipping");
-                    }}
-                  >
-                    <Scissors size={15} />
-                    <span>解剖剖切</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`toolbar-tool-btn ${state.rctMode ? "active" : ""}`}
-                    aria-pressed={state.rctMode}
-                    onClick={() => setState((s) => ({ ...s, rctMode: !s.rctMode }))}
-                  >
-                    <Sparkles size={15} />
-                    <span>髓腔示意</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`toolbar-tool-btn ${state.fascialMode ? "active" : ""}`}
-                    aria-pressed={state.fascialMode}
-                    onClick={() =>
-                      setState((s) => ({
-                        ...s,
-                        fascialMode: !s.fascialMode,
-                        explode: 0,
-                        rotate: false,
-                        rctMode: false,
-                        rulerMode: false,
-                        clipping: s.clipping ? { ...s.clipping, enabled: false } : s.clipping,
-                        fascialPathId: s.fascialPathId || "wisdom-tooth-ramus",
-                        fascialStageIndex: 0,
-                        fascialActiveSpaceId:
-                          (
-                            INFECTION_PATHWAYS.find((p) => p.id === s.fascialPathId) ??
-                            INFECTION_PATHWAYS[0]
-                          ).stages[0]?.spaceId,
-                      }))
-                    }
-                  >
-                    <Activity size={15} />
-                    <span>间隙感染</span>
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* Contextual selection tools when a structure is selected */}
-            <div className="selection-tools" aria-label="结构上下文操作">
-              {chosen && !state.canalMode && (
-                <>
-                  <button
-                    type="button"
-                    className={`toolbar-tool-btn isolate-btn ${state.isolate ? "active" : ""}`}
-                    aria-pressed={state.isolate}
-                    onClick={() =>
-                      setState((s) => ({
-                        ...s,
-                        isolate: !s.isolate,
-                        explode: 0,
-                        reset: s.reset + 1,
-                      }))
-                    }
-                    title={state.isolate ? "恢复周围结构" : "聚焦单独显示"}
-                  >
-                    <Focus size={15} />
-                    <span>{state.isolate ? "显示周围" : "单独显示"}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="toolbar-tool-btn"
-                    onClick={() => {
-                      setState((s) => ({
-                        ...s,
-                        hidden: [...new Set([...(s.hidden ?? []), ...chosen.elements])],
-                        selected: [],
-                        isolate: false,
-                      }));
-                      setChosen(null);
-                    }}
-                    title="隐藏当前结构"
-                  >
-                    <EyeOff size={15} />
-                    <span>隐藏结构</span>
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Row 3: Live Clipping Controls Bar (when clipping is enabled) */}
+          {/* Floating Live Clipping Controls (when clipping is enabled) */}
           {state.clipping?.enabled && (
-            <div className="toolbar-row clipping-bar-row">
+            <div className="floating-clipping-dock" role="region" aria-label="剖切控制">
               <div className="clipping-bar-axes">
                 <span className="clipping-bar-label">切面:</span>
                 {(preset === "dental" && state.explode > 0.85
@@ -1044,22 +863,20 @@ export default function YuAnatomy() {
                 <output className="clipping-bar-val">{state.clipping?.offset ?? 0}%</output>
               </div>
 
-              <div className="clipping-bar-actions">
-                <button
-                  type="button"
-                  className="clipping-close-btn"
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      clipping: { ...s.clipping!, enabled: false },
-                    }))
-                  }
-                  title="退出解剖剖切"
-                  aria-label="关闭剖切"
-                >
-                  <X size={14} />
-                </button>
-              </div>
+              <button
+                type="button"
+                className="clipping-close-btn"
+                onClick={() =>
+                  setState((s) => ({
+                    ...s,
+                    clipping: { ...s.clipping!, enabled: false },
+                  }))
+                }
+                title="退出解剖剖切"
+                aria-label="关闭剖切"
+              >
+                <X size={14} />
+              </button>
             </div>
           )}
         </div>

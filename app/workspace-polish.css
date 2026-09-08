@@ -47,45 +47,283 @@
 .workspace-kicker { display: block; color: var(--muted); font-size: 11px; letter-spacing: 1.5px; margin-bottom: 4px; }
 .viewer-heading h1 { font-size: 20px; font-weight: 600; letter-spacing: -.5px; line-height: 1.4; }
 .viewer-status { display: inline-flex; gap: 7px; align-items: center; font-size: 12px; color: var(--muted); white-space: nowrap; }
-.workspace .viewer-toolbar { margin: 0; border: 0; border-top: 1px solid #e0e6e2; border-radius: 0; background: #fcfdfc; padding: 12px 16px; box-shadow: none; gap: 10px; flex-shrink: 0; }
-.workspace .toolbar-row { flex-wrap: wrap; gap: 8px; }
-.workspace .camera-buttons { gap: 2px; }
-.workspace .camera-buttons button { font-size: 13px; padding: 7px 9px; }
-.workspace .camera-buttons button[aria-pressed="true"] { background: #e8eeea; }
-.workspace .toolbar-tool-btn { border-color: transparent; background: #eef2ef; padding: 9px 11px; font-size: 13px; gap: 6px; min-height: 38px; }
-.workspace .toolbar-tool-btn:hover { background: #e2eae5; }
-.workspace .toolbar-tool-btn.active { background: var(--green); color: white; }
-.workspace .selection-tools { margin-left: auto; }
-.workspace .explode-control input { width: 78px; }
-.toolbar-center-reset-btn {
+/* ==========================================================================
+   1. 【去边框无壳设计 (Naked Dock)】 & 2. 【鱼眼波浪动效】 & 3. 【双态色彩系统】
+   ========================================================================== */
+.naked-dock {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  pointer-events: auto;
+  user-select: none;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 6px 2px;
+}
+
+.naked-dock-item-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* 按钮以独立的圆形/扁平鹅卵石颗粒形态存在 */
+.naked-dock-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 14px rgba(36, 70, 50, 0.08);
+  cursor: pointer;
+  color: #3b4e45;
+  outline: none;
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* 3. 【双态色彩系统】：未激活态统一收敛为低饱和单色灰 */
+.naked-dock-btn.dormant {
+  filter: grayscale(1) opacity(0.55);
+  transition: background 0.2s ease, filter 0.2s ease, opacity 0.2s ease, color 0.2s ease;
+}
+.naked-dock-btn.dormant:hover {
+  filter: grayscale(0.15) opacity(0.92);
+  background: rgba(255, 255, 255, 0.95);
+  color: #173b32;
+  box-shadow: 0 6px 18px rgba(36, 70, 50, 0.12);
+}
+
+/* 3. 【双态色彩系统】：激活/选中态解除灰度，绽放品牌专属高饱和颜色与柔和漫射光晕 */
+.naked-dock-btn.active {
+  filter: none !important;
+  opacity: 1 !important;
+  color: #ffffff !important;
+}
+.naked-dock-btn.active.bloom-emerald {
+  background: #1b6b57 !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(27, 107, 87, 0.42), 0 0 0 1.5px rgba(27, 107, 87, 0.6) !important;
+}
+.naked-dock-btn.active.bloom-cyan {
+  background: #0284c7 !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.45), 0 0 0 1.5px rgba(2, 132, 199, 0.65) !important;
+}
+.naked-dock-btn.active.bloom-amber {
+  background: #d97706 !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(217, 119, 6, 0.45), 0 0 0 1.5px rgba(217, 119, 6, 0.65) !important;
+}
+.naked-dock-btn.active.bloom-crimson {
+  background: #e11d48 !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(225, 29, 72, 0.45), 0 0 0 1.5px rgba(225, 29, 72, 0.65) !important;
+}
+.naked-dock-btn.active.bloom-violet {
+  background: #7c3aed !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.45), 0 0 0 1.5px rgba(124, 58, 237, 0.65) !important;
+}
+.naked-dock-btn.active.bloom-teal {
+  background: #0d9488 !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.45), 0 0 0 1.5px rgba(13, 148, 136, 0.65) !important;
+}
+
+/* 4. 【语义降噪与原位反馈】：轻盈胶囊徽标原位滑出与自动收回 */
+.in-situ-badge {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 15px;
+  padding: 6px 13px;
   border-radius: 9999px;
-  background: #ffffff;
-  border: 1px solid #d4dfd7;
-  color: #244632;
+  background: rgba(23, 49, 39, 0.90);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
   font-size: 13px;
   font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 50;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  animation: inSituSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.in-situ-icon {
+  color: #5eead4;
+  flex-shrink: 0;
+}
+@keyframes inSituSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-8px, -50%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, -50%) scale(1);
+  }
+}
+
+/* 浮动微型弹出层 (Flyouts) */
+.naked-dock-flyout {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(223, 230, 225, 0.9);
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: 0 8px 26px rgba(34, 61, 48, 0.14);
+  z-index: 40;
+  animation: inSituSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.view-flyout {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 90px;
+}
+.flyout-title {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 2px 6px 4px;
+  border-bottom: 1px solid #edf2ee;
+  margin-bottom: 2px;
+}
+.flyout-option-btn {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: #244632;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.15s ease;
-  box-shadow: 0 1px 3px rgba(36, 70, 50, 0.08);
+  white-space: nowrap;
 }
-.toolbar-center-reset-btn:hover {
-  background: #f0f5f2;
-  border-color: #244632;
-  color: #173b32;
-  transform: translateY(-1px);
+.flyout-option-btn:hover {
+  background: #eef4f0;
 }
-.toolbar-center-reset-btn:active {
-  transform: translateY(0);
+.flyout-option-btn.active {
+  background: var(--green);
+  color: white;
+  font-weight: 500;
 }
-.toolbar-row.view-row {
+
+.explode-flyout {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 170px;
+  padding: 10px 12px;
+}
+.flyout-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+.flyout-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+.flyout-close-btn {
+  border: 0;
+  background: transparent;
+  padding: 2px;
+  border-radius: 4px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.flyout-close-btn:hover {
+  color: var(--text);
+}
+.flyout-slider-row input[type="range"] {
+  width: 100%;
+}
+.flyout-quick-steps {
+  display: flex;
+  gap: 4px;
+}
+.flyout-quick-steps .step-btn {
+  flex: 1;
+  border: 0;
+  background: #f0f4f1;
+  font-size: 11px;
+  padding: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #3b4e45;
+  transition: all 0.15s;
+}
+.flyout-quick-steps .step-btn:hover {
+  background: #e2eae4;
+}
+.flyout-quick-steps .step-btn.active {
+  background: var(--green);
+  color: white;
+}
+
+/* 底部中央悬浮剖切控制栏 (Floating Live Clipping Dock) */
+.floating-clipping-dock {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  display: inline-flex;
+  align-items: center;
   gap: 12px;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  box-shadow: 0 6px 24px rgba(217, 119, 6, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  animation: inSituSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes inSituSlideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+.canal-naked-return {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 15;
 }
 .workspace .orientation { left: 20px; bottom: 16px; font-size: 11px; letter-spacing: 0; }
 .workspace .orientation small { display: none; }
@@ -187,16 +425,26 @@
   .workspace-kicker { font-size: 10px; }
   .workspace .inspector { border: 0; border-top: 1px solid var(--line); border-radius: 20px 20px 0 0; padding: 26px 22px; overflow: visible; min-height: 240px; }
   .workspace .selection-empty { min-height: 200px; padding: 20px 0; }
-  .workspace .viewer-toolbar { padding: 10px; gap: 6px; }
-  .workspace .toolbar-tool-btn { min-height: 44px; font-size: 13px; padding: 8px 10px; }
-  .workspace .toolbar-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; }
-  .workspace .camera-buttons, .workspace .learning-tools, .workspace .selection-tools { flex-wrap: nowrap; flex-shrink: 0; }
-  .workspace .toolbar-tool-btn, .workspace .help-button { white-space: nowrap; flex-shrink: 0; }
-  .workspace .selection-tools { margin-left: 0; }
-  .workspace .explode-control { flex-shrink: 0; }
-  .workspace .camera-buttons button { min-height: 40px; padding: 6px 8px; }
-  .workspace .view-rotate-btn span { display: none; }
-  .workspace .explode-control { margin-left: auto; }
+  .naked-dock {
+    left: 8px;
+    gap: 7px;
+    padding: 2px;
+  }
+  .naked-dock-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+  }
+  .naked-dock-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  .floating-clipping-dock {
+    bottom: 12px;
+    padding: 6px 10px;
+    gap: 8px;
+    max-width: calc(100% - 20px);
+  }
   .workspace .fdi-bottom-dock { max-width: calc(100% - 20px); bottom: 10px; }
   .workspace .fdi-tooth-btn { min-width: 32px; height: 44px; }
   .workspace .fdi-quadrant-label { flex-shrink: 0; }
