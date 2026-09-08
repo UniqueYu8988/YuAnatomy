@@ -849,8 +849,13 @@ export default function AnatomyScene({
         worldBox.copy(bounds[i]).applyMatrix4(mesh.matrixWorld);
         if (!raycaster.ray.intersectBox(worldBox, hitPoint)) return;
         const hits = raycaster.intersectObject(mesh, false);
-        if (hits[0] && hits[0].distance < nearest) {
-          nearest = hits[0].distance;
+        const validHit = hits.find(
+          (h) =>
+            !latest.current.clipping?.enabled ||
+            retainedByPlane(h.point.toArray(), clipPlane.normal.toArray(), clipPlane.constant),
+        );
+        if (validHit && validHit.distance < nearest) {
+          nearest = validHit.distance;
           found = i;
         }
       });
@@ -1010,38 +1015,52 @@ export default function AnatomyScene({
 
       // Update Clipping Plane
       const clipping = s.clipping;
+      const isUnfolded = isDentalUnfolded;
+      const effectiveAxis = clipping?.axis ?? (isUnfolded ? "z" : "y");
       const clippingKey = clipping?.enabled
-        ? `${s.canalMode}:${clipping.axis}:${clipping.offset}:${clipping.inverted}:${clipping.solidCap !== false}`
+        ? `${s.canalMode}:${effectiveAxis}:${clipping.offset}:${clipping.inverted}:${clipping.solidCap !== false}:${isUnfolded}:${currentMesialAngle.toFixed(2)}:${currentOcclusalAngle.toFixed(2)}:${amount.toFixed(2)}`
         : "disabled";
       if (clippingKey !== lastClippingKey) {
         lastClippingKey = clippingKey;
         if (clipping?.enabled) {
           const targetBox = new T.Box3();
-          atlas.parts.forEach((p, i) => {
-            if (isVisible(p, s)) targetBox.union(bounds[i]);
-          });
-          if (s.canalMode) targetBox.set(new T.Vector3(...CANAL_MODEL_BOUNDS[0]), new T.Vector3(...CANAL_MODEL_BOUNDS[1]));
-          if (targetBox.isEmpty()) {
-            targetBox.set(new T.Vector3(-0.15, 0, -0.15), new T.Vector3(0.15, 0.42, 0.15));
+          if (isUnfolded) {
+            pickers.forEach((mesh, i) => {
+              if (!mesh || data[i * 4 + 3] < 0.5) return;
+              worldBox.copy(bounds[i]).applyMatrix4(mesh.matrixWorld);
+              targetBox.union(worldBox);
+            });
+            if (targetBox.isEmpty()) {
+              targetBox.set(new T.Vector3(-0.15, 0.15, -0.02), new T.Vector3(0.15, 0.35, 0.02));
+            }
+          } else {
+            atlas.parts.forEach((p, i) => {
+              if (isVisible(p, s)) targetBox.union(bounds[i]);
+            });
+            if (s.canalMode) targetBox.set(new T.Vector3(...CANAL_MODEL_BOUNDS[0]), new T.Vector3(...CANAL_MODEL_BOUNDS[1]));
+            if (targetBox.isEmpty()) {
+              targetBox.set(new T.Vector3(-0.15, 0, -0.15), new T.Vector3(0.15, 0.42, 0.15));
+            }
           }
+
           const minV =
-            clipping.axis === "x"
+            effectiveAxis === "x"
               ? targetBox.min.x
-              : clipping.axis === "y"
+              : effectiveAxis === "y"
                 ? targetBox.min.y
                 : targetBox.min.z;
           const maxV =
-            clipping.axis === "x"
+            effectiveAxis === "x"
               ? targetBox.max.x
-              : clipping.axis === "y"
+              : effectiveAxis === "y"
                 ? targetBox.max.y
                 : targetBox.max.z;
           const posVal = T.MathUtils.lerp(minV, maxV, (clipping.offset + 100) / 200);
 
           const normal = new T.Vector3(
-            clipping.axis === "x" ? (clipping.inverted ? 1 : -1) : 0,
-            clipping.axis === "y" ? (clipping.inverted ? 1 : -1) : 0,
-            clipping.axis === "z" ? (clipping.inverted ? 1 : -1) : 0,
+            effectiveAxis === "x" ? (clipping.inverted ? 1 : -1) : 0,
+            effectiveAxis === "y" ? (clipping.inverted ? 1 : -1) : 0,
+            effectiveAxis === "z" ? (clipping.inverted ? 1 : -1) : 0,
           );
           const constant = (clipping.inverted ? -1 : 1) * posVal;
           clipPlane.set(normal, constant);

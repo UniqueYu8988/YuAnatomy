@@ -574,7 +574,7 @@ export default function YuAnatomy() {
           {preset === "dental" && state.explode > 0.85 && (
             <div className="dental-unfold-caption">
               <div className="dental-unfold-caption-title">
-                <strong>3D 象限协同旋转</strong>
+                <strong>{state.clipping?.enabled ? "3D 象限协同旋转 · 深度剖切已开启" : "3D 象限协同旋转"}</strong>
                 <button
                   type="button"
                   className="dental-unfold-reset-chip"
@@ -584,7 +584,11 @@ export default function YuAnatomy() {
                   重置角度
                 </button>
               </div>
-              <span>左右拖动：近中 / 远中旋转 · 上下拖动：𬌗面 / 根尖翻转 · 双击重置</span>
+              <span>
+                {state.clipping?.enabled
+                  ? "唇面朝前时为纵切牙面；旋转至𬌗面朝前时为横截面 · 可直接在上方控制栏微调深度"
+                  : "左右拖动：近中 / 远中旋转 · 上下拖动：𬌗面 / 根尖翻转 · 双击重置"}
+              </span>
             </div>
           )}
 
@@ -876,11 +880,14 @@ export default function YuAnatomy() {
                     aria-pressed={state.clipping?.enabled}
                     onClick={() => {
                       const willEnable = !state.clipping?.enabled;
+                      const isUnfolded = preset === "dental" && state.explode > 0.85;
                       setState((s) => ({
                         ...s,
                         clipping: {
                           enabled: willEnable,
-                          axis: s.clipping?.axis ?? "y",
+                          axis: willEnable
+                            ? (isUnfolded ? "z" : (s.clipping?.axis ?? "y"))
+                            : (s.clipping?.axis ?? "y"),
                           offset: s.clipping?.offset ?? 0,
                           inverted: s.clipping?.inverted ?? false,
                           solidCap: s.clipping?.solidCap ?? true,
@@ -987,6 +994,146 @@ export default function YuAnatomy() {
               </button>
             </div>
           </div>
+
+          {/* Row 3: Live Clipping Controls Bar (when clipping is enabled) */}
+          {state.clipping?.enabled && (
+            <div className="toolbar-row clipping-bar-row">
+              <div className="clipping-bar-axes">
+                <span className="clipping-bar-label">切面:</span>
+                {(preset === "dental" && state.explode > 0.85
+                  ? [
+                      { id: "z", label: "深度 (纵/横切)" },
+                      { id: "y", label: "上下 (Y)" },
+                      { id: "x", label: "左右 (X)" },
+                    ]
+                  : [
+                      { id: "y", label: "水平面 (Y)" },
+                      { id: "z", label: "冠状面 (Z)" },
+                      { id: "x", label: "矢状面 (X)" },
+                    ]
+                ).map(({ id, label }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`clipping-axis-chip ${(state.clipping?.axis ?? (preset === "dental" && state.explode > 0.85 ? "z" : "y")) === id ? "active" : ""}`}
+                    onClick={() =>
+                      setState((s) => ({ ...s, clipping: { ...s.clipping!, axis: id as "x" | "y" | "z" } }))
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="clipping-bar-slider">
+                <span className="clipping-bar-label">推移:</span>
+                <button
+                  type="button"
+                  className="clipping-step-btn"
+                  onClick={() =>
+                    setState((s) => ({
+                      ...s,
+                      clipping: {
+                        ...s.clipping!,
+                        offset: Math.max(-100, (s.clipping?.offset ?? 0) - 5),
+                      },
+                    }))
+                  }
+                  title="向外推移 (-5%)"
+                >
+                  -
+                </button>
+                <input
+                  type="range"
+                  min="-100"
+                  max="100"
+                  step="1"
+                  value={state.clipping?.offset ?? 0}
+                  onChange={(e) => {
+                    const offset = Number(e.target.value);
+                    setState((s) => ({ ...s, clipping: { ...s.clipping!, offset } }));
+                  }}
+                  className="clipping-bar-range"
+                  aria-label="剖切截面推移"
+                />
+                <button
+                  type="button"
+                  className="clipping-step-btn"
+                  onClick={() =>
+                    setState((s) => ({
+                      ...s,
+                      clipping: {
+                        ...s.clipping!,
+                        offset: Math.min(100, (s.clipping?.offset ?? 0) + 5),
+                      },
+                    }))
+                  }
+                  title="向内推移 (+5%)"
+                >
+                  +
+                </button>
+                <output className="clipping-bar-val">{state.clipping?.offset ?? 0}%</output>
+              </div>
+
+              <div className="clipping-bar-actions">
+                <button
+                  type="button"
+                  className={`clipping-action-chip ${state.clipping?.inverted ? "active" : ""}`}
+                  onClick={() =>
+                    setState((s) => ({
+                      ...s,
+                      clipping: { ...s.clipping!, inverted: !s.clipping?.inverted },
+                    }))
+                  }
+                  title="反转切面保留方向"
+                >
+                  <RotateCcw size={13} />
+                  <span>反转</span>
+                </button>
+                <button
+                  type="button"
+                  className={`clipping-action-chip ${state.clipping?.solidCap !== false ? "active" : ""}`}
+                  onClick={() =>
+                    setState((s) => ({
+                      ...s,
+                      clipping: { ...s.clipping!, solidCap: s.clipping?.solidCap === false },
+                    }))
+                  }
+                  title="切换实体红髓截面 / 镂空透视截面"
+                >
+                  <Layers size={13} />
+                  <span>{state.clipping?.solidCap !== false ? "实体截面" : "镂空"}</span>
+                </button>
+                <button
+                  type="button"
+                  className="clipping-action-chip reset"
+                  onClick={() =>
+                    setState((s) => ({
+                      ...s,
+                      clipping: { ...s.clipping!, offset: 0 },
+                    }))
+                  }
+                  title="居中切面 (0%)"
+                >
+                  居中
+                </button>
+                <button
+                  type="button"
+                  className="clipping-close-btn"
+                  onClick={() =>
+                    setState((s) => ({
+                      ...s,
+                      clipping: { ...s.clipping!, enabled: false },
+                    }))
+                  }
+                  title="退出解剖剖切"
+                  aria-label="关闭剖切"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -1266,14 +1413,25 @@ export default function YuAnatomy() {
               <div className="tool-section">
                 <h4>剖切轴向</h4>
                 <div className="segmented-control">
-                  {(["y", "x", "z"] as const).map((axis) => (
+                  {(preset === "dental" && state.explode > 0.85
+                    ? [
+                        { id: "z", label: "深度 (Z · 纵/横截面)" },
+                        { id: "y", label: "上下剖切 (Y)" },
+                        { id: "x", label: "左右剖切 (X)" },
+                      ]
+                    : [
+                        { id: "y", label: "水平面 (Y)" },
+                        { id: "x", label: "矢状面 (X)" },
+                        { id: "z", label: "冠状面 (Z)" },
+                      ]
+                  ).map(({ id, label }) => (
                     <button
-                      key={axis}
+                      key={id}
                       type="button"
-                      className={`segment-btn ${state.clipping?.axis === axis ? "active" : ""}`}
-                      onClick={() => setState((s) => ({ ...s, clipping: { ...s.clipping!, axis } }))}
+                      className={`segment-btn ${(state.clipping?.axis ?? (preset === "dental" && state.explode > 0.85 ? "z" : "y")) === id ? "active" : ""}`}
+                      onClick={() => setState((s) => ({ ...s, clipping: { ...s.clipping!, axis: id as "x" | "y" | "z" } }))}
                     >
-                      {axis === "y" ? "水平面 (Y)" : axis === "x" ? "矢状面 (X)" : "冠状面 (Z)"}
+                      {label}
                     </button>
                   ))}
                 </div>
