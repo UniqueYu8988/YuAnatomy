@@ -90,6 +90,7 @@ export default function AnatomyScene({
     controls.target.set(0, 0.88, 0);
     controls.enableDamping = true;
     controls.dampingFactor = 0.085;
+    controls.screenSpacePanning = true;
     controls.minDistance = 0.07;
     controls.maxDistance = 40;
     controls.maxPolarAngle = Math.PI * 0.96;
@@ -756,14 +757,7 @@ export default function AnatomyScene({
       orbit.phi = T.MathUtils.lerp(orbit.phi, Math.PI / 2, extent);
       direction.setFromSpherical(orbit);
       const targetCenter = center.clone();
-      const isDental = latest.current.preset === "dental" && !latest.current.isolate;
-      if (isDental) {
-        // 微调牙体中心：适度轻移约 3~5mm，配合顶栏移除后的开阔视窗，上下留白匀称居中
-        targetCenter.y -= T.MathUtils.lerp(0.003, 0.005, extent);
-      } else {
-        // Keep the same center throughout expansion and collapse.
-        targetCenter.y += Math.min(0.016, size.y * 0.03);
-      }
+      // 严格保持旋转枢轴与视线聚焦点位于可见结构的真实三维几何中心，确保水平旋转与平移无偏心漂移、无倾斜失真
       controls.target.copy(targetCenter);
       camera.position.copy(controls.target).addScaledVector(direction, distance);
       controls.update();
