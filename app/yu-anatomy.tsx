@@ -43,6 +43,11 @@ import {
   FASCIAL_SOURCES,
   INFECTION_PATHWAYS,
 } from "./fascial-spaces";
+import {
+  TEACHING_MODULES,
+  type TeachingModule,
+  type TeachingStructure,
+} from "./teaching-modules";
 
 const JAW_BONE_IDS = ["FJ3269", "FJ3289", "FJ3375"]; // Left maxilla, Mandible, Right maxilla
 
@@ -94,6 +99,11 @@ export default function YuAnatomy() {
   const [detailTab, setDetailTab] = useState<"morphology" | "pulp" | "clinical">("morphology");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [inspectorTab, setInspectorTab] = useState<"knowledge" | "clipping">("knowledge");
+  const [activeModuleId, setActiveModuleId] = useState<string>("dental");
+  const activeModule = useMemo(
+    () => TEACHING_MODULES.find((m) => m.id === activeModuleId) ?? TEACHING_MODULES[0],
+    [activeModuleId],
+  );
 
   const [query, setQuery] = useState("");
   const [chosen, setChosen] = useState<Concept | null>(null);
@@ -280,6 +290,71 @@ export default function YuAnatomy() {
     }));
   };
 
+  const activateModule = (mod: TeachingModule) => {
+    setActiveModuleId(mod.id);
+    setPreset(mod.preset);
+    setChosen(null);
+    setQuery("");
+    setState((s) => ({
+      ...initial,
+      view: mod.preset === "dental" ? "front" : "three-quarter",
+      hidden: [],
+      reset: s.reset + 1,
+      rctMode: mod.defaultScene?.rctMode ?? false,
+      canalMode: mod.defaultScene?.canalMode ?? false,
+      fascialMode: mod.defaultScene?.fascialMode ?? false,
+      rulerMode: false,
+      rotate: false,
+      explode: 0,
+      clipping: {
+        enabled: false,
+        axis: mod.preset === "dental" ? "z" : "y",
+        offset: 0,
+        inverted: false,
+        solidCap: true,
+      },
+    }));
+    if (mod.id === "dental") {
+      setIsFdiOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (state.fascialMode) {
+      setActiveModuleId("fascial");
+    } else if (preset === "dental") {
+      setActiveModuleId("dental");
+    } else if (preset === "mastication") {
+      setActiveModuleId("mastication");
+    } else if (preset === "bones") {
+      setActiveModuleId("bones");
+    } else if (preset === "nerves") {
+      setActiveModuleId("nerves");
+    } else if (preset === "oral") {
+      setActiveModuleId("oral");
+    } else if (preset === "overview") {
+      setActiveModuleId("overview");
+    }
+  }, [preset, state.fascialMode]);
+
+  const handleSelectStructure = (struct: TeachingStructure) => {
+    if (struct.type === "tooth") {
+      if (preset !== "dental") setPreset("dental");
+      selectToothByFdi(struct.param, false);
+    } else if (struct.type === "fascial") {
+      if (!state.fascialMode) {
+        setState((s) => ({ ...s, fascialMode: true }));
+      }
+      selectSpace(struct.param);
+    } else if (struct.type === "concept") {
+      if (!atlas) return;
+      const concept =
+        atlas.concepts.find((c) => c.id === struct.param) ||
+        atlas.concepts.find((c) => c.elements.includes(struct.param));
+      if (concept) choose(concept);
+    }
+  };
+
   const toggleJawBones = () => {
     setShowJawBones((prev) => !prev);
   };
@@ -430,86 +505,129 @@ export default function YuAnatomy() {
           )}
         </div>
 
-        <nav className="presets" aria-label="学习主题预设">
-          {PRESETS.map((p, i) => (
-            <button
-              key={p.id}
-              aria-pressed={!state.canalMode && preset === p.id}
-              className={!state.canalMode && preset === p.id ? "active" : ""}
-              onClick={() => changePreset(p.id)}
-            >
-              <span className="preset-number">{i === 0 ? "00" : `0${i}`}</span>
-              <span>{p.name}</span>
-              <ChevronRight size={14} />
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={openCanals}
-            aria-pressed={!!state.canalMode}
-            className={state.canalMode ? "active" : ""}
-          >
-            <span className="preset-number">3D</span>
-            <span>根管分型</span>
-            <ChevronRight size={14} />
-          </button>
+        {/* 教学板块切换列表 */}
+        <nav className="module-nav" aria-label="口腔教学板块">
+          {TEACHING_MODULES.map((m) => {
+            const isActive = activeModuleId === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                aria-pressed={isActive}
+                className={`module-tab ${isActive ? "active" : ""}`}
+                onClick={() => activateModule(m)}
+              >
+                <span className="module-code">{m.code}</span>
+                <span className="module-name">{m.name}</span>
+                <ChevronRight size={13} className="module-arrow" />
+              </button>
+            );
+          })}
         </nav>
 
-        {preset !== "dental" && (
-          <>
-            <label className="search-box">
-              <Search size={15} />
-              <input
-                id="structure-search"
-                value={query}
-                placeholder="搜索结构、牙位（如 36）..."
-                aria-label="搜索解剖结构"
-                onChange={(e) => setQuery(e.target.value)}
-              />
-              {query ? (
-                <button
-                  type="button"
-                  onClick={() => setQuery("")}
-                  title="清除检索"
-                  aria-label="清除检索"
-                >
-                  <X size={14} />
-                </button>
-              ) : (
-                <kbd>/</kbd>
-              )}
-            </label>
-
-            <div className="list-heading">
-              <span>解剖结构</span>
-              <span>{results.length} 项</span>
-            </div>
-
-            <div className="structure-list" role="listbox" aria-label="结构检索结果">
-              {results.slice(0, 120).map((c) => {
-                const e = getStudyEntry(c.id, c.elements);
+        {/* 当前板块专属内容与核心结构 */}
+        <div className="module-content-panel">
+          {activeModule.quickActions && activeModule.quickActions.length > 0 && !query && (
+            <div className="module-quick-actions">
+              {activeModule.quickActions.map((qa) => {
+                const isActionActive =
+                  qa.action === "toggle_pulp"
+                    ? !!state.rctMode
+                    : qa.action === "open_canals"
+                    ? !!state.canalMode
+                    : qa.action === "toggle_fdi"
+                    ? isFdiOpen
+                    : false;
                 return (
                   <button
-                    key={c.id}
-                    role="option"
-                    aria-selected={chosen?.id === c.id}
-                    className={chosen?.id === c.id ? "selected" : ""}
-                    onClick={() => choose(c)}
+                    key={qa.id}
+                    type="button"
+                    className={`quick-action-chip ${isActionActive ? "active" : ""}`}
+                    onClick={() => {
+                      if (qa.action === "toggle_pulp")
+                        setState((s) => ({ ...s, rctMode: !s.rctMode }));
+                      else if (qa.action === "open_canals") openCanals();
+                      else if (qa.action === "toggle_fdi") setIsFdiOpen((o) => !o);
+                    }}
                   >
-                    <span>{e?.displayName ?? c.name}</span>
-                    <ChevronRight size={13} />
+                    {qa.label}
                   </button>
                 );
               })}
-              {results.length === 0 && (
-                <p className="empty">未找到匹配结构，请更换关键词或切换上方预设。</p>
-              )}
-              {results.length > 120 && (
-                <p className="empty">显示前 120 项，请输入更精准的关键词。</p>
-              )}
             </div>
-          </>
-        )}
+          )}
+
+          <div className="module-structures-list" role="listbox" aria-label="核心解剖结构">
+            {query ? (
+              results.length > 0 ? (
+                results.slice(0, 80).map((c) => {
+                  const e = getStudyEntry(c.id, c.elements);
+                  const isSel = chosen?.id === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      role="option"
+                      aria-selected={isSel}
+                      type="button"
+                      className={`structure-row ${isSel ? "selected" : ""}`}
+                      onClick={() => choose(c)}
+                    >
+                      <span className="struct-title">{e?.displayName ?? c.name}</span>
+                      <ChevronRight size={12} className="struct-arrow" />
+                    </button>
+                  );
+                })
+              ) : (
+                <p className="module-empty-hint">未找到匹配解剖结构</p>
+              )
+            ) : (
+              activeModule.structures.map((s) => {
+                const isSel =
+                  s.type === "tooth"
+                    ? selectedTooth?.fdi === s.param
+                    : s.type === "fascial"
+                    ? state.fascialActiveSpaceId === s.param
+                    : s.type === "concept"
+                    ? chosen?.id === s.param
+                    : false;
+                return (
+                  <button
+                    key={s.id}
+                    role="option"
+                    aria-selected={isSel}
+                    type="button"
+                    className={`structure-row ${isSel ? "selected" : ""}`}
+                    onClick={() => handleSelectStructure(s)}
+                  >
+                    <span className="struct-title">{s.name}</span>
+                    {s.tag && <span className="struct-tag">{s.tag}</span>}
+                  </button>
+                );
+              })
+            )}
+          </div>
+
+          <div className="sidebar-search-wrap">
+            <Search size={14} className="search-icon" />
+            <input
+              id="structure-search"
+              value={query}
+              placeholder="快速检索结构或牙位..."
+              aria-label="搜索解剖结构"
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="search-clear-btn"
+                title="清除检索"
+              >
+                <X size={13} />
+              </button>
+            )}
+          </div>
+        </div>
       </aside>
 
       {drawer && (
