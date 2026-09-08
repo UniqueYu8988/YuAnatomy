@@ -1,12 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
 import {
   RotateCcw,
-  Compass,
-  Layers,
+  Camera,
+  Boxes,
   Ruler,
-  Scissors,
-  Sparkles,
-  Activity,
+  Slice,
+  ScanLine,
+  Route,
   Focus,
   EyeOff,
   Check,
@@ -23,7 +23,6 @@ export interface NakedDockProps {
   chosen: Concept | null;
   onClearChosen: () => void;
   setInspectorTab: (tab: "knowledge" | "clipping") => void;
-  setFdiDockMinimized?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface DockItem {
@@ -44,7 +43,6 @@ export default function NakedDock({
   chosen,
   onClearChosen,
   setInspectorTab,
-  setFdiDockMinimized,
 }: NakedDockProps) {
   const dockRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -83,7 +81,7 @@ export default function NakedDock({
       if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
       flyoutTimer.current = window.setTimeout(() => {
         setActiveFlyout(null);
-      }, 160);
+      }, 180);
     }
   };
 
@@ -95,7 +93,7 @@ export default function NakedDock({
     if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
     flyoutTimer.current = window.setTimeout(() => {
       setActiveFlyout(null);
-    }, 160);
+    }, 180);
   };
 
   // Close flyouts on outside pointerdown
@@ -158,7 +156,7 @@ export default function NakedDock({
     };
   };
 
-  // Build items list
+  // Build items list with functionally intuitive icons
   const items: DockItem[] = [
     {
       id: "reset",
@@ -174,7 +172,7 @@ export default function NakedDock({
     {
       id: "view",
       label: "观察视角切换",
-      icon: <Compass size={18} />,
+      icon: <Camera size={18} />,
       isActive: activeFlyout === "view",
       bloomColor: "emerald",
       hasFlyout: true,
@@ -185,12 +183,11 @@ export default function NakedDock({
     {
       id: "explode",
       label: state.explode > 0 ? "复位解剖位置" : "全解剖拆解",
-      icon: <Layers size={18} />,
+      icon: <Boxes size={18} />,
       isActive: state.explode > 0,
       bloomColor: "emerald",
       onClick: () => {
         const willExplode = state.explode === 0;
-        if (willExplode && setFdiDockMinimized) setFdiDockMinimized(true);
         setState((s) => ({
           ...s,
           explode: willExplode ? 1.0 : 0,
@@ -223,7 +220,7 @@ export default function NakedDock({
     {
       id: "clipping",
       label: state.clipping?.enabled ? "退出解剖剖切" : "解剖剖切",
-      icon: <Scissors size={18} />,
+      icon: <Slice size={18} />,
       isActive: !!state.clipping?.enabled || activeFlyout === "clipping",
       bloomColor: "amber",
       hasFlyout: true,
@@ -247,7 +244,7 @@ export default function NakedDock({
     {
       id: "pulp",
       label: state.rctMode ? "关闭髓腔透视" : "髓腔透视",
-      icon: <Sparkles size={18} />,
+      icon: <ScanLine size={18} />,
       isActive: !!state.rctMode,
       bloomColor: "crimson",
       onClick: () => {
@@ -259,7 +256,7 @@ export default function NakedDock({
     {
       id: "fascial",
       label: state.fascialMode ? "退出间隙感染" : "间隙感染",
-      icon: <Activity size={18} />,
+      icon: <Route size={18} />,
       isActive: !!state.fascialMode,
       bloomColor: "violet",
       onClick: () => {
@@ -368,15 +365,14 @@ export default function NakedDock({
               </div>
             )}
 
-            {/* View Switcher Flyout */}
+            {/* Naked Bold Text Secondary Menu for View */}
             {item.id === "view" && activeFlyout === "view" && (
               <div
-                className="naked-dock-flyout view-flyout"
+                className="naked-sub-menu"
                 role="menu"
                 onPointerEnter={handleFlyoutContainerEnter}
                 onPointerLeave={handleFlyoutContainerLeave}
               >
-                <div className="flyout-title">视角</div>
                 {(["front", "side", "three-quarter", "back"] as View[]).map((v, i) => {
                   const label = ["正面", "侧面", "斜视", "背面"][i];
                   const active = state.view === v;
@@ -384,7 +380,7 @@ export default function NakedDock({
                     <button
                       key={v}
                       type="button"
-                      className={`flyout-option-btn ${active ? "active" : ""}`}
+                      className={`naked-sub-item ${active ? "active" : ""}`}
                       onClick={() => {
                         setState((s) => ({ ...s, view: v, reset: s.reset + 1 }));
                         triggerFeedback("view", `已切换至「${label}」`);
@@ -398,26 +394,25 @@ export default function NakedDock({
               </div>
             )}
 
-            {/* Clipping Options Flyout */}
+            {/* Naked Bold Text Secondary Menu for Clipping */}
             {item.id === "clipping" && activeFlyout === "clipping" && (
               <div
-                className="naked-dock-flyout clipping-flyout"
+                className="naked-sub-menu"
                 role="menu"
                 onPointerEnter={handleFlyoutContainerEnter}
                 onPointerLeave={handleFlyoutContainerLeave}
               >
-                <div className="flyout-title">剖切面</div>
                 {[
-                  { axis: "z" as const, label: "冠状 / 深度剖切" },
-                  { axis: "y" as const, label: "水平 / 高度剖切" },
-                  { axis: "x" as const, label: "矢状 / 左右剖切" },
+                  { axis: "z" as const, label: "冠状面" },
+                  { axis: "y" as const, label: "水平面" },
+                  { axis: "x" as const, label: "矢状面" },
                 ].map(({ axis, label }) => {
                   const active = state.clipping?.enabled && state.clipping?.axis === axis;
                   return (
                     <button
                       key={axis}
                       type="button"
-                      className={`flyout-option-btn ${active ? "active" : ""}`}
+                      className={`naked-sub-item ${active ? "active" : ""}`}
                       onClick={() => {
                         setState((s) => ({
                           ...s,
@@ -437,10 +432,9 @@ export default function NakedDock({
                     </button>
                   );
                 })}
-                <div className="flyout-divider" />
                 <button
                   type="button"
-                  className={`flyout-option-btn ${state.clipping?.inverted ? "active" : ""}`}
+                  className={`naked-sub-item ${state.clipping?.inverted ? "active" : ""}`}
                   onClick={() => {
                     setState((s) => ({
                       ...s,
@@ -450,7 +444,7 @@ export default function NakedDock({
                     }));
                   }}
                 >
-                  {state.clipping?.inverted ? "切面方向：反向 ✓" : "反转切面方向"}
+                  {state.clipping?.inverted ? "反向 ✓" : "反向"}
                 </button>
               </div>
             )}

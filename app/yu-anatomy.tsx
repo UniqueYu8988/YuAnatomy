@@ -77,14 +77,18 @@ export default function YuAnatomy() {
   const [state, setState] = useState<SceneState>(initial);
   const [preset, setPreset] = useState<PresetId>("dental");
   const [showJawBones, setShowJawBones] = useState(false);
-  const [fdiDockMinimized, setFdiDockMinimized] = useState(false);
+  const [isFdiOpen, setIsFdiOpen] = useState(false);
+  const fdiDockRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const compact = window.matchMedia("(max-width: 680px)");
-    const collapseDock = () => { if (compact.matches) setFdiDockMinimized(true); };
-    collapseDock();
-    compact.addEventListener("change", collapseDock);
-    return () => compact.removeEventListener("change", collapseDock);
-  }, []);
+    if (!isFdiOpen) return;
+    const handlePointerDown = (e: PointerEvent) => {
+      if (fdiDockRef.current && !fdiDockRef.current.contains(e.target as Node)) {
+        setIsFdiOpen(false);
+      }
+    };
+    window.addEventListener("pointerdown", handlePointerDown);
+    return () => window.removeEventListener("pointerdown", handlePointerDown);
+  }, [isFdiOpen]);
   const [hideCornerPip, setHideCornerPip] = useState(false);
   const [fdiFilter, setFdiFilter] = useState<"all" | ToothCategory>("all");
   const [detailTab, setDetailTab] = useState<"morphology" | "pulp" | "clinical">("morphology");
@@ -282,7 +286,7 @@ export default function YuAnatomy() {
 
   const jumpToDentalPreset = (fdi?: string) => {
     setPreset("dental");
-    setFdiDockMinimized(false);
+    setIsFdiOpen(true);
     setState((s) => ({
       ...initial,
       hidden: [],
@@ -298,6 +302,7 @@ export default function YuAnatomy() {
     setChosen(null);
     setQuery("");
     setRulerMeasurement(null);
+    setIsFdiOpen(false);
     setState((s) => ({
       ...initial,
       view: preset === "dental" ? "front" : "three-quarter",
@@ -595,41 +600,64 @@ export default function YuAnatomy() {
             !state.fascialMode &&
             !state.rulerMode &&
             !state.canalMode && (
-              <div
-                className="fdi-bottom-dock"
-                role="region"
-                aria-label="FDI 恒牙列牙位盘"
-              >
-                <div className="fdi-quadrant-chart">
-                  <div className="fdi-row upper">
-                    <div className="fdi-quadrant-label">右上 (I)</div>
-                    <div className="fdi-teeth-group">
-                      {["17", "16", "15", "14", "13", "12", "11"].map(renderToothBtn)}
+              !isFdiOpen ? (
+                <button
+                  type="button"
+                  className="fdi-collapsed-handle"
+                  onClick={() => setIsFdiOpen(true)}
+                  aria-label="展开 FDI 牙位盘"
+                  title="点击展开 28 颗恒牙 FDI 牙位盘"
+                >
+                  <span className="fdi-handle-bar" />
+                </button>
+              ) : (
+                <div
+                  ref={fdiDockRef}
+                  className="fdi-bottom-dock open"
+                  role="region"
+                  aria-label="FDI 恒牙列牙位盘"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    type="button"
+                    className="fdi-top-handle"
+                    onClick={() => setIsFdiOpen(false)}
+                    aria-label="收起牙位盘"
+                    title="收起牙位盘"
+                  >
+                    <span className="fdi-handle-bar-inner" />
+                  </button>
+                  <div className="fdi-quadrant-chart">
+                    <div className="fdi-row upper">
+                      <div className="fdi-quadrant-label">右上 (I)</div>
+                      <div className="fdi-teeth-group">
+                        {["17", "16", "15", "14", "13", "12", "11"].map(renderToothBtn)}
+                      </div>
+                      <div className="fdi-divider-v" />
+                      <div className="fdi-teeth-group">
+                        {["21", "22", "23", "24", "25", "26", "27"].map(renderToothBtn)}
+                      </div>
+                      <div className="fdi-quadrant-label">左上 (II)</div>
                     </div>
-                    <div className="fdi-divider-v" />
-                    <div className="fdi-teeth-group">
-                      {["21", "22", "23", "24", "25", "26", "27"].map(renderToothBtn)}
-                    </div>
-                    <div className="fdi-quadrant-label">左上 (II)</div>
-                  </div>
 
-                  <div className="fdi-divider-h">
-                    <span className="fdi-midline-tag">中线</span>
-                  </div>
+                    <div className="fdi-divider-h">
+                      <span className="fdi-midline-tag">中线</span>
+                    </div>
 
-                  <div className="fdi-row lower">
-                    <div className="fdi-quadrant-label">右下 (IV)</div>
-                    <div className="fdi-teeth-group">
-                      {["47", "46", "45", "44", "43", "42", "41"].map(renderToothBtn)}
+                    <div className="fdi-row lower">
+                      <div className="fdi-quadrant-label">右下 (IV)</div>
+                      <div className="fdi-teeth-group">
+                        {["47", "46", "45", "44", "43", "42", "41"].map(renderToothBtn)}
+                      </div>
+                      <div className="fdi-divider-v" />
+                      <div className="fdi-teeth-group">
+                        {["31", "32", "33", "34", "35", "36", "37"].map(renderToothBtn)}
+                      </div>
+                      <div className="fdi-quadrant-label">左下 (III)</div>
                     </div>
-                    <div className="fdi-divider-v" />
-                    <div className="fdi-teeth-group">
-                      {["31", "32", "33", "34", "35", "36", "37"].map(renderToothBtn)}
-                    </div>
-                    <div className="fdi-quadrant-label">左下 (III)</div>
                   </div>
                 </div>
-              </div>
+              )
             )}
 
           {/* Naked Dock on Left Wall */}
@@ -642,7 +670,6 @@ export default function YuAnatomy() {
               chosen={chosen}
               onClearChosen={() => setChosen(null)}
               setInspectorTab={setInspectorTab}
-              setFdiDockMinimized={setFdiDockMinimized}
             />
           )}
 
