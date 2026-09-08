@@ -212,40 +212,42 @@
 }
 
 /* ==========================================================================
-   侧边栏二级纯文字菜单 (Naked Sub Menu) - 彻底去除外壳，纯粗体文字排版
+   侧边栏二级纯文字菜单 (Naked Sub Menu) - 彻底去除外壳，纯粗体文字竖向排版
    ========================================================================== */
 .naked-sub-menu {
   position: absolute;
-  left: calc(100% + 14px);
+  left: calc(100% + 28px);
   top: 50%;
   transform: translateY(-50%);
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
   background: transparent;
   border: 0;
-  padding: 0;
+  padding: 4px 10px 4px 0;
   box-shadow: none;
   z-index: 40;
   white-space: nowrap;
   pointer-events: auto;
-  animation: nakedSubIn 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: nakedSubIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* 鼠标从按钮滑向文字的透明桥接区，防止 hover 闪烁丢失 */
 .naked-sub-menu::before {
   content: "";
   position: absolute;
-  left: -20px;
-  top: -12px;
-  bottom: -12px;
-  width: 24px;
+  left: -38px;
+  top: -16px;
+  bottom: -16px;
+  width: 46px;
+  pointer-events: auto;
 }
 
 @keyframes nakedSubIn {
   from {
     opacity: 0;
-    transform: translate(-6px, -50%);
+    transform: translate(-8px, -50%);
   }
   to {
     opacity: 1;
@@ -254,9 +256,10 @@
 }
 
 .naked-sub-item {
+  position: relative;
   background: transparent;
   border: 0;
-  padding: 4px 6px;
+  padding: 4px 8px;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -275,7 +278,7 @@
 
 .naked-sub-item:hover {
   color: #047857;
-  transform: translateY(-1px) scale(1.08);
+  transform: translateX(4px);
   text-shadow:
     0 1px 3px rgba(255, 255, 255, 1),
     0 0 12px rgba(255, 255, 255, 0.95),
@@ -283,7 +286,7 @@
 }
 
 .naked-sub-item:active {
-  transform: scale(0.96);
+  transform: translateX(2px) scale(0.96);
 }
 
 .naked-sub-item.active {
@@ -295,10 +298,10 @@
 .naked-sub-item.active::after {
   content: "";
   position: absolute;
-  bottom: -2px;
-  left: 4px;
-  right: 4px;
-  height: 2.5px;
+  bottom: 0px;
+  left: 6px;
+  right: 6px;
+  height: 2px;
   border-radius: 9999px;
   background: #059669;
   box-shadow: 0 1px 4px rgba(5, 150, 105, 0.4);

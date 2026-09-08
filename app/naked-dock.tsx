@@ -81,7 +81,7 @@ export default function NakedDock({
       if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
       flyoutTimer.current = window.setTimeout(() => {
         setActiveFlyout(null);
-      }, 180);
+      }, 260);
     }
   };
 
@@ -93,7 +93,7 @@ export default function NakedDock({
     if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
     flyoutTimer.current = window.setTimeout(() => {
       setActiveFlyout(null);
-    }, 180);
+    }, 260);
   };
 
   // Close flyouts on outside pointerdown
