@@ -142,45 +142,6 @@
   box-shadow: 0 4px 20px rgba(13, 148, 136, 0.45), 0 0 0 1.5px rgba(13, 148, 136, 0.65) !important;
 }
 
-/* 4. 【语义降噪与原位反馈】：轻盈胶囊徽标原位滑出与自动收回 */
-.in-situ-badge {
-  position: absolute;
-  left: calc(100% + 14px);
-  top: 50%;
-  transform: translateY(-50%);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 13px;
-  border-radius: 9999px;
-  background: rgba(23, 49, 39, 0.90);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 50;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
-  animation: inSituSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-.in-situ-icon {
-  color: #5eead4;
-  flex-shrink: 0;
-}
-@keyframes inSituSlideIn {
-  from {
-    opacity: 0;
-    transform: translate(-8px, -50%) scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: translate(0, -50%) scale(1);
-  }
-}
-
 /* 独立左上角解剖目录收起/展开按钮 */
 .standalone-sidebar-toggle {
   position: absolute;

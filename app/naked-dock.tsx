@@ -9,7 +9,6 @@ import {
   Route,
   Focus,
   EyeOff,
-  Check,
 } from "lucide-react";
 import type { Concept, SceneState, View } from "./anatomy";
 import type { PresetId } from "./study";
@@ -48,23 +47,11 @@ export default function NakedDock({
   const btnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const [cursorY, setCursorY] = useState<number | null>(null);
   const [pressedId, setPressedId] = useState<string | null>(null);
-  const [inSitu, setInSitu] = useState<{ id: string; text: string } | null>(null);
-  const inSituTimer = useRef<number | null>(null);
   const flyoutTimer = useRef<number | null>(null);
   const [activeFlyout, setActiveFlyout] = useState<"view" | "clipping" | null>(null);
 
-  // In-situ inline feedback trigger (auto-dismisses after 1600ms)
-  const triggerFeedback = (id: string, text: string) => {
-    if (inSituTimer.current) window.clearTimeout(inSituTimer.current);
-    setInSitu({ id, text });
-    inSituTimer.current = window.setTimeout(() => {
-      setInSitu(null);
-    }, 1600);
-  };
-
   useEffect(() => {
     return () => {
-      if (inSituTimer.current) window.clearTimeout(inSituTimer.current);
       if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
     };
   }, []);
@@ -166,7 +153,6 @@ export default function NakedDock({
       bloomColor: "emerald",
       onClick: () => {
         onFullReset();
-        triggerFeedback("reset", "已恢复默认全解剖状态");
       },
     },
     {
@@ -194,7 +180,6 @@ export default function NakedDock({
           isolate: false,
           view: preset === "dental" ? "front" : s.view,
         }));
-        triggerFeedback("explode", willExplode ? "已完全拆解" : "已复位解剖");
       },
     },
     {
@@ -214,7 +199,6 @@ export default function NakedDock({
           fascialMode: false,
           clipping: s.clipping ? { ...s.clipping, solidCap: false } : s.clipping,
         }));
-        triggerFeedback("ruler", next ? "测距标尺已就绪" : "已退出测距");
       },
     },
     {
@@ -238,7 +222,6 @@ export default function NakedDock({
           },
         }));
         if (willEnable) setInspectorTab("clipping");
-        triggerFeedback("clipping", willEnable ? "解剖剖切已开启" : "已退出剖切");
       },
     },
     {
@@ -250,7 +233,6 @@ export default function NakedDock({
       onClick: () => {
         const next = !state.rctMode;
         setState((s) => ({ ...s, rctMode: next }));
-        triggerFeedback("pulp", next ? "髓腔透视已开启" : "已关闭髓腔透视");
       },
     },
     {
@@ -275,7 +257,6 @@ export default function NakedDock({
             (INFECTION_PATHWAYS.find((p) => p.id === s.fascialPathId) ?? INFECTION_PATHWAYS[0])
               .stages[0]?.spaceId,
         }));
-        triggerFeedback("fascial", next ? "间隙感染已就绪" : "已退出间隙感染");
       },
     },
   ];
@@ -292,7 +273,6 @@ export default function NakedDock({
         onClick: () => {
           const next = !state.isolate;
           setState((s) => ({ ...s, isolate: next, explode: 0, reset: s.reset + 1 }));
-          triggerFeedback("isolate", next ? "已聚焦单独显示" : "已恢复周围结构");
         },
       },
       {
@@ -309,7 +289,6 @@ export default function NakedDock({
             isolate: false,
           }));
           onClearChosen();
-          triggerFeedback("hide", "结构已隐藏");
         },
       },
     );
@@ -330,7 +309,6 @@ export default function NakedDock({
       {items.map((item) => {
         const isCurrentActive = item.isActive;
         const waveStyle = getFisheyeStyle(item.id);
-        const hasFeedback = inSitu?.id === item.id;
 
         return (
           <div
@@ -357,14 +335,6 @@ export default function NakedDock({
               {item.icon}
             </button>
 
-            {/* In-situ Inline Feedback Capsule */}
-            {hasFeedback && (
-              <div className="in-situ-badge" role="status" aria-live="polite">
-                <Check size={12} className="in-situ-icon" />
-                <span>{inSitu.text}</span>
-              </div>
-            )}
-
             {/* Naked Bold Text Secondary Menu for View */}
             {item.id === "view" && activeFlyout === "view" && (
               <div
@@ -383,7 +353,6 @@ export default function NakedDock({
                       className={`naked-sub-item ${active ? "active" : ""}`}
                       onClick={() => {
                         setState((s) => ({ ...s, view: v, reset: s.reset + 1 }));
-                        triggerFeedback("view", `已切换至「${label}」`);
                         setActiveFlyout(null);
                       }}
                     >
@@ -424,7 +393,6 @@ export default function NakedDock({
                             solidCap: s.clipping?.solidCap ?? true,
                           },
                         }));
-                        triggerFeedback("clipping", `剖切：${label}`);
                         setActiveFlyout(null);
                       }}
                     >
