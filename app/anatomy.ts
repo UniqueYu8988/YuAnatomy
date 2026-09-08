@@ -175,6 +175,7 @@ export interface RulerMeasurement {
   partB?: { id: string; name: string };
 }
 export interface SceneState {
+  preset?: string;
   canalMode?: boolean;
   canalType?: number;
   canalSection?: number;

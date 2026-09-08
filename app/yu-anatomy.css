@@ -526,6 +526,66 @@ p {
   display: none;
 }
 
+/* Dental Unfold Coordinated Rotation Caption */
+.dental-unfold-caption {
+  position: absolute;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(22, 101, 52, 0.2);
+  box-shadow: 0 4px 20px rgba(18, 48, 34, 0.1);
+  padding: 7px 16px;
+  border-radius: 20px;
+  z-index: 15;
+  pointer-events: auto;
+  user-select: none;
+  white-space: nowrap;
+  animation: fadeInDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dental-unfold-caption-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dental-unfold-caption strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: #166534;
+  letter-spacing: 0.3px;
+}
+
+.dental-unfold-caption span {
+  font-size: 11px;
+  color: #4b6357;
+  letter-spacing: 0.2px;
+}
+
+.dental-unfold-reset-chip {
+  font-size: 11px;
+  font-weight: 600;
+  color: #166534;
+  background: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  border-radius: 10px;
+  padding: 1px 7px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dental-unfold-reset-chip:hover {
+  background: #c8e6c9;
+  color: #0f4d25;
+}
+
 /* Orientation Compass */
 .orientation {
   position: absolute;

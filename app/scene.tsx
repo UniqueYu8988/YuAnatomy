@@ -13,6 +13,7 @@ import { SYSTEMS, type Atlas, type SceneState, type RulerMeasurement } from "./a
 import { getStudyEntry } from "./study";
 import { createPulpCavityGeometry, loadPulpData } from "./pulp-generator";
 import { FASCIAL_SPACES } from "./fascial-spaces";
+import { getDentalToothByMesh } from "./dental-data";
 
 interface Props {
   atlas: Atlas;
@@ -156,6 +157,20 @@ export default function AnatomyScene({
     const rotations = atlas.parts.map(() => new T.Quaternion());
     const targetRotations = atlas.parts.map(() => new T.Quaternion());
     const dentalFrames = new Map<string, DentalFrame>();
+    const dentalTeeth = atlas.parts.map((p) => getDentalToothByMesh(p.id));
+    let targetMesialAngle = 0;
+    let targetOcclusalAngle = 0;
+    let currentMesialAngle = 0;
+    let currentOcclusalAngle = 0;
+    let isToothDragging = false;
+    let toothDragPointerId = -1;
+    let toothDragLastX = 0;
+    let toothDragLastY = 0;
+    let toothDragIsRight = false;
+    let toothDragIsLower = false;
+    const interactiveEuler = new T.Euler();
+    const interactiveQuat = new T.Quaternion();
+    const finalTargetRot = new T.Quaternion();
     const injectRotation = (shader: Parameters<T.MeshStandardMaterial["onBeforeCompile"]>[0]) => {
       shader.uniforms.partRotation = { value: rotationTexture };
       shader.vertexShader = "uniform sampler2D partRotation;\nvec3 rotatePart(vec3 v, vec4 q) { return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v); }\n" + shader.vertexShader;
@@ -668,9 +683,47 @@ export default function AnatomyScene({
     const down = (e: PointerEvent) => {
       hover.hidden = true;
       tap.down(e.pointerId, e.clientX, e.clientY, e.pointerType === "touch" ? 12 : 5);
+      const s = latest.current;
+      const isDentalUnfolded = s.preset === "dental" && amount > 0.85;
+      if (isDentalUnfolded && e.button === 0) {
+        isToothDragging = true;
+        toothDragPointerId = e.pointerId;
+        toothDragLastX = e.clientX;
+        toothDragLastY = e.clientY;
+        const rect = renderer.domElement.getBoundingClientRect();
+        const startX = e.clientX - rect.left;
+        const startY = e.clientY - rect.top;
+        const hitIndex = findTarget(startX, startY, 24);
+        const hitTooth = hitIndex >= 0 ? dentalTeeth[hitIndex] : null;
+        if (hitTooth) {
+          toothDragIsRight = hitTooth.quadrant === 2 || hitTooth.quadrant === 3;
+          toothDragIsLower = hitTooth.quadrant === 3 || hitTooth.quadrant === 4;
+        } else {
+          toothDragIsRight = startX >= rect.width / 2;
+          toothDragIsLower = startY >= rect.height / 2;
+        }
+        try {
+          renderer.domElement.setPointerCapture(e.pointerId);
+        } catch {}
+      }
     };
     const move = (e: PointerEvent) => {
       tap.move(e.pointerId, e.clientX, e.clientY);
+      if (isToothDragging && e.pointerId === toothDragPointerId) {
+        const dx = e.clientX - toothDragLastX;
+        const dy = e.clientY - toothDragLastY;
+        toothDragLastX = e.clientX;
+        toothDragLastY = e.clientY;
+
+        const deltaMesial = (toothDragIsRight ? -dx : dx) * 0.008;
+        const deltaOcclusal = (toothDragIsLower ? -dy : dy) * 0.008;
+
+        targetMesialAngle += deltaMesial;
+        targetOcclusalAngle = Math.max(-1.55, Math.min(1.55, targetOcclusalAngle + deltaOcclusal));
+        renderer.domElement.style.cursor = "grabbing";
+        dirty = true;
+        return;
+      }
       if (latest.current.rulerMode) {
         if (amount > .0001) return;
         hover.hidden = true;
@@ -711,7 +764,7 @@ export default function AnatomyScene({
         y = e.clientY - rect.top,
         index = findTarget(x, y, 12);
       hover.hidden = index < 0;
-      renderer.domElement.style.cursor = index < 0 ? "grab" : "pointer";
+      renderer.domElement.style.cursor = index < 0 ? (latest.current.preset === "dental" && amount > 0.85 ? "grab" : "grab") : "pointer";
       if (index >= 0) {
         const part = atlas.parts[index];
         const study = getStudyEntry(part.conceptId, [part.id]);
@@ -722,8 +775,22 @@ export default function AnatomyScene({
         hover.style.top = `${Math.max(8, Math.min(y + 18, el.clientHeight - 55))}px`;
       }
     };
-    const cancel = (e: PointerEvent) => tap.cancel(e.pointerId);
+    const cancel = (e: PointerEvent) => {
+      tap.cancel(e.pointerId);
+      if (e.pointerId === toothDragPointerId) {
+        isToothDragging = false;
+        try {
+          renderer.domElement.releasePointerCapture(e.pointerId);
+        } catch {}
+      }
+    };
     const up = (e: PointerEvent) => {
+      if (e.pointerId === toothDragPointerId) {
+        isToothDragging = false;
+        try {
+          renderer.domElement.releasePointerCapture(e.pointerId);
+        } catch {}
+      }
       const validTap = tap.up(e.pointerId, e.clientX, e.clientY);
       if (!validTap || !ready || latest.current.canalMode) return;
       const rect = renderer.domElement.getBoundingClientRect();
@@ -802,6 +869,14 @@ export default function AnatomyScene({
     renderer.domElement.addEventListener("pointermove", move);
     renderer.domElement.addEventListener("pointerup", up);
     renderer.domElement.addEventListener("pointercancel", cancel);
+    const dblclick = () => {
+      if (latest.current.preset === "dental" && amount > 0.85) {
+        targetMesialAngle = 0;
+        targetOcclusalAngle = 0;
+        dirty = true;
+      }
+    };
+    renderer.domElement.addEventListener("dblclick", dblclick);
     const clock = new T.Clock();
     let lastExtent = -1;
     const animate = () => {
@@ -809,18 +884,34 @@ export default function AnatomyScene({
       frame = requestAnimationFrame(animate);
       const dt = Math.min(clock.getDelta(), 0.05),
         s = latest.current;
+      const isDentalPreset = s.preset === "dental";
+      const isDentalUnfolded = isDentalPreset && amount > 0.85;
+      const unfoldFactor = isDentalPreset ? Math.max(0, Math.min(1, (amount - 0.7) / 0.25)) : 0;
+
+      const anglesMoving =
+        Math.abs(currentMesialAngle - targetMesialAngle) > 1e-4 ||
+        Math.abs(currentOcclusalAngle - targetOcclusalAngle) > 1e-4;
+      if (anglesMoving) {
+        currentMesialAngle = T.MathUtils.damp(currentMesialAngle, targetMesialAngle, 14, dt);
+        currentOcclusalAngle = T.MathUtils.damp(currentOcclusalAngle, targetOcclusalAngle, 14, dt);
+        dirty = true;
+      }
+
       const changed =
         lastState?.visible !== s.visible ||
         lastState?.selected !== s.selected ||
         lastState?.isolate !== s.isolate ||
         lastState?.scope !== s.scope ||
-        lastState?.hidden !== s.hidden || lastState?.canalMode !== s.canalMode || lastState?.fascialMode !== s.fascialMode || lastState?.fascialActiveSpaceId !== s.fascialActiveSpaceId;
+        lastState?.hidden !== s.hidden ||
+        lastState?.canalMode !== s.canalMode ||
+        lastState?.fascialMode !== s.fascialMode ||
+        lastState?.fascialActiveSpaceId !== s.fascialActiveSpaceId;
       const moving = Math.abs(amount - s.explode) > 0.0001;
       if (moving) {
         amount = T.MathUtils.damp(amount, s.explode, 8, dt);
         dirty = true;
       }
-      if (changed || moving || lastExtent < 0) {
+      if (changed || moving || (unfoldFactor > 0 && (anglesMoving || dirty)) || lastExtent < 0) {
         const visible = new Set(s.visible),
           selection = new Set(s.selected);
         const visibleParts = atlas.parts.filter((p) => isVisible(p, s));
@@ -845,8 +936,21 @@ export default function AnatomyScene({
         atlas.parts.forEach((p, i) => {
           const c = centers[i],
             destination = offsets[i];
-          // One reversible path, with the same progress used for camera framing.
-          rotations[i].identity().slerp(targetRotations[i], amount);
+          const tooth = dentalTeeth[i];
+          if (tooth && unfoldFactor > 0.001) {
+            const effMesial = currentMesialAngle * unfoldFactor;
+            const effOcclusal = currentOcclusalAngle * unfoldFactor;
+            const q = tooth.quadrant;
+            const yaw = (q === 1 || q === 4) ? -effMesial : effMesial;
+            const pitch = (q === 1 || q === 2) ? -effOcclusal : effOcclusal;
+            interactiveEuler.set(pitch, yaw, 0, "YXZ");
+            interactiveQuat.setFromEuler(interactiveEuler);
+            finalTargetRot.copy(targetRotations[i]).premultiply(interactiveQuat);
+            rotations[i].identity().slerp(finalTargetRot, amount);
+          } else {
+            // One reversible path, with the same progress used for camera framing.
+            rotations[i].identity().slerp(targetRotations[i], amount);
+          }
           rotations[i].toArray(rotationData, i * 4);
           const movedCenter = c.clone().lerp(destination, amount);
           const rotatedCenter = c.clone().applyQuaternion(rotations[i]);
@@ -880,6 +984,8 @@ export default function AnatomyScene({
         fit(s.view, amount);
         lastView = s.view;
         lastReset = s.reset;
+        targetMesialAngle = 0;
+        targetOcclusalAngle = 0;
       }
       if (moving && !s.isolate)
         fit(s.view, amount);
@@ -891,7 +997,8 @@ export default function AnatomyScene({
         lastIsolate = isolateKey;
       }
       controls.minDistance = s.canalMode ? .028 : .07;
-      controls.enableRotate = amount < 0.8;
+      controls.enableRotate = !isDentalUnfolded && amount < 0.8;
+      controls.enablePan = !isDentalUnfolded;
       controls.mouseButtons.LEFT = amount < 0.8 ? T.MOUSE.ROTATE : T.MOUSE.PAN;
       controls.touches.ONE = amount < 0.8 ? T.TOUCH.ROTATE : T.TOUCH.PAN;
       ground.visible = platform.visible = ring.visible = innerRing.visible = false;
@@ -1199,6 +1306,7 @@ export default function AnatomyScene({
         m.geometry.dispose();
         (m.material as T.Material).dispose();
       });
+      renderer.domElement.removeEventListener("dblclick", dblclick);
       renderer.dispose();
       renderer.domElement.remove();
     };

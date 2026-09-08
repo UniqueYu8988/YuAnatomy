@@ -541,7 +541,7 @@ export default function YuAnatomy() {
           {atlas && (
             <AnatomyScene
               atlas={atlas}
-              state={{ ...state, scope }}
+              state={{ ...state, scope, preset }}
               onError={setError}
               onSelect={(id) => {
                 const tooth = getDentalToothByMesh(id);
@@ -567,6 +567,24 @@ export default function YuAnatomy() {
                 {CANAL_PATTERNS[state.canalType ?? 0].stages.join("–")}
               </strong>
               <span>通用三维教学模型</span>
+            </div>
+          )}
+
+          {/* Dental Unfold Coordinated Rotation Caption */}
+          {preset === "dental" && state.explode > 0.85 && (
+            <div className="dental-unfold-caption">
+              <div className="dental-unfold-caption-title">
+                <strong>3D 象限协同旋转</strong>
+                <button
+                  type="button"
+                  className="dental-unfold-reset-chip"
+                  onClick={() => setState((prev) => ({ ...prev, reset: prev.reset + 1 }))}
+                  title="重置牙齿旋转角度"
+                >
+                  重置角度
+                </button>
+              </div>
+              <span>左右拖动：近中 / 远中旋转 · 上下拖动：𬌗面 / 根尖翻转 · 双击重置</span>
             </div>
           )}
 
