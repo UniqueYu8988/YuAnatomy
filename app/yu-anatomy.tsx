@@ -294,7 +294,7 @@ export default function YuAnatomy() {
       isolate: false,
     }));
     if (fdi) {
-      selectToothByFdi(fdi);
+      selectToothByFdi(fdi, false);
     }
   };
 
@@ -357,8 +357,12 @@ export default function YuAnatomy() {
     if (selectedTooth) setHideCornerPip(false);
   }, [selectedTooth?.fdi]);
 
-  const selectToothByFdi = (fdi: string) => {
+  const selectToothByFdi = (fdi: string, toggle = true) => {
     if (!atlas) return;
+    if (toggle && selectedTooth?.fdi === fdi) {
+      clear();
+      return;
+    }
     const tooth = DENTAL_TEETH_DATA[fdi];
     if (!tooth) return;
     const concept =
@@ -388,7 +392,7 @@ export default function YuAnatomy() {
         key={fdi}
         type="button"
         className={`fdi-tooth-btn ${isSelected ? "selected" : ""} ${!matchesCategory ? "dimmed" : ""}`}
-        onClick={() => selectToothByFdi(fdi)}
+        onClick={() => selectToothByFdi(fdi, true)}
         title={`${fdi} ${tooth?.name ?? ""}`}
         aria-label={`${fdi} ${tooth?.name ?? ""}`}
         aria-pressed={isSelected}
@@ -540,7 +544,7 @@ export default function YuAnatomy() {
               onSelect={(id) => {
                 const tooth = getDentalToothByMesh(id);
                 if (tooth) {
-                  selectToothByFdi(tooth.fdi);
+                  selectToothByFdi(tooth.fdi, false);
                   return;
                 }
                 const concept =
