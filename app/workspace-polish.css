@@ -1,0 +1,178 @@
+/* Workspace visual system. Scoped specificity keeps module styles consistent. */
+:root:root {
+  font-family: "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --green: #216b5b;
+  --green-light: #e8f1ed;
+  --text: #263c35;
+  --muted: #64756e;
+  --line: #e4e9e6;
+  --border-btn: 9px;
+  --border-panel: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+.workspace.workspace {
+  padding: 12px;
+  gap: 12px;
+  grid-template-columns: 248px minmax(0, 1fr) 348px;
+  background: #e9eeeb;
+}
+.workspace.sidebar-collapsed { grid-template-columns: 0 minmax(0, 1fr) 348px; }
+.workspace .sidebar, .workspace .inspector {
+  border: 1px solid #dfe6e1;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px #223d3003;
+}
+.workspace .sidebar { padding: 18px 12px 12px; background: #f9fbf9; overflow: hidden; }
+.workspace .sidebar-brand-header { padding: 2px 0 20px; margin: 0 4px; border: 0; }
+.workspace .brand-icon { width: 36px; height: 36px; border-radius: 10px; }
+.workspace .brand-name { font-size: 19px; letter-spacing: -.6px; }
+.workspace .brand-sub { font-size: 11px; margin-top: 5px; letter-spacing: .6px; }
+.workspace .sidebar-brand-actions { gap: 0; }
+.workspace .sidebar-brand-actions .icon-button { width: 26px; }
+.workspace .presets { gap: 3px; margin: 0 0 20px; }
+.workspace .presets button { min-height: 42px; padding: 9px 12px; font-size: 14px; border-radius: 9px; }
+.workspace .presets .active { background: #216b5b; color: white; box-shadow: 0 3px 8px #216b5b18; }
+.workspace .presets .active .preset-number { color: #c4ded4; }
+.workspace .preset-number { font-size: 11px; font-variant-numeric: tabular-nums; }
+.workspace .search-box { background: #eef2ef; border-color: transparent; min-height: 44px; flex-shrink: 0; }
+.workspace .search-box:focus-within { background: white; border-color: var(--green); }
+.workspace .search-box input { font-size: 14px; }
+.workspace .list-heading { margin: 20px 10px 10px; font-size: 12px; letter-spacing: .3px; }
+.workspace .structure-list { padding-right: 4px; }
+.workspace .structure-list button { padding: 11px 10px; font-size: 14px; }
+.workspace .structure-list button svg { opacity: .5; width: 12px; }
+.workspace .sidebar-footer { font-size: 12px; padding: 14px 8px 2px; }
+.workspace .viewer { border-radius: 16px; overflow: hidden; background: #f2f3f3; border: 1px solid #dfe6e1; }
+.viewer-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 24px 16px; flex-shrink: 0; }
+.workspace-kicker { display: block; color: var(--muted); font-size: 11px; letter-spacing: 1.5px; margin-bottom: 4px; }
+.viewer-heading h1 { font-size: 20px; font-weight: 600; letter-spacing: -.5px; line-height: 1.4; }
+.viewer-status { display: inline-flex; gap: 7px; align-items: center; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.workspace .viewer-toolbar { margin: 0; border: 0; border-top: 1px solid #e0e6e2; border-radius: 0; background: #fcfdfc; padding: 12px 16px; box-shadow: none; gap: 10px; flex-shrink: 0; }
+.workspace .toolbar-row { flex-wrap: wrap; gap: 8px; }
+.workspace .camera-buttons { gap: 2px; }
+.workspace .camera-buttons button { font-size: 13px; padding: 7px 9px; }
+.workspace .camera-buttons button[aria-pressed="true"] { background: #e8eeea; }
+.workspace .toolbar-tool-btn { border-color: transparent; background: #eef2ef; padding: 9px 11px; font-size: 13px; gap: 6px; min-height: 38px; }
+.workspace .toolbar-tool-btn:hover { background: #e2eae5; }
+.workspace .toolbar-tool-btn.active { background: var(--green); color: white; }
+.workspace .selection-tools { margin-left: auto; }
+.workspace .explode-control input { width: 78px; }
+.workspace .orientation { left: 20px; bottom: 16px; font-size: 11px; letter-spacing: 0; }
+.workspace .orientation small { display: none; }
+.workspace .inspector { padding: 26px 24px; background: #fff; }
+.workspace .detail-top { margin-bottom: 16px; }
+.workspace .eyebrow { letter-spacing: .7px; font-size: 12px; font-weight: 500; }
+.workspace .detail-panel h2 { font-size: 25px; line-height: 1.4; letter-spacing: -.6px; margin: 0 0 8px; }
+.workspace .latin-subtitle { font-size: 14px; line-height: 1.65; color: #748079; margin-bottom: 22px; }
+.workspace .selection-empty { height: 100%; min-height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0 100px; }
+.empty-selection-icon { display: grid; place-items: center; width: 64px; height: 64px; border: 1px solid #e3eae5; border-radius: 20px; background: #f5f8f5; color: #739184; margin-bottom: 22px; }
+.workspace .selection-empty h2 { font-size: 18px; margin-bottom: 8px; }
+.workspace .empty-hint { font-size: 14px; color: var(--muted); }
+.workspace .structure-summary, .workspace .dental-feature-list, .workspace .pulp-info-row, .workspace .disclosure-body { font-size: 16px; line-height: 1.85; }
+.workspace .dental-feature-list li { padding-left: 2px; margin-bottom: 12px; }
+.workspace .dental-feature-list li::marker { color: #86a397; }
+.workspace .dental-detail-tabs { gap: 4px; background: #f1f4f1; border: 0; padding: 4px; border-radius: 10px; margin: 20px 0; }
+.workspace .dental-detail-tabs button { border: 0; border-radius: 7px; font-size: 14px; padding: 9px 3px; }
+.workspace .dental-detail-tabs button.active { background: white; box-shadow: 0 1px 4px #24463212; }
+.workspace .metric-item, .workspace .axis-item { border: 0; background: #f3f6f3; padding: 12px 10px; border-radius: 9px; }
+.workspace .metric-label, .workspace .axis-name { font-size: 12px; margin-bottom: 5px; }
+.workspace .metric-val, .workspace .axis-val { font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.workspace .disclosure-section { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; margin: 14px 0 0; }
+.workspace .disclosure-section summary { padding: 16px 0; color: #455c50; }
+.workspace .disclosure-section summary::after { content: "+"; font-size: 18px; font-weight: 400; color: #72867a; }
+.workspace .disclosure-section[open] summary::after { content: "−"; }
+.workspace .disclosure-body { padding: 0 0 16px; border: 0; }
+.workspace .segmented-control { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.workspace .segmented-control:has(> :nth-child(2):last-child) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.workspace .segment-btn { font-size: 14px; }
+.workspace .tool-section { gap: 12px; padding: 12px 0; }
+.workspace input[type="range"] { accent-color: var(--green); min-height: 20px; }
+.workspace .fascial-detail-card { gap: 20px; }
+.workspace .fascial-pathway-btn { padding: 11px 12px; font-size: 14px; border-color: transparent; background: #f3f6f3; }
+.workspace .fascial-pathway-btn.active { background: var(--green-light); box-shadow: inset 3px 0 var(--green); }
+.workspace .boundary-pair { grid-template-columns: 1fr; }
+.workspace .boundary-cell { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; border: 0; font-size: 15px; line-height: 1.75; padding: 12px; }
+.workspace .boundary-cell + .boundary-cell { border-top: 1px solid var(--line); }
+.workspace .b-label, .workspace .c-label { font-size: 13px; font-weight: 500; }
+.workspace .clinical-item { font-size: 16px; line-height: 1.8; gap: 6px; margin-bottom: 18px; }
+.workspace .ruler-hero-value .val { font-size: 42px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.workspace .fdi-bottom-dock { padding: 12px; border-radius: 14px; box-shadow: 0 6px 24px #243c3010; width: max-content; max-width: calc(100% - 24px); }
+.workspace .fdi-dock-header { flex-wrap: wrap; gap: 8px; }
+.workspace .fdi-dock-title-group { margin-right: auto; }
+.workspace .fdi-quadrant-chart { overflow-x: auto; padding: 4px 0; }
+.workspace .fdi-tooth-btn { width: 30px; height: 36px; background: #f5f7f5; border-color: transparent; border-radius: 6px; }
+.workspace .fdi-tooth-btn.selected { background: var(--green); }
+.workspace .fdi-btn-num { font-size: 14px; }
+.workspace .fdi-btn-sub { display: none; }
+.workspace .fdi-dock-actions { margin-left: auto; }
+.workspace .fdi-bottom-dock.minimized { padding: 0; border: 0; background: transparent; box-shadow: none; }
+/* The wireframe preview is an overlay with a real viewport, never a flow box
+   covering the main scene's picking surface. */
+.tooth-corner-pip { position: absolute; top: 12px; right: 16px; width: 220px; z-index: 12; border: 1px solid #dce7ea; border-radius: 14px; background: #f8fcfef2; box-shadow: 0 6px 24px #223d3010; overflow: hidden; }
+.corner-pip-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 12px; border-bottom: 1px solid #e2ecef; }
+.corner-pip-badge { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.corner-fdi-tag { color: #087bae; font-size: 12px; font-weight: 600; }
+.corner-tooth-name { font-size: 13px; line-height: 1.5; }
+.corner-pip-actions { display: flex; align-items: center; gap: 6px; }
+.corner-pip-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: #64818e; white-space: nowrap; }
+.corner-pip-close { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 6px; }
+.corner-pip-close:hover { background: #e3eff4; }
+.corner-pip-viewport { position: relative; width: 100%; height: 240px; touch-action: none; }
+.corner-pip-viewport canvas { display: block; }
+.corner-pip-loading { position: absolute; inset: 0; display: grid; place-items: center; font-size: 13px; color: #64818e; pointer-events: none; }
+@media (max-width: 1100px) { .tooth-corner-pip { width: 170px; right: 10px; } .corner-pip-viewport { height: 180px; } .corner-pip-tag { display: none; } }
+@media (max-width: 680px) { .tooth-corner-pip { width: 132px; top: 8px; } .corner-pip-header { padding: 8px; } .corner-tooth-name { font-size: 11px; } .corner-pip-viewport { height: 150px; } }
+.workspace .canal-types { gap: 8px; }
+.workspace .canal-types button { padding: 14px 4px; background: #f4f7f4; border-color: transparent; border-radius: 10px; }
+.workspace .canal-types button[aria-pressed="true"] { background: var(--green); }
+.workspace .canal-types strong { font-size: 16px; }
+.workspace .canal-types span { font-size: 12px; }
+.workspace .canal-panel { gap: 18px; }
+.workspace .canal-options button { font-size: 14px; padding: 9px 12px; }
+.workspace .canal-summary p { font-size: 16px; line-height: 1.8; }
+@media (max-width: 1200px) and (min-width: 901px) {
+  .workspace.workspace { grid-template-columns: 220px minmax(0, 1fr) 308px; gap: 8px; padding: 8px; }
+  .workspace.sidebar-collapsed { grid-template-columns: 0 minmax(0, 1fr) 308px; }
+  .workspace .inspector { padding: 22px 18px; }
+  .workspace .brand-sub { display: none; }
+  .workspace .brand-name { font-size: 16px; letter-spacing: -.4px; }
+  .workspace .sidebar-brand-header .brand { gap: 6px; }
+  .workspace .brand-icon { width: 30px; height: 30px; }
+  .workspace .view-rotate-btn span { display: none; }
+}
+@media (max-width: 900px) {
+  .workspace.workspace { grid-template-columns: 0 minmax(0, 1fr) 300px; padding: 8px; gap: 8px; }
+  .workspace .sidebar { border-radius: 0 16px 16px 0; padding: 20px 14px; }
+  .workspace.sidebar-collapsed .sidebar.open { opacity: 1; pointer-events: auto; }
+  .workspace .inspector { padding: 22px 18px; }
+  .viewer-heading { padding: 18px 16px 12px; }
+  .viewer-status { display: none; }
+}
+@media (max-width: 680px) {
+  body { overflow: auto; }
+  .workspace.workspace { display: flex; flex-direction: column; padding: 0; gap: 0; height: auto; min-height: 100dvh; overflow: visible; }
+  .workspace .viewer { height: 76dvh; min-height: 560px; border: 0; border-radius: 0; flex-shrink: 0; }
+  .viewer-heading { padding: 16px 18px 10px; }
+  .viewer-heading h1 { font-size: 18px; }
+  .workspace-kicker { font-size: 10px; }
+  .workspace .inspector { border: 0; border-top: 1px solid var(--line); border-radius: 20px 20px 0 0; padding: 26px 22px; overflow: visible; min-height: 240px; }
+  .workspace .selection-empty { min-height: 200px; padding: 20px 0; }
+  .workspace .viewer-toolbar { padding: 10px; gap: 6px; }
+  .workspace .toolbar-tool-btn { min-height: 44px; font-size: 13px; padding: 8px 10px; }
+  .workspace .toolbar-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; }
+  .workspace .camera-buttons, .workspace .learning-tools, .workspace .selection-tools { flex-wrap: nowrap; flex-shrink: 0; }
+  .workspace .toolbar-tool-btn, .workspace .help-button { white-space: nowrap; flex-shrink: 0; }
+  .workspace .selection-tools { margin-left: 0; }
+  .workspace .explode-control { flex-shrink: 0; }
+  .workspace .camera-buttons button { min-height: 40px; padding: 6px 8px; }
+  .workspace .view-rotate-btn span { display: none; }
+  .workspace .explode-control { margin-left: auto; }
+  .workspace .fdi-bottom-dock { max-width: calc(100% - 20px); bottom: 10px; }
+  .workspace .fdi-tooth-btn { min-width: 32px; height: 44px; }
+  .workspace .fdi-quadrant-label { flex-shrink: 0; }
+  .workspace .fdi-filter-chip, .workspace .fdi-dock-btn { min-height: 36px; }
+  .workspace .canal-options button { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace *, .workspace *::before, .workspace *::after { transition: none !important; animation: none !important; }
+}

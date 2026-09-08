@@ -199,3 +199,7 @@ npm run preview
 先读 `docs/fascial-ruler.md`。间隙已改为 `public/fascial` 离线骨肌约束的局部区域，不得恢复全局椭球或穿骨发光扩散管；知识条目是可发生的扩展关系，不是病程模拟。8个区域只表达左侧局部解剖；缺失筋膜等边界必须保留示意说明。
 
 测距复位使用 `SceneState.rulerReset`，同步清空Three.js与React；结果只表示原始模型表面两点直线距离。剖切拾取必须采用与渲染一致的半空间条件。不得在拆解状态读出解剖距离。修改后保留 `validate-fascial-ruler.mjs` 的模型与负例检查，以及既有髓腔独立验证。
+
+## 12. 工作台视觉规范（2026-09-08）
+
+调整面板前阅读 `docs/ui-design.md`。当前视觉层为 `app/workspace-polish.css`，在 `web/main.tsx` 最后加载。保持桌面三栏、手机默认折叠牙位盘与横向工具栏、16px 知识正文及示意来源说明。修改后验证桌面与手机，避免牙位盘和工具遮挡全部模型区域。

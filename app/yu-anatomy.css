@@ -329,6 +329,74 @@ p {
   color: #7b8f85;
 }
 
+/* Dental Mode Dedicated Sidebar Guide */
+.dental-sidebar-panel {
+  margin-top: 12px;
+  flex: 1;
+}
+
+.dental-sidebar-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--border-radius);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dental-card-badge {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--green);
+  background: var(--green-light);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.dental-card-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.dental-card-desc strong {
+  color: var(--text);
+}
+
+.dental-card-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #edf2ef;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--green);
+  font-family: "Segoe UI", sans-serif;
+  line-height: 1.2;
+}
+
+.stat-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
 /* Structure List */
 .list-heading {
   display: flex;
@@ -582,37 +650,6 @@ p {
   background: var(--green-light);
   color: var(--green);
   font-weight: 600;
-}
-
-.view-rotate-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 7px 10px;
-  border-radius: var(--border-btn);
-  color: #354d43;
-  transition: all 0.15s ease;
-}
-
-.view-rotate-btn.active {
-  background: var(--green-light);
-  color: var(--green);
-  font-weight: 600;
-}
-
-.view-rotate-btn.active svg {
-  animation: spin-cw 4s linear infinite;
-}
-
-@keyframes spin-cw {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .explode-control {

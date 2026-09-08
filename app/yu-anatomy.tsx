@@ -19,7 +19,6 @@ import {
   Activity,
   Layers,
   HelpCircle,
-  RotateCw,
 } from "lucide-react";
 import AnatomyScene from "./scene";
 import ToothPointMatrix from "./tooth-point-matrix";
@@ -51,7 +50,7 @@ const initial: SceneState = {
   visible: SYSTEMS.filter((s) => s.id !== "integumentary").map((s) => s.id),
   selected: [],
   isolate: false,
-  view: "three-quarter",
+  view: "front",
   rotate: false,
   reset: 0,
   hidden: [],
@@ -74,13 +73,17 @@ export default function YuAnatomy() {
   const dialog = useRef<HTMLDialogElement>(null);
   const helpDialog = useRef<HTMLDialogElement>(null);
   const [atlas, setAtlas] = useState<Atlas | null>(null);
-  const [state, setState] = useState({
-    ...initial,
-    hidden: JAW_BONE_IDS,
-  });
+  const [state, setState] = useState<SceneState>(initial);
   const [preset, setPreset] = useState<PresetId>("dental");
   const [showJawBones, setShowJawBones] = useState(false);
   const [fdiDockMinimized, setFdiDockMinimized] = useState(false);
+  useEffect(() => {
+    const compact = window.matchMedia("(max-width: 680px)");
+    const collapseDock = () => { if (compact.matches) setFdiDockMinimized(true); };
+    collapseDock();
+    compact.addEventListener("change", collapseDock);
+    return () => compact.removeEventListener("change", collapseDock);
+  }, []);
   const [hideCornerPip, setHideCornerPip] = useState(false);
   const [fdiFilter, setFdiFilter] = useState<"all" | ToothCategory>("all");
   const [detailTab, setDetailTab] = useState<"morphology" | "pulp" | "clinical">("morphology");
@@ -206,8 +209,18 @@ export default function YuAnatomy() {
 
   const parts = useMemo(() => new Map((atlas?.parts ?? []).map((p) => [p.id, p])), [atlas]);
   const scope = useMemo(
-    () => (atlas?.parts ?? []).filter((p) => inPreset(p, preset)).map((p) => p.id),
-    [atlas, preset],
+    () =>
+      (atlas?.parts ?? [])
+        .filter((p) => {
+          if (preset === "dental") {
+            return showJawBones
+              ? p.system === "dental" || /mandible|maxilla/i.test(p.name)
+              : p.system === "dental";
+          }
+          return inPreset(p, preset);
+        })
+        .map((p) => p.id),
+    [atlas, preset, showJawBones],
   );
   const scopeSet = useMemo(() => new Set(scope), [scope]);
 
@@ -250,7 +263,8 @@ export default function YuAnatomy() {
     setQuery("");
     setState((s) => ({
       ...initial,
-      hidden: id === "dental" && !showJawBones ? JAW_BONE_IDS : [],
+      view: id === "dental" ? "front" : "three-quarter",
+      hidden: [],
       reset: s.reset + 1,
       rctMode: s.rctMode,
       clipping: s.clipping,
@@ -262,19 +276,7 @@ export default function YuAnatomy() {
   };
 
   const toggleJawBones = () => {
-    setShowJawBones((prev) => {
-      const next = !prev;
-      setState((s) => {
-        const currentHidden = s.hidden ?? [];
-        return {
-          ...s,
-          hidden: next
-            ? currentHidden.filter((id) => !JAW_BONE_IDS.includes(id))
-            : Array.from(new Set([...currentHidden, ...JAW_BONE_IDS])),
-        };
-      });
-      return next;
-    });
+    setShowJawBones((prev) => !prev);
   };
 
   const jumpToDentalPreset = (fdi?: string) => {
@@ -282,7 +284,7 @@ export default function YuAnatomy() {
     setFdiDockMinimized(false);
     setState((s) => ({
       ...initial,
-      hidden: showJawBones ? [] : JAW_BONE_IDS,
+      hidden: [],
       reset: s.reset + 1,
       isolate: false,
     }));
@@ -356,6 +358,8 @@ export default function YuAnatomy() {
         className={`fdi-tooth-btn ${isSelected ? "selected" : ""} ${!matchesCategory ? "dimmed" : ""}`}
         onClick={() => selectToothByFdi(fdi)}
         title={`${fdi} ${tooth?.name ?? ""}`}
+        aria-label={`${fdi} ${tooth?.name ?? ""}`}
+        aria-pressed={isSelected}
       >
         <span className="fdi-btn-num">{fdi}</span>
         {tooth && <span className="fdi-btn-sub">{tooth.name.slice(0, 2)}</span>}
@@ -427,66 +431,93 @@ export default function YuAnatomy() {
             className={state.canalMode ? "active" : ""}
           >
             <span className="preset-number">3D</span>
-            <span>3D 根管分型</span>
+            <span>根管分型</span>
             <ChevronRight size={14} />
           </button>
         </nav>
 
-        <label className="search-box">
-          <Search size={15} />
-          <input
-            id="structure-search"
-            value={query}
-            placeholder="搜索结构、牙位（如 36）..."
-            aria-label="搜索解剖结构"
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          {query ? (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              title="清除检索"
-              aria-label="清除检索"
-            >
-              <X size={14} />
-            </button>
-          ) : (
-            <kbd>/</kbd>
-          )}
-        </label>
+        {preset === "dental" ? (
+          <div className="dental-sidebar-panel">
+            <div className="dental-sidebar-card">
+              <div className="dental-card-badge">FDI 恒牙专科模式</div>
+              <p className="dental-card-desc">
+                已聚焦 28 颗恒牙立体解剖。请使用视窗下方的 <strong>FDI 牙位盘</strong> 快速定位指定牙位，或直接在 3D 模型表面点击任意牙齿查看解剖考点与牙体形态。
+              </p>
+              <div className="dental-card-stats">
+                <div className="stat-item">
+                  <span className="stat-val">28</span>
+                  <span className="stat-lbl">标准恒牙</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-val">4</span>
+                  <span className="stat-lbl">解剖象限</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-val">FDI</span>
+                  <span className="stat-lbl">两位数标注</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <label className="search-box">
+              <Search size={15} />
+              <input
+                id="structure-search"
+                value={query}
+                placeholder="搜索结构、牙位（如 36）..."
+                aria-label="搜索解剖结构"
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              {query ? (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  title="清除检索"
+                  aria-label="清除检索"
+                >
+                  <X size={14} />
+                </button>
+              ) : (
+                <kbd>/</kbd>
+              )}
+            </label>
 
-        <div className="list-heading">
-          <span>解剖结构</span>
-          <span>{results.length} 项</span>
-        </div>
+            <div className="list-heading">
+              <span>解剖结构</span>
+              <span>{results.length} 项</span>
+            </div>
 
-        <div className="structure-list" role="listbox" aria-label="结构检索结果">
-          {results.slice(0, 120).map((c) => {
-            const e = getStudyEntry(c.id, c.elements);
-            return (
-              <button
-                key={c.id}
-                role="option"
-                aria-selected={chosen?.id === c.id}
-                className={chosen?.id === c.id ? "selected" : ""}
-                onClick={() => choose(c)}
-              >
-                <span>{e?.displayName ?? c.name}</span>
-                <ChevronRight size={13} />
-              </button>
-            );
-          })}
-          {results.length === 0 && (
-            <p className="empty">未找到匹配结构，请更换关键词或切换上方预设。</p>
-          )}
-          {results.length > 120 && (
-            <p className="empty">显示前 120 项，请输入更精准的关键词。</p>
-          )}
-        </div>
+            <div className="structure-list" role="listbox" aria-label="结构检索结果">
+              {results.slice(0, 120).map((c) => {
+                const e = getStudyEntry(c.id, c.elements);
+                return (
+                  <button
+                    key={c.id}
+                    role="option"
+                    aria-selected={chosen?.id === c.id}
+                    className={chosen?.id === c.id ? "selected" : ""}
+                    onClick={() => choose(c)}
+                  >
+                    <span>{e?.displayName ?? c.name}</span>
+                    <ChevronRight size={13} />
+                  </button>
+                );
+              })}
+              {results.length === 0 && (
+                <p className="empty">未找到匹配结构，请更换关键词或切换上方预设。</p>
+              )}
+              {results.length > 120 && (
+                <p className="empty">显示前 120 项，请输入更精准的关键词。</p>
+              )}
+            </div>
+          </>
+        )}
 
         <div className="sidebar-footer">
           <span className="live-dot" />
-          <span>{visible} 个部件已显示</span>
+          <span>{preset === "dental" ? "28 颗恒牙已就绪" : `${visible} 个部件已显示`}</span>
         </div>
       </aside>
 
@@ -502,6 +533,10 @@ export default function YuAnatomy() {
           Center Column (1fr): Viewer - Model Centered
          ===================================================================== */}
       <section className="viewer" aria-label="三维视窗">
+        <header className="viewer-heading">
+          <div><span className="workspace-kicker">学习工作台</span><h1>{state.canalMode ? "根管分型" : state.fascialMode ? "颌面间隙" : PRESETS.find((p) => p.id === preset)?.name ?? "头颈解剖"}</h1></div>
+          <span className="viewer-status"><span className="live-dot" />{state.canalMode ? "三维示意" : "三维解剖"}</span>
+        </header>
         <div className="canvas-wrap">
           {atlas && (
             <AnatomyScene
@@ -509,7 +544,13 @@ export default function YuAnatomy() {
               state={{ ...state, scope }}
               onError={setError}
               onSelect={(id) => {
-                const concept = atlas.concepts.find((c) => c.elements.includes(id));
+                const tooth = getDentalToothByMesh(id);
+                if (tooth) {
+                  selectToothByFdi(tooth.fdi);
+                  return;
+                }
+                const concept = atlas.concepts.find((c) => c.elements.length === 1 && c.elements[0] === id)
+                  ?? atlas.concepts.find((c) => c.elements.includes(id));
                 if (concept) choose(concept);
               }}
               onProgress={setProgress}
@@ -592,7 +633,7 @@ export default function YuAnatomy() {
                     title="展开 FDI 牙位盘"
                   >
                     <span className="pill-dot" />
-                    <span className="pill-title">00 FDI 牙位盘</span>
+                    <span className="pill-title">FDI 牙位盘</span>
                     {selectedTooth ? (
                       <span className="pill-selected">
                         已选: {selectedTooth.fdi} {selectedTooth.name}
@@ -606,7 +647,7 @@ export default function YuAnatomy() {
                   <>
                     <div className="fdi-dock-header">
                       <div className="fdi-dock-title-group">
-                        <span className="fdi-dock-badge">00 FDI 牙位盘</span>
+                        <span className="fdi-dock-badge">FDI 牙位盘</span>
                         <span className="muted" style={{ fontSize: "12px" }}>
                           28 颗恒牙
                         </span>
@@ -748,17 +789,6 @@ export default function YuAnatomy() {
               ))}
               <button
                 type="button"
-                className={`view-rotate-btn ${state.rotate ? "active" : ""}`}
-                title={state.rotate ? "停止旋转" : "开启 360° 全景旋转观察"}
-                aria-label={state.rotate ? "停止旋转" : "开启 360° 全景旋转观察"}
-                aria-pressed={state.rotate}
-                onClick={() => setState((s) => ({ ...s, rotate: !s.rotate }))}
-              >
-                <RotateCw size={14} />
-                <span>全景旋转</span>
-              </button>
-              <button
-                type="button"
                 className="icon-button"
                 title="重置当前视角"
                 aria-label="重置当前视角"
@@ -781,11 +811,12 @@ export default function YuAnatomy() {
                 value={state.explode * 100}
                 onChange={(e) => {
                   const explode = Number(e.target.value) / 100;
+                  if (explode > 0) setFdiDockMinimized(true);
                   setState((s) => ({
                     ...s,
                     explode,
                     isolate: false,
-                    view: explode > 0.8 ? "front" : s.view,
+                    view: preset === "dental" ? "front" : s.view,
                   }));
                 }}
               />
@@ -926,18 +957,6 @@ export default function YuAnatomy() {
                 </>
               )}
 
-              {!!state.hidden?.length && !state.canalMode && (
-                <button
-                  type="button"
-                  className="toolbar-tool-btn"
-                  onClick={() => setState((s) => ({ ...s, hidden: [] }))}
-                  title="恢复所有已隐藏结构"
-                >
-                  <RotateCcw size={14} />
-                  <span>恢复隐藏 ({state.hidden.length})</span>
-                </button>
-              )}
-
               <button
                 type="button"
                 className="help-button"
@@ -1002,7 +1021,7 @@ export default function YuAnatomy() {
                     <span className="val">{rulerMeasurement.distanceMm.toFixed(1)}</span>
                     <span className="unit">mm</span>
                   </div>
-                  <p className="ruler-caption">直线距离 · 空间直线测量</p>
+                  <p className="ruler-caption">两点直线距离</p>
 
                   <div className="ruler-axes-grid">
                     <div className="axis-item">
@@ -1206,7 +1225,6 @@ export default function YuAnatomy() {
               </div>
 
               <h2>解剖剖切面</h2>
-              <p className="clipping-intro">剖切三维几何结构，观察颅颌深层组织与内部解剖走向。</p>
 
               {chosen && (
                 <div className="segmented-control" style={{ marginBottom: "8px" }}>
@@ -1532,6 +1550,8 @@ export default function YuAnatomy() {
           ) : (
             /* Case 6: Calm, minimal empty state */
             <div className="selection-empty">
+              <span className="empty-selection-icon"><Focus size={28} strokeWidth={1.4} /></span>
+              <h2>结构详情</h2>
               <p className="empty-hint">点击模型查看结构</p>
             </div>
           )}
@@ -1656,3 +1676,4 @@ export default function YuAnatomy() {
     </main>
   );
 }
+

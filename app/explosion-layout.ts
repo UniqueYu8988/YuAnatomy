@@ -1,12 +1,43 @@
 import type { Part } from "./anatomy";
+import { getDentalToothByMesh } from "./dental-data.ts";
+import { DENTAL_ROWS, type DentalFrame } from "./dental-unfold.ts";
 export interface LayoutCell {
   x: number;
   y: number;
   width: number;
   height: number;
+  rotation?: DentalFrame["rotation"];
+  centerOffset?: DentalFrame["centerOffset"];
 }
 /** Pack only visible source meshes. Every projected bounding box gets its own cell. */
-export function createExplosionLayout(parts: Part[], aspect = 1) {
+export function createExplosionLayout(parts: Part[], aspect = 1, frames?: Map<string, DentalFrame>) {
+  const teeth = parts.map((part) => ({ part, tooth: getDentalToothByMesh(part.id) }));
+  if (teeth.length && teeth.every(({ tooth }) => tooth)) {
+    const widths = Array<number>(14).fill(0);
+    const heights = Array<number>(2).fill(0);
+    for (const { part, tooth } of teeth) {
+      const row = tooth!.quadrant <= 2 ? 0 : 1, col = DENTAL_ROWS[row].indexOf(tooth!.fdi);
+      const size = frames?.get(part.id)?.size;
+      widths[col] = Math.max(widths[col], size?.x ?? part.bounds[1][0] - part.bounds[0][0]);
+      heights[row] = Math.max(heights[row], size?.y ?? part.bounds[1][1] - part.bounds[0][1]);
+    }
+    const columnSizes = widths.map(w => Math.max(w, .005) + .002);
+    const rowSizes = heights.map(h => Math.max(h, .012) + .008);
+    const width = columnSizes.reduce((a, b) => a + b, 0);
+    const height = rowSizes.reduce((a, b) => a + b, 0);
+    const cells = new Map<string, LayoutCell>();
+    for (const { part, tooth } of teeth) {
+      const row = tooth!.quadrant <= 2 ? 0 : 1, col = DENTAL_ROWS[row].indexOf(tooth!.fdi);
+      const frame = frames?.get(part.id);
+      cells.set(part.id, {
+        x: columnSizes.slice(0, col).reduce((a, b) => a + b, 0) + columnSizes[col] / 2 - width / 2,
+        y: height / 2 - rowSizes.slice(0, row).reduce((a, b) => a + b, 0) - rowSizes[row] / 2,
+        width: columnSizes[col], height: rowSizes[row],
+        rotation: frame?.rotation, centerOffset: frame?.centerOffset,
+      });
+    }
+    return { cells, width, height };
+  }
   const cards = parts.map((p) => ({
     id: p.id,
     system: p.system,

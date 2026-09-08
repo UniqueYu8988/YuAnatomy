@@ -4,6 +4,8 @@ import "./validate-canal-types.mjs";
 import fs from "node:fs";
 import assert from "node:assert/strict";
 import { gunzipSync } from "node:zlib";
+import * as T from "three";
+import { createDentalFrame, DENTAL_ROWS } from "../app/dental-unfold.ts";
 import { createExplosionLayout } from "../app/explosion-layout.ts";
 import { inPreset, PRESETS, getStudyEntry } from "../app/study.ts";
 import { PointerTap } from "../app/pointer-tap.ts";
@@ -81,6 +83,52 @@ for (const preset of PRESETS) {
   }
 }
 assert.ok(a.parts.filter((p) => inPreset(p, "oral")).some((p) => p.system === "dental"));
+// Panoramic display: right-to-left patient order, two arches, rigid source transforms.
+const dentalParts = Object.values(DENTAL_TEETH_DATA).map(t => a.parts.find(p => p.id === t.meshId));
+const frames = new Map(dentalParts.map(p => {
+  const buffer = files[p.chunk];
+  const positions = new Float32Array(buffer.buffer, buffer.byteOffset + p.positions, p.vertexCount * 3);
+  return [p.id, createDentalFrame(p, a.parts, positions)];
+}));
+const dentalLayout = createExplosionLayout(dentalParts, 1, frames);
+assert.equal(dentalLayout.cells.size, 28);
+assert.ok(dentalLayout.width < .25 && dentalLayout.height < .10, "Compact two-arch layout");
+let previousRow = Infinity;
+for (const sequence of DENTAL_ROWS) {
+  let previousX = -Infinity;
+  const row = sequence.map(fdi => dentalLayout.cells.get(DENTAL_TEETH_DATA[fdi].meshId));
+  assert.ok(row[0].y < previousRow, "Upper arch above lower arch");
+  previousRow = row[0].y;
+  for (const cell of row) {
+    assert.equal(cell.y, row[0].y);
+    assert.ok(cell.x > previousX, "Patient-right molars to midline to patient-left molars");
+    previousX = cell.x;
+  }
+}
+for (const part of dentalParts) {
+  const cell = dentalLayout.cells.get(part.id), frame = frames.get(part.id);
+  assert.ok(Math.abs(frame.rotation.length() - 1) < 1e-8, "Rigid unit rotation");
+  assert.ok(cell.width >= frame.size.x + .0019);
+  assert.ok(cell.height >= frame.size.y + .0079);
+  const buffer = files[part.chunk];
+  const positions = new Float32Array(buffer.buffer, buffer.byteOffset + part.positions, part.vertexCount * 3);
+  const pivot = new T.Vector3(...part.bounds[0]).add(new T.Vector3(...part.bounds[1])).multiplyScalar(.5);
+  const transformed = new T.Vector3();
+  for (let v = 0; v < positions.length; v += 3) {
+    transformed.fromArray(positions, v).sub(pivot).applyQuaternion(frame.rotation).sub(frame.centerOffset);
+    assert.ok(Math.abs(transformed.x) <= cell.width / 2 - .0009, `Unfolded width: ${part.id}`);
+    assert.ok(Math.abs(transformed.y) <= cell.height / 2 - .0039, `Unfolded height: ${part.id}`);
+  }
+  const sourceA = new T.Vector3().fromArray(positions), sourceB = new T.Vector3().fromArray(positions, positions.length - 3);
+  const distance = sourceA.distanceTo(sourceB);
+  sourceA.sub(pivot).applyQuaternion(frame.rotation); sourceB.sub(pivot).applyQuaternion(frame.rotation);
+  assert.ok(Math.abs(sourceA.distanceTo(sourceB) - distance) < 1e-10, "Tooth dimensions preserved");
+}
+const dentalCells = [...dentalLayout.cells.values()];
+for (let i = 0; i < dentalCells.length; i++) for (let j = i + 1; j < dentalCells.length; j++) {
+  const x = dentalCells[i], y = dentalCells[j];
+  assert.ok(Math.abs(x.x - y.x) >= (x.width + y.width) / 2 - 1e-8 || Math.abs(x.y - y.y) >= (x.height + y.height) / 2 - 1e-8, "Unfolded teeth do not overlap");
+}
 for (const p of a.parts) {
   const entry = getStudyEntry(p.conceptId, [p.id]);
   assert.ok(entry && entry.displayName, `Part missing Chinese localization: ${p.id} (${p.name})`);

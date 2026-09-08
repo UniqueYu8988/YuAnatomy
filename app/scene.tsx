@@ -6,6 +6,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { createExplosionLayout } from "./explosion-layout";
+import { createDentalFrame, type DentalFrame } from "./dental-unfold";
 import { decodeModelResponse } from "./model-download";
 import { PointerTap } from "./pointer-tap";
 import { SYSTEMS, type Atlas, type SceneState, type RulerMeasurement } from "./anatomy";
@@ -148,6 +149,19 @@ export default function AnatomyScene({
       data = new Float32Array(width * 4),
       partTexture = new T.DataTexture(data, width, 1, T.RGBAFormat, T.FloatType);
     partTexture.needsUpdate = true;
+    const rotationData = new Float32Array(width * 4);
+    for (let i = 0; i < width; i++) rotationData[i * 4 + 3] = 1;
+    const rotationTexture = new T.DataTexture(rotationData, width, 1, T.RGBAFormat, T.FloatType);
+    rotationTexture.needsUpdate = true;
+    const rotations = atlas.parts.map(() => new T.Quaternion());
+    const targetRotations = atlas.parts.map(() => new T.Quaternion());
+    const dentalFrames = new Map<string, DentalFrame>();
+    const injectRotation = (shader: Parameters<T.MeshStandardMaterial["onBeforeCompile"]>[0]) => {
+      shader.uniforms.partRotation = { value: rotationTexture };
+      shader.vertexShader = "uniform sampler2D partRotation;\nvec3 rotatePart(vec3 v, vec4 q) { return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v); }\n" + shader.vertexShader;
+      shader.vertexShader = shader.vertexShader.replace("transformed += state.xyz;", "transformed = rotatePart(transformed, texture2D(partRotation, stateUv)) + state.xyz;");
+      shader.vertexShader = shader.vertexShader.replace("#include <beginnormal_vertex>", "#include <beginnormal_vertex>\nobjectNormal = rotatePart(objectNormal, texture2D(partRotation, vec2((partIndex + 0.5) / stateWidth, 0.5)));\n#ifdef USE_TANGENT\nobjectTangent = rotatePart(objectTangent, texture2D(partRotation, vec2((partIndex + 0.5) / stateWidth, 0.5)));\n#endif");
+    };
     const selectedData = new Uint8Array(width * 4),
       selectionTexture = new T.DataTexture(selectedData, width, 1);
     selectionTexture.needsUpdate = true;
@@ -236,6 +250,7 @@ export default function AnatomyScene({
           "#include <begin_vertex>",
           "#include <begin_vertex>\nvec2 stateUv = vec2((partIndex + 0.5) / stateWidth, 0.5); vec4 state = texture2D(partState, stateUv); transformed += state.xyz; partVisible = state.w;",
         );
+        injectRotation(shader);
         shader.fragmentShader = "varying float partVisible;\n" + shader.fragmentShader;
         shader.fragmentShader = shader.fragmentShader.replace(
           "#include <clipping_planes_fragment>",
@@ -270,6 +285,56 @@ export default function AnatomyScene({
     const stencilGroup = new T.Group();
     stencilGroup.visible = false;
     scene.add(stencilGroup);
+
+    // Stencil Pulp Cavity Clipping Caps Setup (Red Cut Cross-Section)
+    const pulpStencilBackMat = new T.MeshBasicMaterial({
+      depthWrite: false,
+      depthTest: false,
+      colorWrite: false,
+      stencilWrite: true,
+      stencilFunc: T.AlwaysStencilFunc,
+      side: T.BackSide,
+      stencilFail: T.KeepStencilOp,
+      stencilZFail: T.IncrementWrapStencilOp,
+      stencilZPass: T.IncrementWrapStencilOp,
+    });
+    const pulpStencilFrontMat = new T.MeshBasicMaterial({
+      depthWrite: false,
+      depthTest: false,
+      colorWrite: false,
+      stencilWrite: true,
+      stencilFunc: T.AlwaysStencilFunc,
+      side: T.FrontSide,
+      stencilFail: T.KeepStencilOp,
+      stencilZFail: T.DecrementWrapStencilOp,
+      stencilZPass: T.DecrementWrapStencilOp,
+    });
+    const pulpCapGeo = new T.PlaneGeometry(3, 3);
+    const pulpCapMat = new T.MeshStandardMaterial({
+      color: 0xc85057,
+      roughness: 0.65,
+      metalness: 0,
+      stencilWrite: true,
+      stencilRef: 0,
+      stencilFunc: T.NotEqualStencilFunc,
+      stencilFail: T.ReplaceStencilOp,
+      stencilZFail: T.ReplaceStencilOp,
+      stencilZPass: T.ReplaceStencilOp,
+      side: T.DoubleSide,
+      depthTest: true,
+      depthWrite: true,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1,
+    });
+    const pulpCapMesh = new T.Mesh(pulpCapGeo, pulpCapMat);
+    pulpCapMesh.renderOrder = 5;
+    pulpCapMesh.frustumCulled = false;
+    pulpCapMesh.visible = false;
+    pulpCapMesh.onAfterRender = (r) => {
+      r.clearStencil();
+    };
+    scene.add(pulpCapMesh);
 
     // 3D Interactive Ruler Setup
     const rulerGroup = new T.Group();
@@ -406,6 +471,7 @@ export default function AnatomyScene({
           "#include <begin_vertex>",
           "#include <begin_vertex>\nvec2 stateUv = vec2((partIndex + 0.5) / stateWidth, 0.5); vec4 state = texture2D(partState, stateUv); transformed += state.xyz; partVisible = state.w; partSelected = texture2D(selectionState, stateUv).r;",
         );
+        injectRotation(shader);
         shader.fragmentShader =
           "uniform float fascialMode; varying float partVisible; varying float partSelected;\n" + shader.fragmentShader;
         shader.fragmentShader = shader.fragmentShader.replace(
@@ -442,6 +508,9 @@ export default function AnatomyScene({
           new T.BufferAttribute(new Int16Array(buffer, p.normals, p.vertexCount * 3), 3, true),
         );
         g.setIndex(new T.BufferAttribute(new Uint32Array(buffer, p.indices, p.indexCount), 1));
+        const dentalFrame = createDentalFrame(p, atlas.parts, g.attributes.position.array);
+        if (dentalFrame) dentalFrames.set(p.id, dentalFrame);
+        layoutKey = "";
         g.boundingBox = bounds[i].clone();
         g.computeBoundingSphere();
         const pick = new T.Mesh(g);
@@ -497,6 +566,19 @@ export default function AnatomyScene({
           for (const part of pulpData.manifest.parts) {
             const index = atlas.parts.findIndex((p) => p.id === part.id);
             const group = createPulpCavityGeometry(part, pulpData.buffer);
+            const pulpMesh = group.children[0] as T.Mesh;
+            pulpMesh.renderOrder = 6;
+
+            const pulpBackMesh = new T.Mesh(pulpMesh.geometry, pulpStencilBackMat);
+            pulpBackMesh.renderOrder = 4;
+            pulpBackMesh.frustumCulled = false;
+            group.add(pulpBackMesh);
+
+            const pulpFrontMesh = new T.Mesh(pulpMesh.geometry, pulpStencilFrontMat);
+            pulpFrontMesh.renderOrder = 4;
+            pulpFrontMesh.frustumCulled = false;
+            group.add(pulpFrontMesh);
+
             pulpGroups[index] = group;
             scene.add(group);
           }
@@ -532,7 +614,6 @@ export default function AnatomyScene({
         Math.max(0.2, atlasDistance),
         extent,
       );
-      if (extent > 0.8) view = "front";
       const direction =
         view === "front"
           ? new T.Vector3(0, 0, 1)
@@ -541,13 +622,14 @@ export default function AnatomyScene({
             : view === "side"
               ? new T.Vector3(1, 0, 0)
               : new T.Vector3(0.55, 0.15, 1).normalize();
+      const orbit = new T.Spherical().setFromVector3(direction);
+      orbit.theta *= 1 - extent;
+      orbit.phi = T.MathUtils.lerp(orbit.phi, Math.PI / 2, extent);
+      direction.setFromSpherical(orbit);
       const targetCenter = center.clone();
-      if (extent < 0.2) {
-        // Keep a single 20 mm tooth centered; a fixed 16 mm offset displaced
-        // the whole tooth behind the bottom toolbar in the specialty view.
-        targetCenter.y += Math.min(0.016, size.y * 0.03);
-      }
-      controls.target.copy(targetCenter.lerp(new T.Vector3(0, 0.25, 0), extent));
+      // Keep the same center throughout expansion and collapse.
+      targetCenter.y += Math.min(0.016, size.y * 0.03);
+      controls.target.copy(targetCenter);
       camera.position.copy(controls.target).addScaledVector(direction, distance);
       controls.update();
       dirty = true;
@@ -574,7 +656,7 @@ export default function AnatomyScene({
       let result: { index: number; point: T.Vector3; distance: number } | null = null;
       pickers.forEach((mesh, i) => {
         if (!mesh || data[i*4+3] < .5) return;
-        worldBox.copy(bounds[i]).translate(mesh.position);
+        worldBox.copy(bounds[i]).applyMatrix4(mesh.matrixWorld);
         if (!raycaster.ray.intersectBox(worldBox, hitPoint)) return;
         const hit = raycaster.intersectObject(mesh, false).find((h) =>
           !latest.current.clipping?.enabled || retainedByPlane(h.point.toArray(), clipPlane.normal.toArray(), clipPlane.constant));
@@ -697,7 +779,7 @@ export default function AnatomyScene({
           (hasSolid && atlas.parts[i].system === "integumentary")
         )
           return;
-        worldBox.copy(bounds[i]).translate(mesh.position);
+        worldBox.copy(bounds[i]).applyMatrix4(mesh.matrixWorld);
         if (!raycaster.ray.intersectBox(worldBox, hitPoint)) return;
         const hits = raycaster.intersectObject(mesh, false);
         if (hits[0] && hits[0].distance < nearest) {
@@ -745,52 +827,48 @@ export default function AnatomyScene({
         const nextLayoutKey =
           visibleParts.map((p) => p.id).join(",") + ":" + camera.aspect.toFixed(3);
         if (nextLayoutKey !== layoutKey) {
-          const layout = createExplosionLayout(visibleParts, camera.aspect);
+          const layout = createExplosionLayout(visibleParts, camera.aspect, dentalFrames);
           packingWidth = layout.width;
           packingHeight = layout.height;
+          const layoutBounds = new T.Box3();
+          atlas.parts.forEach((p, i) => { if (isVisible(p, s)) layoutBounds.union(bounds[i]); });
+          const layoutCenter = layoutBounds.isEmpty() ? new T.Vector3(0, .25, 0) : layoutBounds.getCenter(new T.Vector3());
           atlas.parts.forEach((p, i) => {
             const cell = layout.cells.get(p.id);
-            offsets[i] = cell ? new T.Vector3(cell.x, cell.y + 0.25, 0) : centers[i].clone();
+            targetRotations[i].copy(cell?.rotation ?? new T.Quaternion());
+            offsets[i] = cell ? new T.Vector3(cell.x + layoutCenter.x, cell.y + layoutCenter.y, layoutCenter.z).sub(cell.centerOffset ?? new T.Vector3()) : centers[i].clone();
           });
           layoutKey = nextLayoutKey;
-          if (amount > 0.05 && !s.isolate) fit(s.view, Math.max(0, (amount - 0.3) / 0.7));
+          if (amount > 0.05 && !s.isolate) fit(s.view, amount);
         }
 
         atlas.parts.forEach((p, i) => {
           const c = centers[i],
             destination = offsets[i];
-          let dx = 0,
-            dy = 0,
-            dz = 0;
-          if (amount <= 0.45) {
-            const t = amount / 0.45;
-            const group = SYSTEMS.findIndex((sys) => sys.id === p.system);
-            const angle = (group / SYSTEMS.length) * Math.PI * 2;
-            dx = Math.sin(angle) * t * 0.48;
-            dy = (c.y - 0.25) * t * 0.28;
-            dz = Math.cos(angle) * t * 0.48;
-          } else {
-            const t = (amount - 0.45) / 0.55,
-              group = SYSTEMS.findIndex((sys) => sys.id === p.system),
-              angle = (group / SYSTEMS.length) * Math.PI * 2;
-            dx = T.MathUtils.lerp(Math.sin(angle) * 0.48, destination.x - c.x, t);
-            dy = T.MathUtils.lerp((c.y - 0.25) * 0.28, destination.y - c.y, t);
-            dz = T.MathUtils.lerp(Math.cos(angle) * 0.48, -c.z, t);
-          }
+          // One reversible path, with the same progress used for camera framing.
+          rotations[i].identity().slerp(targetRotations[i], amount);
+          rotations[i].toArray(rotationData, i * 4);
+          const movedCenter = c.clone().lerp(destination, amount);
+          const rotatedCenter = c.clone().applyQuaternion(rotations[i]);
+          const dx = movedCenter.x - rotatedCenter.x,
+            dy = movedCenter.y - rotatedCenter.y,
+            dz = movedCenter.z - rotatedCenter.z;
           const selected = s.fascialMode ? !!FASCIAL_SPACES.find((space) => space.id === s.fascialActiveSpaceId)?.boundaryParts.includes(p.id) : selection.has(p.id);
           data.set([dx, dy, dz, isVisible(p, s) ? 1 : 0], i * 4);
           selectedData[i * 4] = selected ? 255 : 0;
           markerPositions.set(
-            data[i * 4 + 3] > 0.5 ? [c.x + dx, c.y + dy, c.z + dz] : [10000, 10000, 10000],
+            data[i * 4 + 3] > 0.5 ? [movedCenter.x, movedCenter.y, movedCenter.z] : [10000, 10000, 10000],
             i * 3,
           );
           const mesh = pickers[i];
           if (mesh) {
+            mesh.quaternion.copy(rotations[i]);
             mesh.position.set(dx, dy, dz);
             mesh.updateMatrix();
             mesh.updateMatrixWorld(true);
           }
         });
+        rotationTexture.needsUpdate = true;
         partTexture.needsUpdate = true;
         selectionTexture.needsUpdate = true;
         markerGeometry.attributes.position.needsUpdate = true;
@@ -804,7 +882,7 @@ export default function AnatomyScene({
         lastReset = s.reset;
       }
       if (moving && !s.isolate)
-        fit(amount > 0.5 ? "front" : s.view, Math.max(0, (amount - 0.3) / 0.7));
+        fit(s.view, amount);
       const isolateKey = s.isolate
         ? s.selected.join(",") + ":" + s.reset + ":" + s.view + ":" + camera.aspect
         : "";
@@ -867,14 +945,20 @@ export default function AnatomyScene({
           });
           stencilBackMat.clippingPlanes = [clipPlane];
           stencilFrontMat.clippingPlanes = [clipPlane];
+          pulpStencilBackMat.clippingPlanes = [clipPlane];
+          pulpStencilFrontMat.clippingPlanes = [clipPlane];
 
           const planePoint = clipPlane.normal.clone().multiplyScalar(-clipPlane.constant);
           capMesh.position.copy(planePoint);
           capMesh.lookAt(planePoint.clone().add(clipPlane.normal));
 
+          pulpCapMesh.position.copy(planePoint);
+          pulpCapMesh.lookAt(planePoint.clone().add(clipPlane.normal));
+
           const solid = !s.canalMode && clipping.solidCap !== false;
           capMesh.visible = solid;
           stencilGroup.visible = solid;
+          pulpCapMesh.visible = solid;
 
           pulpGroups.forEach((g) => {
             g?.traverse((child) => {
@@ -889,8 +973,11 @@ export default function AnatomyScene({
           });
           stencilBackMat.clippingPlanes = [];
           stencilFrontMat.clippingPlanes = [];
+          pulpStencilBackMat.clippingPlanes = [];
+          pulpStencilFrontMat.clippingPlanes = [];
           capMesh.visible = false;
           stencilGroup.visible = false;
+          pulpCapMesh.visible = false;
           pulpGroups.forEach((g) => {
             g?.traverse((child) => {
               if (child instanceof T.Mesh && child.material) {
@@ -988,18 +1075,16 @@ export default function AnatomyScene({
         dirty = true;
       }
 
-      if (s.rctMode) {
+      const showPulp = !s.canalMode && (!!s.rctMode || !!s.clipping?.enabled);
+      if (showPulp) {
         atlas.parts.forEach((p, i) => {
           const pulp = pulpGroups[i];
           if (!pulp) return;
           const vis = isVisible(p, s);
           pulp.visible = vis;
           if (vis) {
-            pulp.position.set(
-              centers[i].x + data[i * 4],
-              centers[i].y + data[i * 4 + 1],
-              centers[i].z + data[i * 4 + 2],
-            );
+            pulp.quaternion.copy(rotations[i]);
+            pulp.position.copy(centers[i]).applyQuaternion(rotations[i]).add(new T.Vector3(data[i * 4], data[i * 4 + 1], data[i * 4 + 2]));
           }
         });
       } else {
@@ -1024,10 +1109,12 @@ export default function AnatomyScene({
             for (let corner = 0; corner < 8; corner++) {
               projected
                 .set(
-                  p.bounds[corner & 1 ? 1 : 0][0] + data[i * 4],
-                  p.bounds[corner & 2 ? 1 : 0][1] + data[i * 4 + 1],
-                  p.bounds[corner & 4 ? 1 : 0][2] + data[i * 4 + 2],
+                  p.bounds[corner & 1 ? 1 : 0][0],
+                  p.bounds[corner & 2 ? 1 : 0][1],
+                  p.bounds[corner & 4 ? 1 : 0][2],
                 )
+                .applyQuaternion(rotations[i])
+                .add(new T.Vector3(data[i * 4], data[i * 4 + 1], data[i * 4 + 2]))
                 .project(camera);
               const x = ((projected.x + 1) * el.clientWidth) / 2,
                 y = ((1 - projected.y) * el.clientHeight) / 2;
@@ -1038,6 +1125,7 @@ export default function AnatomyScene({
             }
             projected
               .copy(centers[i])
+              .applyQuaternion(rotations[i])
               .add(new T.Vector3(data[i * 4], data[i * 4 + 1], data[i * 4 + 2]))
               .project(camera);
             if (projected.z < -1 || projected.z > 1) return;
@@ -1090,6 +1178,7 @@ export default function AnatomyScene({
         }
       });
       env.dispose();
+      rotationTexture.dispose();
       partTexture.dispose();
       selectionTexture.dispose();
       markerGeometry.dispose();
