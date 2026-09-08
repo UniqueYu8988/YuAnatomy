@@ -1,7 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 import {
-  PanelLeftClose,
-  PanelLeftOpen,
   RotateCcw,
   Compass,
   Layers,
@@ -12,15 +10,12 @@ import {
   Focus,
   EyeOff,
   Check,
-  X,
 } from "lucide-react";
 import type { Concept, SceneState, View } from "./anatomy";
 import type { PresetId } from "./study";
 import { INFECTION_PATHWAYS } from "./fascial-spaces";
 
 export interface NakedDockProps {
-  sidebarCollapsed: boolean;
-  onToggleSidebar: () => void;
   state: SceneState;
   setState: React.Dispatch<React.SetStateAction<SceneState>>;
   preset: PresetId;
@@ -42,8 +37,6 @@ interface DockItem {
 }
 
 export default function NakedDock({
-  sidebarCollapsed,
-  onToggleSidebar,
   state,
   setState,
   preset,
@@ -59,7 +52,8 @@ export default function NakedDock({
   const [pressedId, setPressedId] = useState<string | null>(null);
   const [inSitu, setInSitu] = useState<{ id: string; text: string } | null>(null);
   const inSituTimer = useRef<number | null>(null);
-  const [activeFlyout, setActiveFlyout] = useState<"view" | "explode" | null>(null);
+  const flyoutTimer = useRef<number | null>(null);
+  const [activeFlyout, setActiveFlyout] = useState<"view" | "clipping" | null>(null);
 
   // In-situ inline feedback trigger (auto-dismisses after 1600ms)
   const triggerFeedback = (id: string, text: string) => {
@@ -73,10 +67,38 @@ export default function NakedDock({
   useEffect(() => {
     return () => {
       if (inSituTimer.current) window.clearTimeout(inSituTimer.current);
+      if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
     };
   }, []);
 
-  // Close flyouts on outside click or Escape
+  const handlePointerEnterItem = (id: string) => {
+    if (id === "view" || id === "clipping") {
+      if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
+      setActiveFlyout(id);
+    }
+  };
+
+  const handlePointerLeaveItem = (id: string) => {
+    if (id === "view" || id === "clipping") {
+      if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
+      flyoutTimer.current = window.setTimeout(() => {
+        setActiveFlyout(null);
+      }, 160);
+    }
+  };
+
+  const handleFlyoutContainerEnter = () => {
+    if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
+  };
+
+  const handleFlyoutContainerLeave = () => {
+    if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
+    flyoutTimer.current = window.setTimeout(() => {
+      setActiveFlyout(null);
+    }, 160);
+  };
+
+  // Close flyouts on outside pointerdown
   useEffect(() => {
     const handleDown = (e: PointerEvent) => {
       if (dockRef.current && !dockRef.current.contains(e.target as Node)) {
@@ -139,17 +161,6 @@ export default function NakedDock({
   // Build items list
   const items: DockItem[] = [
     {
-      id: "sidebar",
-      label: sidebarCollapsed ? "展开解剖目录" : "收起解剖目录",
-      icon: sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />,
-      isActive: false,
-      bloomColor: "emerald",
-      onClick: () => {
-        onToggleSidebar();
-        triggerFeedback("sidebar", sidebarCollapsed ? "已展开目录" : "已收起目录");
-      },
-    },
-    {
       id: "reset",
       label: "重置全部解剖状态与视角",
       icon: <RotateCcw size={17} />,
@@ -173,13 +184,20 @@ export default function NakedDock({
     },
     {
       id: "explode",
-      label: `拆解度 (${Math.round(state.explode * 100)}%)`,
+      label: state.explode > 0 ? "复位解剖位置" : "全解剖拆解",
       icon: <Layers size={18} />,
-      isActive: state.explode > 0 || activeFlyout === "explode",
+      isActive: state.explode > 0,
       bloomColor: "emerald",
-      hasFlyout: true,
       onClick: () => {
-        setActiveFlyout((f) => (f === "explode" ? null : "explode"));
+        const willExplode = state.explode === 0;
+        if (willExplode && setFdiDockMinimized) setFdiDockMinimized(true);
+        setState((s) => ({
+          ...s,
+          explode: willExplode ? 1.0 : 0,
+          isolate: false,
+          view: preset === "dental" ? "front" : s.view,
+        }));
+        triggerFeedback("explode", willExplode ? "已完全拆解" : "已复位解剖");
       },
     },
     {
@@ -206,8 +224,9 @@ export default function NakedDock({
       id: "clipping",
       label: state.clipping?.enabled ? "退出解剖剖切" : "解剖剖切",
       icon: <Scissors size={18} />,
-      isActive: !!state.clipping?.enabled,
+      isActive: !!state.clipping?.enabled || activeFlyout === "clipping",
       bloomColor: "amber",
+      hasFlyout: true,
       onClick: () => {
         const willEnable = !state.clipping?.enabled;
         const isUnfolded = preset === "dental" && state.explode > 0.85;
@@ -317,7 +336,12 @@ export default function NakedDock({
         const hasFeedback = inSitu?.id === item.id;
 
         return (
-          <div key={item.id} className="naked-dock-item-wrapper">
+          <div
+            key={item.id}
+            className="naked-dock-item-wrapper"
+            onPointerEnter={() => handlePointerEnterItem(item.id)}
+            onPointerLeave={() => handlePointerLeaveItem(item.id)}
+          >
             <button
               ref={(el) => {
                 if (el) btnRefs.current.set(item.id, el);
@@ -346,7 +370,12 @@ export default function NakedDock({
 
             {/* View Switcher Flyout */}
             {item.id === "view" && activeFlyout === "view" && (
-              <div className="naked-dock-flyout view-flyout" role="menu">
+              <div
+                className="naked-dock-flyout view-flyout"
+                role="menu"
+                onPointerEnter={handleFlyoutContainerEnter}
+                onPointerLeave={handleFlyoutContainerLeave}
+              >
                 <div className="flyout-title">视角</div>
                 {(["front", "side", "three-quarter", "back"] as View[]).map((v, i) => {
                   const label = ["正面", "侧面", "斜视", "背面"][i];
@@ -369,61 +398,60 @@ export default function NakedDock({
               </div>
             )}
 
-            {/* Explode Slider Flyout */}
-            {item.id === "explode" && activeFlyout === "explode" && (
-              <div className="naked-dock-flyout explode-flyout">
-                <div className="flyout-header">
-                  <span className="flyout-title">解剖拆解</span>
-                  <output className="flyout-val">{Math.round(state.explode * 100)}%</output>
-                  <button
-                    type="button"
-                    className="flyout-close-btn"
-                    onClick={() => setActiveFlyout(null)}
-                    aria-label="关闭"
-                  >
-                    <X size={13} />
-                  </button>
-                </div>
-                <div className="flyout-slider-row">
-                  <input
-                    aria-label="拆解程度"
-                    disabled={state.rulerMode || state.fascialMode || state.canalMode}
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={state.explode * 100}
-                    onChange={(e) => {
-                      const explode = Number(e.target.value) / 100;
-                      if (explode > 0 && setFdiDockMinimized) setFdiDockMinimized(true);
-                      setState((s) => ({
-                        ...s,
-                        explode,
-                        isolate: false,
-                        view: preset === "dental" ? "front" : s.view,
-                      }));
-                    }}
-                  />
-                </div>
-                <div className="flyout-quick-steps">
-                  {[0, 0.5, 1.0].map((step) => (
+            {/* Clipping Options Flyout */}
+            {item.id === "clipping" && activeFlyout === "clipping" && (
+              <div
+                className="naked-dock-flyout clipping-flyout"
+                role="menu"
+                onPointerEnter={handleFlyoutContainerEnter}
+                onPointerLeave={handleFlyoutContainerLeave}
+              >
+                <div className="flyout-title">剖切面</div>
+                {[
+                  { axis: "z" as const, label: "冠状 / 深度剖切" },
+                  { axis: "y" as const, label: "水平 / 高度剖切" },
+                  { axis: "x" as const, label: "矢状 / 左右剖切" },
+                ].map(({ axis, label }) => {
+                  const active = state.clipping?.enabled && state.clipping?.axis === axis;
+                  return (
                     <button
-                      key={step}
+                      key={axis}
                       type="button"
-                      className={`step-btn ${Math.abs(state.explode - step) < 0.05 ? "active" : ""}`}
+                      className={`flyout-option-btn ${active ? "active" : ""}`}
                       onClick={() => {
-                        if (step > 0 && setFdiDockMinimized) setFdiDockMinimized(true);
                         setState((s) => ({
                           ...s,
-                          explode: step,
-                          isolate: false,
-                          view: preset === "dental" ? "front" : s.view,
+                          clipping: {
+                            enabled: true,
+                            axis,
+                            offset: s.clipping?.offset ?? 0,
+                            inverted: s.clipping?.inverted ?? false,
+                            solidCap: s.clipping?.solidCap ?? true,
+                          },
                         }));
+                        triggerFeedback("clipping", `剖切：${label}`);
+                        setActiveFlyout(null);
                       }}
                     >
-                      {step === 0 ? "复位" : step === 0.5 ? "50%" : "全拆解"}
+                      {label}
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
+                <div className="flyout-divider" />
+                <button
+                  type="button"
+                  className={`flyout-option-btn ${state.clipping?.inverted ? "active" : ""}`}
+                  onClick={() => {
+                    setState((s) => ({
+                      ...s,
+                      clipping: s.clipping
+                        ? { ...s.clipping, inverted: !s.clipping.inverted }
+                        : { enabled: true, axis: "y", offset: 0, inverted: true, solidCap: true },
+                    }));
+                  }}
+                >
+                  {state.clipping?.inverted ? "切面方向：反向 ✓" : "反转切面方向"}
+                </button>
               </div>
             )}
           </div>

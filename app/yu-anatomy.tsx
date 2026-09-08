@@ -407,43 +407,18 @@ export default function YuAnatomy() {
               <span className="brand-name">YuAnatomy</span>
             </div>
           </a>
-          <div className="sidebar-brand-actions">
-            <button
-              type="button"
-              className="icon-button"
-              onClick={() => setAbout(true)}
-              title="关于与许可"
-              aria-label="关于与许可"
-            >
-              <Sparkles size={16} />
-            </button>
-            <button
-              type="button"
-              className="icon-button"
-              onClick={() => setHelpOpen(true)}
-              title="操作帮助"
-              aria-label="操作帮助"
-            >
-              <HelpCircle size={16} />
-            </button>
-            <button
-              type="button"
-              className="icon-button desktop-only"
-              onClick={() => setSidebarCollapsed(true)}
-              title="收起左侧栏"
-              aria-label="收起左侧栏"
-            >
-              <PanelLeftClose size={16} />
-            </button>
-            <button
-              type="button"
-              className="icon-button mobile-only"
-              onClick={() => setDrawer(false)}
-              aria-label="关闭抽屉"
-            >
-              <X size={16} />
-            </button>
-          </div>
+          {drawer && (
+            <div className="sidebar-brand-actions">
+              <button
+                type="button"
+                className="icon-button mobile-only"
+                onClick={() => setDrawer(false)}
+                aria-label="关闭抽屉"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
         </div>
 
         <nav className="presets" aria-label="学习主题预设">
@@ -540,12 +515,18 @@ export default function YuAnatomy() {
           Center Column (1fr): Viewer - Model Centered
          ===================================================================== */}
       <section className="viewer" aria-label="三维视窗">
-        {(state.canalMode || state.fascialMode || preset !== "dental") && (
-          <header className="viewer-heading">
-            <h1>{state.canalMode ? "根管分型" : state.fascialMode ? "颌面间隙" : PRESETS.find((p) => p.id === preset)?.name ?? "头颈解剖"}</h1>
-          </header>
-        )}
         <div className="canvas-wrap">
+          {/* Standalone Top-Left Sidebar Collapse/Expand Button */}
+          <button
+            type="button"
+            className="standalone-sidebar-toggle"
+            onClick={() => setSidebarCollapsed((c) => !c)}
+            title={sidebarCollapsed ? "展开解剖目录" : "收起解剖目录"}
+            aria-label={sidebarCollapsed ? "展开解剖目录" : "收起解剖目录"}
+          >
+            {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+          </button>
+
           {atlas && (
             <AnatomyScene
               atlas={atlas}
@@ -557,25 +538,15 @@ export default function YuAnatomy() {
                   selectToothByFdi(tooth.fdi);
                   return;
                 }
-                const concept = atlas.concepts.find((c) => c.elements.length === 1 && c.elements[0] === id)
-                  ?? atlas.concepts.find((c) => c.elements.includes(id));
+                const concept =
+                  atlas.concepts.find((c) => c.elements.length === 1 && c.elements[0] === id) ??
+                  atlas.concepts.find((c) => c.elements.includes(id));
                 if (concept) choose(concept);
               }}
               onProgress={setProgress}
               onMeasure={setRulerMeasurement}
               onSelectFascialSpace={selectSpace}
             />
-          )}
-
-          {/* Minimal Mode Caption in Canvas Top-Left */}
-          {state.canalMode && (
-            <div className="canal-scene-caption">
-              <strong>
-                Vertucci {CANAL_PATTERNS[state.canalType ?? 0].type} 型 ·{" "}
-                {CANAL_PATTERNS[state.canalType ?? 0].stages.join("–")}
-              </strong>
-              <span>通用三维教学模型</span>
-            </div>
           )}
 
 
@@ -625,140 +596,45 @@ export default function YuAnatomy() {
             !state.rulerMode &&
             !state.canalMode && (
               <div
-                className={`fdi-bottom-dock ${fdiDockMinimized ? "minimized" : ""}`}
+                className="fdi-bottom-dock"
                 role="region"
                 aria-label="FDI 恒牙列牙位盘"
               >
-                {fdiDockMinimized ? (
-                  <button
-                    type="button"
-                    className="fdi-dock-pill-btn"
-                    onClick={() => setFdiDockMinimized(false)}
-                    title="展开 FDI 牙位盘"
-                  >
-                    <span className="pill-dot" />
-                    <span className="pill-title">FDI 牙位盘</span>
-                    {selectedTooth ? (
-                      <span className="pill-selected">
-                        已选: {selectedTooth.fdi} {selectedTooth.name}
-                      </span>
-                    ) : (
-                      <span className="pill-selected">28 颗恒牙</span>
-                    )}
-                    <ChevronUp size={14} />
-                  </button>
-                ) : (
-                  <>
-                    <div className="fdi-dock-header">
-                      <div className="fdi-dock-title-group">
-                        <span className="fdi-dock-badge">FDI 牙位盘</span>
-                        <span className="muted" style={{ fontSize: "12px" }}>
-                          28 颗恒牙
-                        </span>
-                      </div>
-
-                      <div className="fdi-filter-row">
-                        {(
-                          [
-                            ["all", "全口 (28)"],
-                            ["incisor", "切/尖牙"],
-                            ["premolar", "前磨牙"],
-                            ["molar", "磨牙"],
-                          ] as const
-                        ).map(([cat, label]) => (
-                          <button
-                            key={cat}
-                            type="button"
-                            className={`fdi-filter-chip ${fdiFilter === cat ? "active" : ""}`}
-                            onClick={() => setFdiFilter(cat)}
-                          >
-                            {label}
-                          </button>
-                        ))}
-                      </div>
-
-                      <div className="fdi-dock-actions">
-                        <button
-                          type="button"
-                          className="fdi-dock-btn"
-                          onClick={() => {
-                            const dentalParts =
-                              atlas?.parts.filter((p) => p.system === "dental").map((p) => p.id) ?? [];
-                            setState((s) => ({
-                              ...s,
-                              visible: s.visible.includes("dental")
-                                ? s.visible
-                                : [...s.visible, "dental"],
-                              selected: dentalParts,
-                              isolate: false,
-                            }));
-                          }}
-                          title="高亮全部 28 颗恒牙"
-                        >
-                          全牙列
-                        </button>
-
-                        <button
-                          type="button"
-                          className={`fdi-dock-btn ${showJawBones ? "active" : ""}`}
-                          onClick={toggleJawBones}
-                          title="切换显示/隐藏颌骨"
-                        >
-                          {showJawBones ? "颌骨: 显" : "颌骨: 隐"}
-                        </button>
-
-                        <button
-                          type="button"
-                          className="icon-button"
-                          style={{ width: "24px", height: "24px" }}
-                          onClick={() => setFdiDockMinimized(true)}
-                          title="收起牙位盘"
-                          aria-label="收起牙位盘"
-                        >
-                          <ChevronDown size={14} />
-                        </button>
-                      </div>
+                <div className="fdi-quadrant-chart">
+                  <div className="fdi-row upper">
+                    <div className="fdi-quadrant-label">右上 (I)</div>
+                    <div className="fdi-teeth-group">
+                      {["17", "16", "15", "14", "13", "12", "11"].map(renderToothBtn)}
                     </div>
-
-                    <div className="fdi-quadrant-chart">
-                      <div className="fdi-row upper">
-                        <div className="fdi-quadrant-label">右上 (I)</div>
-                        <div className="fdi-teeth-group">
-                          {["17", "16", "15", "14", "13", "12", "11"].map(renderToothBtn)}
-                        </div>
-                        <div className="fdi-divider-v" />
-                        <div className="fdi-teeth-group">
-                          {["21", "22", "23", "24", "25", "26", "27"].map(renderToothBtn)}
-                        </div>
-                        <div className="fdi-quadrant-label">左上 (II)</div>
-                      </div>
-
-                      <div className="fdi-divider-h">
-                        <span className="fdi-midline-tag">中线</span>
-                      </div>
-
-                      <div className="fdi-row lower">
-                        <div className="fdi-quadrant-label">右下 (IV)</div>
-                        <div className="fdi-teeth-group">
-                          {["47", "46", "45", "44", "43", "42", "41"].map(renderToothBtn)}
-                        </div>
-                        <div className="fdi-divider-v" />
-                        <div className="fdi-teeth-group">
-                          {["31", "32", "33", "34", "35", "36", "37"].map(renderToothBtn)}
-                        </div>
-                        <div className="fdi-quadrant-label">左下 (III)</div>
-                      </div>
+                    <div className="fdi-divider-v" />
+                    <div className="fdi-teeth-group">
+                      {["21", "22", "23", "24", "25", "26", "27"].map(renderToothBtn)}
                     </div>
-                  </>
-                )}
+                    <div className="fdi-quadrant-label">左上 (II)</div>
+                  </div>
+
+                  <div className="fdi-divider-h">
+                    <span className="fdi-midline-tag">中线</span>
+                  </div>
+
+                  <div className="fdi-row lower">
+                    <div className="fdi-quadrant-label">右下 (IV)</div>
+                    <div className="fdi-teeth-group">
+                      {["47", "46", "45", "44", "43", "42", "41"].map(renderToothBtn)}
+                    </div>
+                    <div className="fdi-divider-v" />
+                    <div className="fdi-teeth-group">
+                      {["31", "32", "33", "34", "35", "36", "37"].map(renderToothBtn)}
+                    </div>
+                    <div className="fdi-quadrant-label">左下 (III)</div>
+                  </div>
+                </div>
               </div>
             )}
 
           {/* Naked Dock on Left Wall */}
           {!state.canalMode && (
             <NakedDock
-              sidebarCollapsed={sidebarCollapsed}
-              onToggleSidebar={() => setSidebarCollapsed((c) => !c)}
               state={state}
               setState={setState}
               preset={preset}
@@ -785,54 +661,13 @@ export default function YuAnatomy() {
             </div>
           )}
 
-          {/* Floating Live Clipping Controls (when clipping is enabled) */}
+          {/* Top-Center Live Clipping Controls (when clipping is enabled) */}
           {state.clipping?.enabled && (
-            <div className="floating-clipping-dock" role="region" aria-label="剖切控制">
-              <div className="clipping-bar-axes">
-                <span className="clipping-bar-label">切面:</span>
-                {(preset === "dental" && state.explode > 0.85
-                  ? [
-                      { id: "z", label: "深度 (纵/横切)" },
-                      { id: "y", label: "上下 (Y)" },
-                      { id: "x", label: "左右 (X)" },
-                    ]
-                  : [
-                      { id: "y", label: "水平面 (Y)" },
-                      { id: "z", label: "冠状面 (Z)" },
-                      { id: "x", label: "矢状面 (X)" },
-                    ]
-                ).map(({ id, label }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    className={`clipping-axis-chip ${(state.clipping?.axis ?? (preset === "dental" && state.explode > 0.85 ? "z" : "y")) === id ? "active" : ""}`}
-                    onClick={() =>
-                      setState((s) => ({ ...s, clipping: { ...s.clipping!, axis: id as "x" | "y" | "z" } }))
-                    }
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="clipping-bar-slider">
-                <span className="clipping-bar-label">推移:</span>
-                <button
-                  type="button"
-                  className="clipping-step-btn"
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      clipping: {
-                        ...s.clipping!,
-                        offset: Math.max(-100, (s.clipping?.offset ?? 0) - 5),
-                      },
-                    }))
-                  }
-                  title="向外推移 (-5%)"
-                >
-                  -
-                </button>
+            <div className="top-center-clipping-dock" role="region" aria-label="剖切控制">
+              <span className="clipping-dock-label">
+                {state.clipping.axis === "z" ? "深度剖切" : state.clipping.axis === "y" ? "水平剖切" : "矢状剖切"}
+              </span>
+              <div className="clipping-dock-slider-row">
                 <input
                   type="range"
                   min="-100"
@@ -843,28 +678,24 @@ export default function YuAnatomy() {
                     const offset = Number(e.target.value);
                     setState((s) => ({ ...s, clipping: { ...s.clipping!, offset } }));
                   }}
-                  className="clipping-bar-range"
+                  className="clipping-dock-range"
                   aria-label="剖切截面推移"
                 />
-                <button
-                  type="button"
-                  className="clipping-step-btn"
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      clipping: {
-                        ...s.clipping!,
-                        offset: Math.min(100, (s.clipping?.offset ?? 0) + 5),
-                      },
-                    }))
-                  }
-                  title="向内推移 (+5%)"
-                >
-                  +
-                </button>
-                <output className="clipping-bar-val">{state.clipping?.offset ?? 0}%</output>
+                <output className="clipping-dock-val">{state.clipping?.offset ?? 0}%</output>
               </div>
-
+              <button
+                type="button"
+                className={`clipping-opt-btn ${state.clipping.inverted ? "active" : ""}`}
+                onClick={() =>
+                  setState((s) => ({
+                    ...s,
+                    clipping: s.clipping ? { ...s.clipping, inverted: !s.clipping.inverted } : undefined,
+                  }))
+                }
+                title="反转切面方向"
+              >
+                反向
+              </button>
               <button
                 type="button"
                 className="clipping-close-btn"
@@ -913,17 +744,17 @@ export default function YuAnatomy() {
                 </button>
               </div>
 
-              <h2>两点直线距离</h2>
+              <h2>{rulerMeasurement?.segmentCount && rulerMeasurement.segmentCount > 1 ? "分段累积测量" : "解剖直线测距"}</h2>
 
               {!rulerMeasurement?.complete ? (
                 <div className="ruler-waiting-box">
                   <div className="ruler-step-hint">
                     {rulerMeasurement
-                      ? "已锚定起点 A，请在模型表面点击选取终点 B"
-                      : "在模型可见表面点击选取起点 A"}
+                      ? "已锚定起点，请点击模型表面选取下一测量点"
+                      : "在模型可见表面点击选取起点"}
                   </div>
                   <p className="ruler-note">
-                    解剖表面两点间空间直线距离（非沿面弧度或临床工作长度）。剖切面不参与拾取。
+                    左键连续点击累积测量；鼠标右键在保留既有线条基础上新建测量线对比研究。
                   </p>
                 </div>
               ) : (
@@ -932,7 +763,11 @@ export default function YuAnatomy() {
                     <span className="val">{rulerMeasurement.distanceMm.toFixed(1)}</span>
                     <span className="unit">mm</span>
                   </div>
-                  <p className="ruler-caption">两点直线距离</p>
+                  <p className="ruler-caption">
+                    {rulerMeasurement.segmentCount && rulerMeasurement.segmentCount > 1
+                      ? `已累积 ${rulerMeasurement.segmentCount} 段路径测量（右键新建线）`
+                      : "空间直线距离（左键继续累加 / 右键新建线）"}
+                  </p>
 
                   <div className="ruler-axes-grid">
                     <div className="axis-item">

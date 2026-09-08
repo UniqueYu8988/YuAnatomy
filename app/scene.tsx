@@ -353,53 +353,165 @@ export default function AnatomyScene({
     };
     scene.add(pulpCapMesh);
 
-    // 3D Interactive Ruler Setup
+    // 3D Interactive Ruler Setup (Continuous Multi-Segment & Multi-Line)
     const rulerGroup = new T.Group();
     rulerGroup.visible = false;
     scene.add(rulerGroup);
 
-    const sphereGeoA = new T.SphereGeometry(1, 16, 16);
+    const rulerHistoryGroup = new T.Group();
+    rulerGroup.add(rulerHistoryGroup);
+
+    const rulerActiveGroup = new T.Group();
+    rulerGroup.add(rulerActiveGroup);
+
+    const sphereGeo = new T.SphereGeometry(1, 16, 16);
     const sphereMatA = new T.MeshBasicMaterial({ color: 0x06b6d4, depthTest: false });
-    const markerA = new T.Mesh(sphereGeoA, sphereMatA);
-    markerA.renderOrder = 20;
-    markerA.visible = false;
-    rulerGroup.add(markerA);
-
-    const sphereGeoB = new T.SphereGeometry(1, 16, 16);
     const sphereMatB = new T.MeshBasicMaterial({ color: 0x10b981, depthTest: false });
-    const markerB = new T.Mesh(sphereGeoB, sphereMatB);
-    markerB.renderOrder = 20;
-    markerB.visible = false;
-    rulerGroup.add(markerB);
+    const historyMarkerMat = new T.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.8, depthTest: false });
+    const historyLineMat = new T.LineBasicMaterial({
+      color: 0x38bdf8,
+      depthTest: false,
+      transparent: true,
+      opacity: 0.75,
+      linewidth: 2,
+    });
 
-    const lineGeo = new T.BufferGeometry();
-    lineGeo.setAttribute("position", new T.BufferAttribute(new Float32Array(6), 3));
-    const lineMat = new T.LineBasicMaterial({
+    const activeLineMat = new T.LineBasicMaterial({
       color: 0x00f2fe,
       depthTest: false,
       transparent: true,
       opacity: 0.95,
       linewidth: 2,
     });
-    const rulerLine = new T.Line(lineGeo, lineMat);
-    rulerLine.renderOrder = 19;
-    rulerLine.visible = false;
-    rulerGroup.add(rulerLine);
+    const activeLineMesh = new T.Line(new T.BufferGeometry(), activeLineMat);
+    activeLineMesh.renderOrder = 19;
+    activeLineMesh.visible = false;
+    rulerActiveGroup.add(activeLineMesh);
 
-    let rulerPointA: T.Vector3 | null = null;
-    let rulerPointB: T.Vector3 | null = null;
-    let rulerPreview: T.Vector3 | null = null;
-    let rulerPartA: Atlas["parts"][number] | null = null;
-    let rulerPartB: Atlas["parts"][number] | null = null;
+    const previewLineGeo = new T.BufferGeometry();
+    previewLineGeo.setAttribute("position", new T.BufferAttribute(new Float32Array(6), 3));
+    const previewLineMat = new T.LineBasicMaterial({
+      color: 0x34d399,
+      depthTest: false,
+      transparent: true,
+      opacity: 0.85,
+      linewidth: 2,
+    });
+    const previewLineMesh = new T.Line(previewLineGeo, previewLineMat);
+    previewLineMesh.renderOrder = 19;
+    previewLineMesh.visible = false;
+    rulerActiveGroup.add(previewLineMesh);
+
+    let rulerPoints: T.Vector3[] = [];
+    let rulerParts: (Atlas["parts"][number] | null)[] = [];
+    const rulerMarkers: T.Mesh[] = [];
+    let rulerPreviewPoint: T.Vector3 | null = null;
+    let completedLinesCount = 0;
 
     const rulerBadge = document.createElement("div");
     rulerBadge.className = "ruler-3d-badge";
     rulerBadge.hidden = true;
     el.appendChild(rulerBadge);
-    const endpointLabels = ["A", "B"].map((name) => {
-      const label = document.createElement("span"); label.className = "ruler-point-label";
-      label.textContent = name; label.hidden = true; el.appendChild(label); return label;
-    });
+
+    const updateActiveLineGeometry = () => {
+      if (rulerPoints.length < 2) {
+        activeLineMesh.visible = false;
+        return;
+      }
+      const coords = new Float32Array(rulerPoints.length * 3);
+      rulerPoints.forEach((p, idx) => {
+        coords[idx * 3] = p.x;
+        coords[idx * 3 + 1] = p.y;
+        coords[idx * 3 + 2] = p.z;
+      });
+      activeLineMesh.geometry.dispose();
+      const newGeo = new T.BufferGeometry();
+      newGeo.setAttribute("position", new T.BufferAttribute(coords, 3));
+      newGeo.computeBoundingSphere();
+      activeLineMesh.geometry = newGeo;
+      activeLineMesh.visible = true;
+    };
+
+    const getCumulativeDistance = () => {
+      let d = 0;
+      for (let i = 0; i < rulerPoints.length - 1; i++) {
+        d += rulerPoints[i].distanceTo(rulerPoints[i + 1]) * 1000;
+      }
+      return d;
+    };
+
+    const commitActiveLine = () => {
+      if (rulerPoints.length >= 2) {
+        const coords = new Float32Array(rulerPoints.length * 3);
+        rulerPoints.forEach((p, idx) => {
+          coords[idx * 3] = p.x;
+          coords[idx * 3 + 1] = p.y;
+          coords[idx * 3 + 2] = p.z;
+        });
+        const histGeo = new T.BufferGeometry();
+        histGeo.setAttribute("position", new T.BufferAttribute(coords, 3));
+        const histLine = new T.Line(histGeo, historyLineMat);
+        histLine.renderOrder = 18;
+        rulerHistoryGroup.add(histLine);
+
+        rulerPoints.forEach((p) => {
+          const hm = new T.Mesh(sphereGeo, historyMarkerMat);
+          hm.position.copy(p);
+          hm.renderOrder = 19;
+          rulerHistoryGroup.add(hm);
+        });
+
+        completedLinesCount++;
+      }
+
+      rulerPoints = [];
+      rulerParts = [];
+      while (rulerMarkers.length > 0) {
+        const m = rulerMarkers.pop();
+        if (m) rulerActiveGroup.remove(m);
+      }
+      activeLineMesh.visible = false;
+      previewLineMesh.visible = false;
+      rulerPreviewPoint = null;
+    };
+
+    const clearAllRuler = () => {
+      while (rulerHistoryGroup.children.length > 0) {
+        const child = rulerHistoryGroup.children[0];
+        rulerHistoryGroup.remove(child);
+        if (child instanceof T.Mesh || child instanceof T.Line) {
+          child.geometry.dispose();
+        }
+      }
+      completedLinesCount = 0;
+      commitActiveLine();
+      rulerBadge.hidden = true;
+      measure.current?.(null);
+    };
+
+    const onContextMenu = (e: MouseEvent) => {
+      if (latest.current.rulerMode) {
+        e.preventDefault();
+        if (rulerPoints.length >= 2) {
+          commitActiveLine();
+          rulerBadge.innerHTML = `<span class="ruler-pill-badge hint">已保存当前测量线 (共${completedLinesCount}条) · 左键点击开始新线</span>`;
+          rulerBadge.hidden = false;
+          dirty = true;
+        } else if (rulerPoints.length === 1) {
+          rulerPoints = [];
+          rulerParts = [];
+          while (rulerMarkers.length > 0) {
+            const m = rulerMarkers.pop();
+            if (m) rulerActiveGroup.remove(m);
+          }
+          previewLineMesh.visible = false;
+          rulerBadge.hidden = true;
+          measure.current?.(null);
+          dirty = true;
+        }
+      }
+    };
+    renderer.domElement.addEventListener("contextmenu", onContextMenu);
 
     // Fascial Spaces & Clinical Infection Spread Setup
     const fascialGroup = new T.Group();
@@ -740,7 +852,7 @@ export default function AnatomyScene({
         if (amount > .0001) return;
         hover.hidden = true;
         renderer.domElement.style.cursor = "crosshair";
-        if (rulerPointA && !rulerPointB) {
+        if (rulerPoints.length >= 1) {
           const rect = renderer.domElement.getBoundingClientRect();
           pointer.set(
             ((e.clientX - rect.left) / rect.width) * 2 - 1,
@@ -748,22 +860,29 @@ export default function AnatomyScene({
           );
           raycaster.setFromCamera(pointer, camera);
           const hoverHit = e.buttons ? null : pickSurface()?.point;
-          rulerPreview = hoverHit?.clone() ?? null;
+          rulerPreviewPoint = hoverHit?.clone() ?? null;
           if (hoverHit) {
-            const posAttr = rulerLine.geometry.attributes.position as T.BufferAttribute;
-            posAttr.setXYZ(0, rulerPointA.x, rulerPointA.y, rulerPointA.z);
-            posAttr.setXYZ(1, (hoverHit as T.Vector3).x, (hoverHit as T.Vector3).y, (hoverHit as T.Vector3).z);
+            const lp = rulerPoints[rulerPoints.length - 1];
+            const posAttr = previewLineMesh.geometry.attributes.position as T.BufferAttribute;
+            posAttr.setXYZ(0, lp.x, lp.y, lp.z);
+            posAttr.setXYZ(1, hoverHit.x, hoverHit.y, hoverHit.z);
             posAttr.needsUpdate = true;
-            rulerLine.geometry.computeBoundingSphere();
-            rulerLine.visible = true;
-            const dist = rulerPointA.distanceTo(hoverHit) * 1000;
+            previewLineMesh.geometry.computeBoundingSphere();
+            previewLineMesh.visible = true;
+
+            const segDist = lp.distanceTo(hoverHit) * 1000;
+            const currentTotal = getCumulativeDistance();
+            const liveTotal = currentTotal + segDist;
             rulerBadge.hidden = false;
-            rulerBadge.innerHTML = `<span class="ruler-pill-badge">${dist.toFixed(1)} mm</span>`;
-            projected.copy(rulerPointA).add(hoverHit).multiplyScalar(0.5).project(camera);
+            rulerBadge.innerHTML = `<span class="ruler-pill-badge active">${rulerPoints.length > 1 ? `累积: ` : ""}${liveTotal.toFixed(1)} mm</span>`;
+            projected.copy(lp).add(hoverHit).multiplyScalar(0.5).project(camera);
             rulerBadge.style.left = `${((projected.x + 1) * el.clientWidth) / 2}px`;
             rulerBadge.style.top = `${((1 - projected.y) * el.clientHeight) / 2}px`;
             dirty = true;
-          } else { rulerLine.visible = false; rulerBadge.innerHTML = '<span class="ruler-pill-badge hint">A · 请选择终点 B</span>'; dirty = true; }
+          } else {
+            previewLineMesh.visible = false;
+            dirty = true;
+          }
         }
         return;
       }
@@ -820,22 +939,59 @@ export default function AnatomyScene({
         if (!hit) return;
         const part = atlas.parts[hit.index];
         const label = { ...part, name: getStudyEntry(part.conceptId, [part.id])?.displayName ?? part.name };
-        if (!rulerPointA) {
-          rulerPointA = hit.point.clone(); rulerPartA = label;
-          markerA.position.copy(rulerPointA); markerA.visible = true;
-          rulerBadge.innerHTML = '<span class="ruler-pill-badge hint">A · 请选择终点 B</span>';
-          measure.current?.(measurePoints(rulerPointA.toArray(), rulerPointA.toArray(), label));
-        } else if (!rulerPointB) {
-          rulerPointB = hit.point.clone(); rulerPartB = label;
-          markerB.position.copy(rulerPointB); markerB.visible = true;
-          const pos = rulerLine.geometry.attributes.position as T.BufferAttribute;
-          pos.setXYZ(0, ...rulerPointA.toArray()); pos.setXYZ(1, ...rulerPointB.toArray()); pos.needsUpdate = true;
-          rulerLine.geometry.computeBoundingSphere(); rulerLine.visible = true;
-          const result = measurePoints(rulerPointA.toArray(), rulerPointB.toArray(), rulerPartA ?? undefined, rulerPartB);
+        const pt = hit.point.clone();
+
+        rulerPoints.push(pt);
+        rulerParts.push(label);
+
+        const m = new T.Mesh(sphereGeo, rulerPoints.length === 1 ? sphereMatA : sphereMatB);
+        m.position.copy(pt);
+        m.renderOrder = 20;
+        rulerActiveGroup.add(m);
+        rulerMarkers.push(m);
+
+        if (rulerPoints.length >= 2) {
+          updateActiveLineGeometry();
+          const totalDist = getCumulativeDistance();
+          const lastPt = rulerPoints[rulerPoints.length - 2];
+          const deltaMm: [number, number, number] = [
+            Math.abs(pt.x - lastPt.x) * 1000,
+            Math.abs(pt.y - lastPt.y) * 1000,
+            Math.abs(pt.z - lastPt.z) * 1000,
+          ];
+          const result: RulerMeasurement = {
+            pointA: rulerPoints[0].toArray(),
+            pointB: pt.toArray(),
+            distanceMm: totalDist,
+            deltaMm,
+            partA: rulerParts[0] ?? undefined,
+            partB: label,
+            complete: true,
+            segmentCount: rulerPoints.length - 1,
+            totalDistanceMm: totalDist,
+            lineCount: completedLinesCount + 1,
+          };
           measure.current?.(result);
-          rulerBadge.innerHTML = `<span class="ruler-pill-badge active">A ↔ B · ${result.distanceMm.toFixed(1)} mm</span>`;
-        } // Completed pairs remain fixed until the explicit reset button is used.
-        rulerBadge.hidden = false; dirty = true;
+          rulerBadge.hidden = false;
+          rulerBadge.innerHTML = `<span class="ruler-pill-badge active">${rulerPoints.length > 2 ? `累积: ` : ""}${totalDist.toFixed(1)} mm (${rulerPoints.length - 1}段)</span>`;
+        } else {
+          const result: RulerMeasurement = {
+            pointA: pt.toArray(),
+            pointB: pt.toArray(),
+            distanceMm: 0,
+            deltaMm: [0, 0, 0],
+            partA: label,
+            complete: false,
+            segmentCount: 0,
+            totalDistanceMm: 0,
+            lineCount: completedLinesCount + 1,
+          };
+          measure.current?.(result);
+          rulerBadge.hidden = false;
+          rulerBadge.innerHTML = '<span class="ruler-pill-badge hint">起点已定 · 点击继续下一测量点 (右键新建线)</span>';
+        }
+        rulerBadge.hidden = false;
+        dirty = true;
         return;
       }
 
@@ -927,7 +1083,7 @@ export default function AnatomyScene({
         lastState?.fascialActiveSpaceId !== s.fascialActiveSpaceId;
       const moving = Math.abs(amount - s.explode) > 0.0001;
       if (moving) {
-        amount = T.MathUtils.damp(amount, s.explode, 8, dt);
+        amount = T.MathUtils.damp(amount, s.explode, 3.8, dt);
         dirty = true;
       }
       if (changed || moving || (unfoldFactor > 0 && (anglesMoving || dirty)) || lastExtent < 0) {
@@ -1215,31 +1371,41 @@ export default function AnatomyScene({
       const nextRulerContext = JSON.stringify([s.rulerMode, s.rulerReset, s.scope, s.hidden, s.visible, s.isolate, s.isolate ? s.selected : [], s.clipping]);
       if (nextRulerContext !== rulerContext) {
         rulerContext = nextRulerContext;
-        rulerPointA = rulerPointB = rulerPreview = null; rulerPartA = rulerPartB = null;
-        markerA.visible = markerB.visible = rulerLine.visible = false;
-        rulerBadge.hidden = true; measure.current?.(null); dirty = true;
-      }
-      for (const marker of [markerA, markerB]) {
-        const pixelScale = 2 * camera.position.distanceTo(marker.position) * Math.tan(T.MathUtils.degToRad(camera.fov / 2)) / Math.max(1, el.clientHeight);
-        marker.scale.setScalar(pixelScale * 4);
-      }
-      // Update Ruler visibility & 3D badge projection
-      if (!s.rulerMode && rulerGroup.visible) {
-        rulerGroup.visible = false;
-        markerA.visible = false;
-        markerB.visible = false;
-        rulerLine.visible = false;
-        rulerBadge.hidden = true;
-        rulerPointA = null;
-        rulerPointB = null;
+        clearAllRuler();
         dirty = true;
+      }
+      const updateMarkerScale = (m: T.Mesh) => {
+        const pixelScale =
+          (2 *
+            camera.position.distanceTo(m.position) *
+            Math.tan(T.MathUtils.degToRad(camera.fov / 2))) /
+          Math.max(1, el.clientHeight);
+        m.scale.setScalar(pixelScale * 4);
+      };
+      rulerMarkers.forEach(updateMarkerScale);
+      rulerHistoryGroup.children.forEach((c) => {
+        if (c instanceof T.Mesh) updateMarkerScale(c);
+      });
+
+      // Update Ruler visibility & 3D badge projection
+      if (!s.rulerMode) {
+        if (renderer.domElement.style.cursor === "crosshair") {
+          renderer.domElement.style.cursor = "default";
+        }
+        if (rulerGroup.visible) {
+          rulerGroup.visible = false;
+          rulerBadge.hidden = true;
+          dirty = true;
+        }
       } else if (s.rulerMode && !rulerGroup.visible) {
         rulerGroup.visible = true;
         dirty = true;
       }
-      if (s.rulerMode && rulerPointA && !rulerBadge.hidden) {
-        const endpoint = rulerPointB ?? rulerPreview;
-        const mid = endpoint ? rulerPointA.clone().add(endpoint).multiplyScalar(0.5) : rulerPointA;
+
+      if (s.rulerMode && rulerPoints.length > 0 && !rulerBadge.hidden) {
+        const lastP = rulerPoints[rulerPoints.length - 1];
+        const targetPt = rulerPreviewPoint ?? (rulerPoints.length > 1 ? rulerPoints[rulerPoints.length - 2] : lastP);
+        const mid = lastP.clone().add(targetPt).multiplyScalar(0.5);
         projected.copy(mid).project(camera);
         rulerBadge.style.visibility = projected.z >= -1 && projected.z <= 1 ? "visible" : "hidden";
         if (projected.z >= -1 && projected.z <= 1) {
@@ -1247,15 +1413,6 @@ export default function AnatomyScene({
           rulerBadge.style.top = `${((1 - projected.y) * el.clientHeight) / 2}px`;
         }
       }
-
-      [rulerPointA, rulerPointB].forEach((point, i) => {
-        const label = endpointLabels[i]; label.hidden = !s.rulerMode || !point;
-        if (point) {
-          projected.copy(point).project(camera); label.hidden ||= projected.z < -1 || projected.z > 1;
-          label.style.left = `${(projected.x+1)*el.clientWidth/2+7}px`;
-          label.style.top = `${(1-projected.y)*el.clientHeight/2+5}px`;
-        }
-      });
       // Show one constrained space, with its actual boundary structures highlighted.
       if (s.fascialMode !== lastFascialMode || s.fascialActiveSpaceId !== lastFascialSpaceId || s.fascialPathId !== lastFascialPathId) {
         const modeChanged = !!s.fascialMode !== lastFascialMode;
@@ -1405,18 +1562,21 @@ export default function AnatomyScene({
       capMat.dispose();
       stencilBackMat.dispose();
       stencilFrontMat.dispose();
-      sphereGeoA.dispose();
+      sphereGeo.dispose();
       sphereMatA.dispose();
-      sphereGeoB.dispose();
       sphereMatB.dispose();
-      lineGeo.dispose();
-      lineMat.dispose();
-      rulerBadge.remove(); endpointLabels.forEach((label) => label.remove());
+      historyMarkerMat.dispose();
+      historyLineMat.dispose();
+      activeLineMat.dispose();
+      previewLineMat.dispose();
+      previewLineGeo.dispose();
+      rulerBadge.remove();
       fascialMeshes.forEach((m) => {
         m.geometry.dispose();
         (m.material as T.Material).dispose();
       });
       renderer.domElement.removeEventListener("dblclick", dblclick);
+      renderer.domElement.removeEventListener("contextmenu", onContextMenu);
       renderer.dispose();
       renderer.domElement.remove();
     };

@@ -173,6 +173,9 @@ export interface RulerMeasurement {
   deltaMm: [number, number, number]; // [dx, dy, dz]
   partA?: { id: string; name: string };
   partB?: { id: string; name: string };
+  segmentCount?: number;
+  totalDistanceMm?: number;
+  lineCount?: number;
 }
 export interface SceneState {
   preset?: string;
