@@ -158,10 +158,10 @@ export default function AnatomyScene({
     const targetRotations = atlas.parts.map(() => new T.Quaternion());
     const dentalFrames = new Map<string, DentalFrame>();
     const dentalTeeth = atlas.parts.map((p) => getDentalToothByMesh(p.id));
-    let targetMesialAngle = 0;
-    let targetOcclusalAngle = 0;
-    let currentMesialAngle = 0;
-    let currentOcclusalAngle = 0;
+    let targetHorizontalAngle = 0;
+    let targetVerticalAngle = 0;
+    let currentHorizontalAngle = 0;
+    let currentVerticalAngle = 0;
     let isToothDragging = false;
     let toothDragPointerId = -1;
     let toothDragLastX = 0;
@@ -716,11 +716,13 @@ export default function AnatomyScene({
         }
 
         if (dragAxisLock === "horizontal") {
-          // Horizontal DOF: rotate around tooth long axis
-          targetMesialAngle += dx * 0.007;
+          // 左右自由度：绕牙体长轴旋转，方便观察唇侧、邻面、舌侧纵截面
+          targetHorizontalAngle += dx * 0.008;
         } else if (dragAxisLock === "vertical") {
-          // Vertical DOF: tilt towards occlusal / root
-          targetOcclusalAngle = Math.max(-1.55, Math.min(1.55, targetOcclusalAngle + dy * 0.007));
+          // 上下自由度：0 = 直立（正对唇面，切出纵截面）~ PI/2 = 翻转90度（正对𬌗面，切出横截面）
+          // 向上拖动 (dy < 0)：翻向𬌗面 (0 -> PI/2)
+          // 向下拖动 (dy > 0)：恢复直立 (PI/2 -> 0)
+          targetVerticalAngle = Math.max(0, Math.min(Math.PI / 2, targetVerticalAngle - dy * 0.008));
         }
 
         renderer.domElement.style.cursor = "grabbing";
@@ -881,8 +883,8 @@ export default function AnatomyScene({
     renderer.domElement.addEventListener("pointercancel", cancel);
     const dblclick = () => {
       if (latest.current.preset === "dental" && amount > 0.85) {
-        targetMesialAngle = 0;
-        targetOcclusalAngle = 0;
+        targetHorizontalAngle = 0;
+        targetVerticalAngle = 0;
         dirty = true;
       }
     };
@@ -899,11 +901,11 @@ export default function AnatomyScene({
       const unfoldFactor = isDentalPreset ? Math.max(0, Math.min(1, (amount - 0.7) / 0.25)) : 0;
 
       const anglesMoving =
-        Math.abs(currentMesialAngle - targetMesialAngle) > 1e-4 ||
-        Math.abs(currentOcclusalAngle - targetOcclusalAngle) > 1e-4;
+        Math.abs(currentHorizontalAngle - targetHorizontalAngle) > 1e-4 ||
+        Math.abs(currentVerticalAngle - targetVerticalAngle) > 1e-4;
       if (anglesMoving) {
-        currentMesialAngle = T.MathUtils.damp(currentMesialAngle, targetMesialAngle, 14, dt);
-        currentOcclusalAngle = T.MathUtils.damp(currentOcclusalAngle, targetOcclusalAngle, 14, dt);
+        currentHorizontalAngle = T.MathUtils.damp(currentHorizontalAngle, targetHorizontalAngle, 14, dt);
+        currentVerticalAngle = T.MathUtils.damp(currentVerticalAngle, targetVerticalAngle, 14, dt);
         dirty = true;
       }
 
@@ -948,9 +950,11 @@ export default function AnatomyScene({
             destination = offsets[i];
           const tooth = dentalTeeth[i];
           if (tooth && unfoldFactor > 0.001) {
-            const effMesial = currentMesialAngle * unfoldFactor;
-            const effOcclusal = currentOcclusalAngle * unfoldFactor;
-            interactiveEuler.set(effOcclusal, effMesial, 0, "YXZ");
+            const effHorizontal = currentHorizontalAngle * unfoldFactor;
+            const effVertical = currentVerticalAngle * unfoldFactor;
+            const isUpper = tooth.quadrant <= 2;
+            const pitch = isUpper ? effVertical : -effVertical;
+            interactiveEuler.set(pitch, effHorizontal, 0, "YXZ");
             interactiveQuat.setFromEuler(interactiveEuler);
             finalTargetRot.copy(targetRotations[i]).multiply(interactiveQuat);
             rotations[i].identity().slerp(finalTargetRot, amount);
@@ -991,10 +995,10 @@ export default function AnatomyScene({
         fit(s.view, amount);
         lastView = s.view;
         lastReset = s.reset;
-        targetMesialAngle = 0;
-        targetOcclusalAngle = 0;
-        currentMesialAngle = 0;
-        currentOcclusalAngle = 0;
+        targetHorizontalAngle = 0;
+        targetVerticalAngle = 0;
+        currentHorizontalAngle = 0;
+        currentVerticalAngle = 0;
         interactiveEuler.set(0, 0, 0);
         interactiveQuat.identity();
         dragAxisLock = "none";
@@ -1026,7 +1030,7 @@ export default function AnatomyScene({
       const isUnfolded = isDentalUnfolded;
       const effectiveAxis = clipping?.axis ?? (isUnfolded ? "z" : "y");
       const clippingKey = clipping?.enabled
-        ? `${s.canalMode}:${effectiveAxis}:${clipping.offset}:${clipping.inverted}:${clipping.solidCap !== false}:${isUnfolded}:${currentMesialAngle.toFixed(3)}:${currentOcclusalAngle.toFixed(3)}:${amount.toFixed(2)}`
+        ? `${s.canalMode}:${effectiveAxis}:${clipping.offset}:${clipping.inverted}:${clipping.solidCap !== false}:${isUnfolded}:${currentHorizontalAngle.toFixed(3)}:${currentVerticalAngle.toFixed(3)}:${amount.toFixed(2)}`
         : "disabled";
       if (clippingKey !== lastClippingKey) {
         lastClippingKey = clippingKey;
@@ -1040,15 +1044,12 @@ export default function AnatomyScene({
               ? new T.Vector3(0, 0.25, 0)
               : layoutBounds.getCenter(new T.Vector3());
 
-            const baseNormal = new T.Vector3(
-              effectiveAxis === "x" ? (clipping.inverted ? 1 : -1) : 0,
-              effectiveAxis === "y" ? (clipping.inverted ? 1 : -1) : 0,
-              effectiveAxis === "z" ? (clipping.inverted ? 1 : -1) : 0,
-            );
+            // Slider effective range smoothly scales with vertical tilt:
+            // Upright (纵截面): tooth depth is ~14mm (half ~7mm)
+            // Tilted to occlusal (横截面): tooth length along Z is ~26mm (half ~13mm)
+            const vProgress = Math.min(1, Math.max(0, currentVerticalAngle / (Math.PI / 2)));
+            const toothDepthHalf = T.MathUtils.lerp(0.007, 0.013, vProgress);
 
-            // Tight geometric limits (zero dead zones on slider):
-            // Tooth depth in Z is ~12-14mm total (-6.5mm to +6.5mm relative to center)
-            const toothDepthHalf = 0.007;
             const basePoint = layoutCenter.clone();
             if (effectiveAxis === "z") {
               basePoint.z += (clipping.inverted ? 1 : -1) * (clipping.offset / 100) * toothDepthHalf;
@@ -1058,10 +1059,15 @@ export default function AnatomyScene({
               basePoint.x += (clipping.inverted ? 1 : -1) * (clipping.offset / 100) * 0.12;
             }
 
-            // The cut plane rotates WITH the teeth, keeping the cut plane fixed relative to the tooth anatomy!
-            const R = interactiveQuat;
-            const planePoint = basePoint.clone().sub(layoutCenter).applyQuaternion(R).add(layoutCenter);
-            const normal = baseNormal.clone().applyQuaternion(R).normalize();
+            // The cut plane normal follows horizontal yaw around Y, keeping the longitudinal cut intact from any view angle:
+            const yawQuat = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), currentHorizontalAngle);
+            const baseNormal = new T.Vector3(
+              effectiveAxis === "x" ? (clipping.inverted ? 1 : -1) : 0,
+              effectiveAxis === "y" ? (clipping.inverted ? 1 : -1) : 0,
+              effectiveAxis === "z" ? (clipping.inverted ? 1 : -1) : 0,
+            );
+            const normal = baseNormal.clone().applyQuaternion(yawQuat).normalize();
+            const planePoint = basePoint.clone().sub(layoutCenter).applyQuaternion(yawQuat).add(layoutCenter);
             const constant = -normal.dot(planePoint);
             clipPlane.set(normal, constant);
 
