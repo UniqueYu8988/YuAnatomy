@@ -321,17 +321,15 @@ export default function YuAnatomy() {
 
   useEffect(() => {
     if (state.fascialMode) {
-      setActiveModuleId("fascial");
+      setActiveModuleId("muscles_spaces");
     } else if (preset === "dental") {
       setActiveModuleId("dental");
-    } else if (preset === "mastication") {
-      setActiveModuleId("mastication");
+    } else if (preset === "mastication" || preset === "oral" || preset === "muscles") {
+      setActiveModuleId("muscles_spaces");
     } else if (preset === "bones") {
       setActiveModuleId("bones");
     } else if (preset === "nerves") {
       setActiveModuleId("nerves");
-    } else if (preset === "oral") {
-      setActiveModuleId("oral");
     } else if (preset === "overview") {
       setActiveModuleId("overview");
     }
@@ -537,6 +535,12 @@ export default function YuAnatomy() {
                     ? !!state.canalMode
                     : qa.action === "toggle_fdi"
                     ? isFdiOpen
+                    : qa.action === "toggle_fascial"
+                    ? !!state.fascialMode
+                    : qa.action === "focus_mastication"
+                    ? preset === "mastication" && !state.fascialMode
+                    : qa.action === "focus_oral"
+                    ? preset === "oral" && !state.fascialMode
                     : false;
                 return (
                   <button
@@ -548,6 +552,15 @@ export default function YuAnatomy() {
                         setState((s) => ({ ...s, rctMode: !s.rctMode }));
                       else if (qa.action === "open_canals") openCanals();
                       else if (qa.action === "toggle_fdi") setIsFdiOpen((o) => !o);
+                      else if (qa.action === "toggle_fascial")
+                        setState((s) => ({ ...s, fascialMode: !s.fascialMode }));
+                      else if (qa.action === "focus_mastication") {
+                        setState((s) => ({ ...s, fascialMode: false }));
+                        changePreset("mastication");
+                      } else if (qa.action === "focus_oral") {
+                        setState((s) => ({ ...s, fascialMode: false }));
+                        changePreset("oral");
+                      }
                     }}
                   >
                     {qa.label}

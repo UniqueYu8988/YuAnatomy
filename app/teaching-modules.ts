@@ -3,7 +3,15 @@ import type { PresetId } from "./study";
 export interface ModuleQuickAction {
   id: string;
   label: string;
-  action: "toggle_pulp" | "open_canals" | "toggle_fdi" | "reset_view" | "explode";
+  action:
+    | "toggle_pulp"
+    | "open_canals"
+    | "toggle_fdi"
+    | "reset_view"
+    | "explode"
+    | "toggle_fascial"
+    | "focus_mastication"
+    | "focus_oral";
   active?: boolean;
 }
 
@@ -62,51 +70,53 @@ export const TEACHING_MODULES: TeachingModule[] = [
     ],
   },
   {
-    id: "mastication",
+    // 合并原 2（咀嚼肌群）、3（颌面间隙）、5（口咽软组织）为统一的口颌肌群与筋膜间隙
+    id: "muscles_spaces",
     code: "02",
-    name: "咀嚼肌群",
-    preset: "mastication",
+    name: "肌群与筋膜间隙",
+    preset: "oral",
     defaultScene: {
       fascialMode: false,
       canalMode: false,
     },
+    quickActions: [
+      { id: "spaces_toggle", label: "8大间隙感染", action: "toggle_fascial" },
+      { id: "mastication_focus", label: "咀嚼肌视图", action: "focus_mastication" },
+      { id: "oral_focus", label: "口底与腺体", action: "focus_oral" },
+    ],
     structures: [
-      { id: "m_masseter_sup_l", name: "左咬肌浅部", tag: "主要提颌/前伸", type: "concept", param: "BP3-FMA49002" },
-      { id: "m_masseter_sup_r", name: "右咬肌浅部", tag: "提颌/前伸", type: "concept", param: "BP3-FMA49001" },
+      // 咀嚼肌系统
+      { id: "m_masseter_sup_l", name: "左咬肌浅部", tag: "提颌/前伸", type: "concept", param: "BP3-FMA49002" },
       { id: "m_masseter_deep_l", name: "左咬肌深部", tag: "提颌/后退", type: "concept", param: "BP3-FMA49005" },
-      { id: "m_masseter_deep_r", name: "右咬肌深部", tag: "提颌/后退", type: "concept", param: "BP3-FMA49004" },
       { id: "m_temp_ant_l", name: "左颞肌前束", tag: "上提下颌", type: "concept", param: "BP3-FMA49008" },
-      { id: "m_temp_mid_l", name: "左颞肌中束", tag: "提颌及后退", type: "concept", param: "BP3-FMA49010" },
-      { id: "m_temp_post_l", name: "左颞肌后束", tag: "主要后退下颌", type: "concept", param: "BP3-FMA49012" },
+      { id: "m_temp_post_l", name: "左颞肌后束", tag: "后退下颌", type: "concept", param: "BP3-FMA49012" },
       { id: "m_pteryg_med_l", name: "左翼内肌", tag: "翼下颌吊带", type: "concept", param: "BP3-FMA49014" },
-      { id: "m_pteryg_med_r", name: "右翼内肌", tag: "翼下颌吊带", type: "concept", param: "BP3-FMA49013" },
       { id: "m_pteryg_lat_sup_l", name: "左翼外肌上头", tag: "附着关节盘", type: "concept", param: "BP3-FMA49016" },
       { id: "m_pteryg_lat_inf_l", name: "左翼外肌下头", tag: "张口/前伸/侧向", type: "concept", param: "BP3-FMA49018" },
-    ],
-  },
-  {
-    id: "fascial",
-    code: "03",
-    name: "颌面间隙",
-    preset: "oral",
-    defaultScene: {
-      fascialMode: true,
-      canalMode: false,
-    },
-    structures: [
+
+      // 颌面间隙系统
       { id: "f_ptm", name: "左翼下颌间隙", tag: "麻醉靶点/咽旁相通", type: "fascial", param: "pterygomandibular_left" },
       { id: "f_mas", name: "左咬肌间隙", tag: "下颌角区红肿", type: "fascial", param: "masseteric_left" },
       { id: "f_itp", name: "左颞下间隙", tag: "深部通向颅内", type: "fascial", param: "infratemporal_left" },
       { id: "f_tem", name: "左颞间隙深部", tag: "颞肌骨膜之间", type: "fascial", param: "temporal_deep_left" },
-      { id: "f_sbm", name: "左下颌下间隙", tag: "下颌下腺所在区", type: "fascial", param: "submandibular_left" },
+      { id: "f_sbm", name: "左下颌下间隙", tag: "下颌下腺区", type: "fascial", param: "submandibular_left" },
       { id: "f_sbl", name: "左舌下间隙", tag: "口底抬高/窒息风险", type: "fascial", param: "sublingual_left" },
       { id: "f_buc", name: "左颊间隙", tag: "颊肌咬肌前缘", type: "fascial", param: "buccal_left" },
-      { id: "f_ior", name: "左眶下间隙", tag: "尖牙根尖感染扩散", type: "fascial", param: "infraorbital_left" },
+      { id: "f_ior", name: "左眶下间隙", tag: "尖牙根尖扩散", type: "fascial", param: "infraorbital_left" },
+
+      // 口底咽喉与腺体软组织
+      { id: "o_tongue", name: "舌与舌肌", tag: "颏舌肌/舌内肌", type: "concept", param: "FMA54640" },
+      { id: "o_submand_l", name: "左下颌下腺", tag: "Wharton导管", type: "concept", param: "FMA59803" },
+      { id: "o_subling_l", name: "左舌下腺", tag: "舌下区/口底", type: "concept", param: "FMA59805" },
+      { id: "o_digastric_l", name: "左二腹肌", tag: "降颌肌/舌骨上", type: "concept", param: "FMA46293" },
+      { id: "o_mylohyoid_l", name: "左下颌舌骨肌", tag: "口底肌肉吊床", type: "concept", param: "FMA46322" },
+      { id: "o_tensor_palatini", name: "左腭帆张肌", tag: "咽鼓管/软腭", type: "concept", param: "FMA46728" },
+      { id: "o_pharyng_sup_l", name: "左咽上缩肌", tag: "翼下颌韧带相连", type: "concept", param: "FMA46632" },
     ],
   },
   {
     id: "bones",
-    code: "04",
+    code: "03",
     name: "颅颌骨骼",
     preset: "bones",
     defaultScene: {
@@ -124,28 +134,8 @@ export const TEACHING_MODULES: TeachingModule[] = [
     ],
   },
   {
-    id: "oral",
-    code: "05",
-    name: "口咽软组织",
-    preset: "oral",
-    defaultScene: {
-      fascialMode: false,
-      canalMode: false,
-    },
-    structures: [
-      { id: "o_tongue", name: "舌", tag: "颏舌肌/舌内肌", type: "concept", param: "FMA54640" },
-      { id: "o_submand_l", name: "左下颌下腺", tag: "大唾液腺/Wharton导管", type: "concept", param: "FMA59803" },
-      { id: "o_subling_l", name: "左舌下腺", tag: "舌下区/Bartholin导管", type: "concept", param: "FMA59805" },
-      { id: "o_digastric_l", name: "左二腹肌", tag: "降颌肌/舌骨上肌群", type: "concept", param: "FMA46293" },
-      { id: "o_mylohyoid_l", name: "左下颌舌骨肌", tag: "口底肌肉吊床", type: "concept", param: "FMA46322" },
-      { id: "o_tensor_palatini", name: "左腭帆张肌", tag: "咽鼓管开放/软腭", type: "concept", param: "FMA46728" },
-      { id: "o_uvula", name: "悬雍垂肌", tag: "软腭后缘中线", type: "concept", param: "FMA46733" },
-      { id: "o_pharyng_sup_l", name: "左咽上缩肌", tag: "咽侧壁/翼下颌韧带", type: "concept", param: "FMA46632" },
-    ],
-  },
-  {
     id: "nerves",
-    code: "06",
+    code: "04",
     name: "神经与血管",
     preset: "nerves",
     defaultScene: {
@@ -162,7 +152,7 @@ export const TEACHING_MODULES: TeachingModule[] = [
   },
   {
     id: "overview",
-    code: "07",
+    code: "05",
     name: "全系总览",
     preset: "overview",
     defaultScene: {
