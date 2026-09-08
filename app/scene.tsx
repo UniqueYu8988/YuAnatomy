@@ -166,8 +166,9 @@ export default function AnatomyScene({
     let toothDragPointerId = -1;
     let toothDragLastX = 0;
     let toothDragLastY = 0;
-    let toothDragIsRight = false;
-    let toothDragIsLower = false;
+    let toothDragStartX = 0;
+    let toothDragStartY = 0;
+    let dragAxisLock: "none" | "horizontal" | "vertical" = "none";
     const interactiveEuler = new T.Euler();
     const interactiveQuat = new T.Quaternion();
     const finalTargetRot = new T.Quaternion();
@@ -690,18 +691,9 @@ export default function AnatomyScene({
         toothDragPointerId = e.pointerId;
         toothDragLastX = e.clientX;
         toothDragLastY = e.clientY;
-        const rect = renderer.domElement.getBoundingClientRect();
-        const startX = e.clientX - rect.left;
-        const startY = e.clientY - rect.top;
-        const hitIndex = findTarget(startX, startY, 24);
-        const hitTooth = hitIndex >= 0 ? dentalTeeth[hitIndex] : null;
-        if (hitTooth) {
-          toothDragIsRight = hitTooth.quadrant === 2 || hitTooth.quadrant === 3;
-          toothDragIsLower = hitTooth.quadrant === 3 || hitTooth.quadrant === 4;
-        } else {
-          toothDragIsRight = startX >= rect.width / 2;
-          toothDragIsLower = startY >= rect.height / 2;
-        }
+        toothDragStartX = e.clientX;
+        toothDragStartY = e.clientY;
+        dragAxisLock = "none";
         try {
           renderer.domElement.setPointerCapture(e.pointerId);
         } catch {}
@@ -715,11 +707,22 @@ export default function AnatomyScene({
         toothDragLastX = e.clientX;
         toothDragLastY = e.clientY;
 
-        const deltaMesial = (toothDragIsRight ? -dx : dx) * 0.008;
-        const deltaOcclusal = (toothDragIsLower ? -dy : dy) * 0.008;
+        if (dragAxisLock === "none") {
+          const totalDx = Math.abs(e.clientX - toothDragStartX);
+          const totalDy = Math.abs(e.clientY - toothDragStartY);
+          if (totalDx > 3 || totalDy > 3) {
+            dragAxisLock = totalDx >= totalDy ? "horizontal" : "vertical";
+          }
+        }
 
-        targetMesialAngle += deltaMesial;
-        targetOcclusalAngle = Math.max(-1.55, Math.min(1.55, targetOcclusalAngle + deltaOcclusal));
+        if (dragAxisLock === "horizontal") {
+          // Horizontal DOF: rotate around tooth long axis
+          targetMesialAngle += dx * 0.007;
+        } else if (dragAxisLock === "vertical") {
+          // Vertical DOF: tilt towards occlusal / root
+          targetOcclusalAngle = Math.max(-1.55, Math.min(1.55, targetOcclusalAngle + dy * 0.007));
+        }
+
         renderer.domElement.style.cursor = "grabbing";
         dirty = true;
         return;
@@ -779,6 +782,7 @@ export default function AnatomyScene({
       tap.cancel(e.pointerId);
       if (e.pointerId === toothDragPointerId) {
         isToothDragging = false;
+        dragAxisLock = "none";
         try {
           renderer.domElement.releasePointerCapture(e.pointerId);
         } catch {}
@@ -787,6 +791,7 @@ export default function AnatomyScene({
     const up = (e: PointerEvent) => {
       if (e.pointerId === toothDragPointerId) {
         isToothDragging = false;
+        dragAxisLock = "none";
         try {
           renderer.domElement.releasePointerCapture(e.pointerId);
         } catch {}
@@ -945,12 +950,9 @@ export default function AnatomyScene({
           if (tooth && unfoldFactor > 0.001) {
             const effMesial = currentMesialAngle * unfoldFactor;
             const effOcclusal = currentOcclusalAngle * unfoldFactor;
-            const q = tooth.quadrant;
-            const yaw = (q === 1 || q === 4) ? -effMesial : effMesial;
-            const pitch = (q === 1 || q === 2) ? -effOcclusal : effOcclusal;
-            interactiveEuler.set(pitch, yaw, 0, "YXZ");
+            interactiveEuler.set(effOcclusal, effMesial, 0, "YXZ");
             interactiveQuat.setFromEuler(interactiveEuler);
-            finalTargetRot.copy(targetRotations[i]).premultiply(interactiveQuat);
+            finalTargetRot.copy(targetRotations[i]).multiply(interactiveQuat);
             rotations[i].identity().slerp(finalTargetRot, amount);
           } else {
             // One reversible path, with the same progress used for camera framing.
@@ -991,6 +993,12 @@ export default function AnatomyScene({
         lastReset = s.reset;
         targetMesialAngle = 0;
         targetOcclusalAngle = 0;
+        currentMesialAngle = 0;
+        currentOcclusalAngle = 0;
+        interactiveEuler.set(0, 0, 0);
+        interactiveQuat.identity();
+        dragAxisLock = "none";
+        dirty = true;
       }
       if (moving && !s.isolate)
         fit(s.view, amount);
@@ -1018,81 +1026,137 @@ export default function AnatomyScene({
       const isUnfolded = isDentalUnfolded;
       const effectiveAxis = clipping?.axis ?? (isUnfolded ? "z" : "y");
       const clippingKey = clipping?.enabled
-        ? `${s.canalMode}:${effectiveAxis}:${clipping.offset}:${clipping.inverted}:${clipping.solidCap !== false}:${isUnfolded}:${currentMesialAngle.toFixed(2)}:${currentOcclusalAngle.toFixed(2)}:${amount.toFixed(2)}`
+        ? `${s.canalMode}:${effectiveAxis}:${clipping.offset}:${clipping.inverted}:${clipping.solidCap !== false}:${isUnfolded}:${currentMesialAngle.toFixed(3)}:${currentOcclusalAngle.toFixed(3)}:${amount.toFixed(2)}`
         : "disabled";
       if (clippingKey !== lastClippingKey) {
         lastClippingKey = clippingKey;
         if (clipping?.enabled) {
-          const targetBox = new T.Box3();
           if (isUnfolded) {
-            pickers.forEach((mesh, i) => {
-              if (!mesh || data[i * 4 + 3] < 0.5) return;
-              worldBox.copy(bounds[i]).applyMatrix4(mesh.matrixWorld);
-              targetBox.union(worldBox);
+            const layoutBounds = new T.Box3();
+            atlas.parts.forEach((p, i) => {
+              if (isVisible(p, s)) layoutBounds.union(bounds[i]);
             });
-            if (targetBox.isEmpty()) {
-              targetBox.set(new T.Vector3(-0.15, 0.15, -0.02), new T.Vector3(0.15, 0.35, 0.02));
+            const layoutCenter = layoutBounds.isEmpty()
+              ? new T.Vector3(0, 0.25, 0)
+              : layoutBounds.getCenter(new T.Vector3());
+
+            const baseNormal = new T.Vector3(
+              effectiveAxis === "x" ? (clipping.inverted ? 1 : -1) : 0,
+              effectiveAxis === "y" ? (clipping.inverted ? 1 : -1) : 0,
+              effectiveAxis === "z" ? (clipping.inverted ? 1 : -1) : 0,
+            );
+
+            // Tight geometric limits (zero dead zones on slider):
+            // Tooth depth in Z is ~12-14mm total (-6.5mm to +6.5mm relative to center)
+            const toothDepthHalf = 0.007;
+            const basePoint = layoutCenter.clone();
+            if (effectiveAxis === "z") {
+              basePoint.z += (clipping.inverted ? 1 : -1) * (clipping.offset / 100) * toothDepthHalf;
+            } else if (effectiveAxis === "y") {
+              basePoint.y += (clipping.inverted ? 1 : -1) * (clipping.offset / 100) * 0.035;
+            } else if (effectiveAxis === "x") {
+              basePoint.x += (clipping.inverted ? 1 : -1) * (clipping.offset / 100) * 0.12;
             }
+
+            // The cut plane rotates WITH the teeth, keeping the cut plane fixed relative to the tooth anatomy!
+            const R = interactiveQuat;
+            const planePoint = basePoint.clone().sub(layoutCenter).applyQuaternion(R).add(layoutCenter);
+            const normal = baseNormal.clone().applyQuaternion(R).normalize();
+            const constant = -normal.dot(planePoint);
+            clipPlane.set(normal, constant);
+
+            materials.forEach((m) => {
+              m.clippingPlanes = [clipPlane];
+              m.clipIntersection = false;
+            });
+            stencilBackMat.clippingPlanes = [clipPlane];
+            stencilFrontMat.clippingPlanes = [clipPlane];
+            pulpStencilBackMat.clippingPlanes = [clipPlane];
+            pulpStencilFrontMat.clippingPlanes = [clipPlane];
+
+            capMesh.position.copy(planePoint);
+            capMesh.lookAt(planePoint.clone().add(normal));
+
+            pulpCapMesh.position.copy(planePoint);
+            pulpCapMesh.lookAt(planePoint.clone().add(normal));
+
+            const solid = !s.canalMode && clipping.solidCap !== false;
+            capMesh.visible = solid;
+            stencilGroup.visible = solid;
+            pulpCapMesh.visible = solid;
+
+            pulpGroups.forEach((g) => {
+              g?.traverse((child) => {
+                if (child instanceof T.Mesh && child.material) {
+                  child.material.clippingPlanes = [clipPlane];
+                }
+              });
+            });
           } else {
+            const targetBox = new T.Box3();
             atlas.parts.forEach((p, i) => {
               if (isVisible(p, s)) targetBox.union(bounds[i]);
             });
-            if (s.canalMode) targetBox.set(new T.Vector3(...CANAL_MODEL_BOUNDS[0]), new T.Vector3(...CANAL_MODEL_BOUNDS[1]));
+            if (s.canalMode)
+              targetBox.set(
+                new T.Vector3(...CANAL_MODEL_BOUNDS[0]),
+                new T.Vector3(...CANAL_MODEL_BOUNDS[1]),
+              );
             if (targetBox.isEmpty()) {
               targetBox.set(new T.Vector3(-0.15, 0, -0.15), new T.Vector3(0.15, 0.42, 0.15));
             }
-          }
 
-          const minV =
-            effectiveAxis === "x"
-              ? targetBox.min.x
-              : effectiveAxis === "y"
-                ? targetBox.min.y
-                : targetBox.min.z;
-          const maxV =
-            effectiveAxis === "x"
-              ? targetBox.max.x
-              : effectiveAxis === "y"
-                ? targetBox.max.y
-                : targetBox.max.z;
-          const posVal = T.MathUtils.lerp(minV, maxV, (clipping.offset + 100) / 200);
+            const minV =
+              effectiveAxis === "x"
+                ? targetBox.min.x
+                : effectiveAxis === "y"
+                  ? targetBox.min.y
+                  : targetBox.min.z;
+            const maxV =
+              effectiveAxis === "x"
+                ? targetBox.max.x
+                : effectiveAxis === "y"
+                  ? targetBox.max.y
+                  : targetBox.max.z;
+            const posVal = T.MathUtils.lerp(minV, maxV, (clipping.offset + 100) / 200);
 
-          const normal = new T.Vector3(
-            effectiveAxis === "x" ? (clipping.inverted ? 1 : -1) : 0,
-            effectiveAxis === "y" ? (clipping.inverted ? 1 : -1) : 0,
-            effectiveAxis === "z" ? (clipping.inverted ? 1 : -1) : 0,
-          );
-          const constant = (clipping.inverted ? -1 : 1) * posVal;
-          clipPlane.set(normal, constant);
+            const normal = new T.Vector3(
+              effectiveAxis === "x" ? (clipping.inverted ? 1 : -1) : 0,
+              effectiveAxis === "y" ? (clipping.inverted ? 1 : -1) : 0,
+              effectiveAxis === "z" ? (clipping.inverted ? 1 : -1) : 0,
+            );
+            const constant = (clipping.inverted ? -1 : 1) * posVal;
+            clipPlane.set(normal, constant);
 
-          materials.forEach((m) => {
-            m.clippingPlanes = [clipPlane];
-            m.clipIntersection = false;
-          });
-          stencilBackMat.clippingPlanes = [clipPlane];
-          stencilFrontMat.clippingPlanes = [clipPlane];
-          pulpStencilBackMat.clippingPlanes = [clipPlane];
-          pulpStencilFrontMat.clippingPlanes = [clipPlane];
-
-          const planePoint = clipPlane.normal.clone().multiplyScalar(-clipPlane.constant);
-          capMesh.position.copy(planePoint);
-          capMesh.lookAt(planePoint.clone().add(clipPlane.normal));
-
-          pulpCapMesh.position.copy(planePoint);
-          pulpCapMesh.lookAt(planePoint.clone().add(clipPlane.normal));
-
-          const solid = !s.canalMode && clipping.solidCap !== false;
-          capMesh.visible = solid;
-          stencilGroup.visible = solid;
-          pulpCapMesh.visible = solid;
-
-          pulpGroups.forEach((g) => {
-            g?.traverse((child) => {
-              if (child instanceof T.Mesh && child.material) {
-                child.material.clippingPlanes = [clipPlane];
-              }
+            materials.forEach((m) => {
+              m.clippingPlanes = [clipPlane];
+              m.clipIntersection = false;
             });
-          });
+            stencilBackMat.clippingPlanes = [clipPlane];
+            stencilFrontMat.clippingPlanes = [clipPlane];
+            pulpStencilBackMat.clippingPlanes = [clipPlane];
+            pulpStencilFrontMat.clippingPlanes = [clipPlane];
+
+            const planePoint = clipPlane.normal.clone().multiplyScalar(-clipPlane.constant);
+            capMesh.position.copy(planePoint);
+            capMesh.lookAt(planePoint.clone().add(clipPlane.normal));
+
+            pulpCapMesh.position.copy(planePoint);
+            pulpCapMesh.lookAt(planePoint.clone().add(clipPlane.normal));
+
+            const solid = !s.canalMode && clipping.solidCap !== false;
+            capMesh.visible = solid;
+            stencilGroup.visible = solid;
+            pulpCapMesh.visible = solid;
+
+            pulpGroups.forEach((g) => {
+              g?.traverse((child) => {
+                if (child instanceof T.Mesh && child.material) {
+                  child.material.clippingPlanes = [clipPlane];
+                }
+              });
+            });
+          }
         } else {
           materials.forEach((m) => {
             m.clippingPlanes = [];

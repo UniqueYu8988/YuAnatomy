@@ -293,10 +293,36 @@ export default function YuAnatomy() {
     }
   };
 
-  const reset = () => {
-    changePreset(preset);
+  const fullReset = () => {
+    setChosen(null);
+    setQuery("");
+    setRulerMeasurement(null);
+    setState((s) => ({
+      ...initial,
+      view: preset === "dental" ? "front" : "three-quarter",
+      hidden: [],
+      selected: [],
+      isolate: false,
+      rotate: false,
+      explode: 0,
+      rctMode: false,
+      clipping: {
+        enabled: false,
+        axis: preset === "dental" ? "z" : "y",
+        offset: 0,
+        inverted: false,
+        solidCap: true,
+      },
+      rulerMode: false,
+      rulerReset: (s.rulerReset ?? 0) + 1,
+      fascialMode: false,
+      canalMode: false,
+      reset: s.reset + 1,
+    }));
     setDrawer(false);
   };
+
+  const reset = fullReset;
 
   const clear = () => {
     setChosen(null);
@@ -762,16 +788,17 @@ export default function YuAnatomy() {
                   {["斜视", "正面", "侧面", "背面"][i]}
                 </button>
               ))}
-              <button
-                type="button"
-                className="icon-button"
-                title="重置当前视角"
-                aria-label="重置当前视角"
-                onClick={reset}
-              >
-                <RotateCcw size={15} />
-              </button>
             </div>
+
+            <button
+              type="button"
+              className="toolbar-center-reset-btn"
+              onClick={fullReset}
+              title="复位视角并恢复所有施加的变量（剖切、髓腔示意、拆解等）"
+            >
+              <RotateCcw size={14} />
+              <span>重置</span>
+            </button>
 
             <label className="explode-control">
               <span>
@@ -1018,47 +1045,6 @@ export default function YuAnatomy() {
               </div>
 
               <div className="clipping-bar-actions">
-                <button
-                  type="button"
-                  className={`clipping-action-chip ${state.clipping?.inverted ? "active" : ""}`}
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      clipping: { ...s.clipping!, inverted: !s.clipping?.inverted },
-                    }))
-                  }
-                  title="反转切面保留方向"
-                >
-                  <RotateCcw size={13} />
-                  <span>反转</span>
-                </button>
-                <button
-                  type="button"
-                  className={`clipping-action-chip ${state.clipping?.solidCap !== false ? "active" : ""}`}
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      clipping: { ...s.clipping!, solidCap: s.clipping?.solidCap === false },
-                    }))
-                  }
-                  title="切换实体红髓截面 / 镂空透视截面"
-                >
-                  <Layers size={13} />
-                  <span>{state.clipping?.solidCap !== false ? "实体截面" : "镂空"}</span>
-                </button>
-                <button
-                  type="button"
-                  className="clipping-action-chip reset"
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      clipping: { ...s.clipping!, offset: 0 },
-                    }))
-                  }
-                  title="居中切面 (0%)"
-                >
-                  居中
-                </button>
                 <button
                   type="button"
                   className="clipping-close-btn"
@@ -1395,35 +1381,6 @@ export default function YuAnatomy() {
                 />
               </div>
 
-              <div className="tool-section switches-row">
-                <button
-                  type="button"
-                  className={`tool-pill-btn ${state.clipping?.inverted ? "active" : ""}`}
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      clipping: { ...s.clipping!, inverted: !s.clipping?.inverted },
-                    }))
-                  }
-                >
-                  <RotateCcw size={14} />
-                  <span>反转方向</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`tool-pill-btn ${state.clipping?.solidCap !== false ? "active" : ""}`}
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      clipping: { ...s.clipping!, solidCap: s.clipping?.solidCap === false },
-                    }))
-                  }
-                >
-                  <Layers size={14} />
-                  <span>{state.clipping?.solidCap !== false ? "实体截面" : "镂空截面"}</span>
-                </button>
-              </div>
 
               <button
                 type="button"

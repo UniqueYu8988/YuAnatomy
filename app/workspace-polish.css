@@ -57,6 +57,36 @@
 .workspace .toolbar-tool-btn.active { background: var(--green); color: white; }
 .workspace .selection-tools { margin-left: auto; }
 .workspace .explode-control input { width: 78px; }
+.toolbar-center-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 15px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 1px solid #d4dfd7;
+  color: #244632;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(36, 70, 50, 0.08);
+}
+.toolbar-center-reset-btn:hover {
+  background: #f0f5f2;
+  border-color: #244632;
+  color: #173b32;
+  transform: translateY(-1px);
+}
+.toolbar-center-reset-btn:active {
+  transform: translateY(0);
+}
+.toolbar-row.view-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
 .workspace .orientation { left: 20px; bottom: 16px; font-size: 11px; letter-spacing: 0; }
 .workspace .orientation small { display: none; }
 .workspace .inspector { padding: 26px 24px; background: #fff; }
