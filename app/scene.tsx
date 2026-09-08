@@ -158,6 +158,7 @@ export default function AnatomyScene({
     const targetRotations = atlas.parts.map(() => new T.Quaternion());
     const dentalFrames = new Map<string, DentalFrame>();
     const dentalTeeth = atlas.parts.map((p) => getDentalToothByMesh(p.id));
+    const cellCenterOffsets: (T.Vector3 | undefined)[] = [];
     let targetHorizontalAngle = 0;
     let targetVerticalAngle = 0;
     let currentHorizontalAngle = 0;
@@ -939,6 +940,7 @@ export default function AnatomyScene({
           atlas.parts.forEach((p, i) => {
             const cell = layout.cells.get(p.id);
             targetRotations[i].copy(cell?.rotation ?? new T.Quaternion());
+            cellCenterOffsets[i] = cell?.centerOffset ? cell.centerOffset.clone() : undefined;
             offsets[i] = cell ? new T.Vector3(cell.x + layoutCenter.x, cell.y + layoutCenter.y, layoutCenter.z).sub(cell.centerOffset ?? new T.Vector3()) : centers[i].clone();
           });
           layoutKey = nextLayoutKey;
@@ -946,18 +948,31 @@ export default function AnatomyScene({
         }
 
         atlas.parts.forEach((p, i) => {
-          const c = centers[i],
-            destination = offsets[i];
+          const c = centers[i];
+          let destination = offsets[i];
           const tooth = dentalTeeth[i];
           if (tooth && unfoldFactor > 0.001) {
             const effHorizontal = currentHorizontalAngle * unfoldFactor;
             const effVertical = currentVerticalAngle * unfoldFactor;
             const isUpper = tooth.quadrant <= 2;
-            const pitch = isUpper ? effVertical : -effVertical;
+            // 上下自由度：0 = 直立（正对唇面，切出纵截面）~ PI/2 = 翻转90度（正对𬌗面，切出横截面）
+            // 上颌牙冠朝-Y，绕X轴按负角旋转翻向+Z(屏幕前)；下颌牙冠朝+Y，绕X轴按正角旋转翻向+Z(屏幕前)
+            const pitch = isUpper ? -effVertical : effVertical;
+            // 左右自由度：绕牙体长轴（2D网格中的屏幕Y轴）全牙列同向自转
             interactiveEuler.set(pitch, effHorizontal, 0, "YXZ");
             interactiveQuat.setFromEuler(interactiveEuler);
-            finalTargetRot.copy(targetRotations[i]).multiply(interactiveQuat);
+
+            // 核心关键：使用 premultiply 将交互旋转作用在“拆解之后”的 2D 展开坐标系上（而非原始头颅未拆解坐标系）
+            finalTargetRot.copy(targetRotations[i]).premultiply(interactiveQuat);
             rotations[i].identity().slerp(finalTargetRot, amount);
+
+            // 保持牙体在 2D 格子中心原地自转，抵消 centerOffset 随旋转产生的偏心位移
+            const cellOffset = cellCenterOffsets[i];
+            if (cellOffset) {
+              const cellPos = offsets[i].clone().add(cellOffset);
+              const rotatedOffset = cellOffset.clone().applyQuaternion(interactiveQuat);
+              destination = cellPos.sub(rotatedOffset);
+            }
           } else {
             // One reversible path, with the same progress used for camera framing.
             rotations[i].identity().slerp(targetRotations[i], amount);
