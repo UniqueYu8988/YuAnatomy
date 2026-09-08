@@ -159,7 +159,7 @@ export default function NakedDock({
       id: "view",
       label: "观察视角切换",
       icon: <Camera size={18} />,
-      isActive: activeFlyout === "view",
+      isActive: false,
       bloomColor: "emerald",
       hasFlyout: true,
       onClick: () => {
@@ -187,7 +187,7 @@ export default function NakedDock({
       label: state.rulerMode ? "退出测距标尺" : "测距标尺",
       icon: <Ruler size={18} />,
       isActive: !!state.rulerMode,
-      bloomColor: "cyan",
+      bloomColor: "emerald",
       onClick: () => {
         const next = !state.rulerMode;
         setState((s) => ({
@@ -205,8 +205,8 @@ export default function NakedDock({
       id: "clipping",
       label: state.clipping?.enabled ? "退出解剖剖切" : "解剖剖切",
       icon: <Slice size={18} />,
-      isActive: !!state.clipping?.enabled || activeFlyout === "clipping",
-      bloomColor: "amber",
+      isActive: !!state.clipping?.enabled,
+      bloomColor: "emerald",
       hasFlyout: true,
       onClick: () => {
         const willEnable = !state.clipping?.enabled;
@@ -229,7 +229,7 @@ export default function NakedDock({
       label: state.rctMode ? "关闭髓腔透视" : "髓腔透视",
       icon: <ScanLine size={18} />,
       isActive: !!state.rctMode,
-      bloomColor: "crimson",
+      bloomColor: "emerald",
       onClick: () => {
         const next = !state.rctMode;
         setState((s) => ({ ...s, rctMode: next }));
@@ -240,7 +240,7 @@ export default function NakedDock({
       label: state.fascialMode ? "退出间隙感染" : "间隙感染",
       icon: <Route size={18} />,
       isActive: !!state.fascialMode,
-      bloomColor: "violet",
+      bloomColor: "emerald",
       onClick: () => {
         const next = !state.fascialMode;
         setState((s) => ({
@@ -269,7 +269,7 @@ export default function NakedDock({
         label: state.isolate ? "恢复周围结构" : "单独显示该结构",
         icon: <Focus size={18} />,
         isActive: !!state.isolate,
-        bloomColor: "teal",
+        bloomColor: "emerald",
         onClick: () => {
           const next = !state.isolate;
           setState((s) => ({ ...s, isolate: next, explode: 0, reset: s.reset + 1 }));

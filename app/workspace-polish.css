@@ -331,35 +331,11 @@
   opacity: 1 !important;
   color: #ffffff !important;
 }
+.naked-dock-btn.active,
 .naked-dock-btn.active.bloom-emerald {
-  background: #1b6b57 !important;
+  background: #216b5b !important;
   border-color: rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 4px 20px rgba(27, 107, 87, 0.42), 0 0 0 1.5px rgba(27, 107, 87, 0.6) !important;
-}
-.naked-dock-btn.active.bloom-cyan {
-  background: #0284c7 !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.45), 0 0 0 1.5px rgba(2, 132, 199, 0.65) !important;
-}
-.naked-dock-btn.active.bloom-amber {
-  background: #d97706 !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 4px 20px rgba(217, 119, 6, 0.45), 0 0 0 1.5px rgba(217, 119, 6, 0.65) !important;
-}
-.naked-dock-btn.active.bloom-crimson {
-  background: #e11d48 !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 4px 20px rgba(225, 29, 72, 0.45), 0 0 0 1.5px rgba(225, 29, 72, 0.65) !important;
-}
-.naked-dock-btn.active.bloom-violet {
-  background: #7c3aed !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.45), 0 0 0 1.5px rgba(124, 58, 237, 0.65) !important;
-}
-.naked-dock-btn.active.bloom-teal {
-  background: #0d9488 !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.45), 0 0 0 1.5px rgba(13, 148, 136, 0.65) !important;
+  box-shadow: 0 4px 18px rgba(33, 107, 91, 0.38), 0 0 0 1.5px rgba(33, 107, 91, 0.5) !important;
 }
 
 /* 独立左上角解剖目录收起/展开按钮 */
@@ -458,20 +434,19 @@
 }
 
 .naked-sub-item:hover {
-  color: #047857;
-  transform: translateX(4px);
+  color: #173b32;
+  transform: translateX(3px);
   text-shadow:
     0 1px 3px rgba(255, 255, 255, 1),
-    0 0 12px rgba(255, 255, 255, 0.95),
-    0 0 16px rgba(16, 185, 129, 0.35);
+    0 0 12px rgba(255, 255, 255, 0.95);
 }
 
 .naked-sub-item:active {
-  transform: translateX(2px) scale(0.96);
+  transform: translateX(1px) scale(0.97);
 }
 
 .naked-sub-item.active {
-  color: #065f46;
+  color: #216b5b;
   font-weight: 800;
   position: relative;
 }
@@ -484,8 +459,8 @@
   right: 6px;
   height: 2px;
   border-radius: 9999px;
-  background: #059669;
-  box-shadow: 0 1px 4px rgba(5, 150, 105, 0.4);
+  background: #216b5b;
+  box-shadow: 0 1px 4px rgba(33, 107, 91, 0.35);
 }
 
 /* ==========================================================================
