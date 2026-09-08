@@ -378,7 +378,6 @@ export default function YuAnatomy() {
             <img className="brand-mark brand-icon" src="/branding/icon-256.png" alt="" />
             <div className="brand-titles">
               <span className="brand-name">YuAnatomy</span>
-              <span className="brand-sub">口腔解剖浏览器</span>
             </div>
           </a>
           <div className="sidebar-brand-actions">
@@ -390,6 +389,15 @@ export default function YuAnatomy() {
               aria-label="关于与许可"
             >
               <Sparkles size={16} />
+            </button>
+            <button
+              type="button"
+              className="icon-button"
+              onClick={() => setHelpOpen(true)}
+              title="操作帮助"
+              aria-label="操作帮助"
+            >
+              <HelpCircle size={16} />
             </button>
             <button
               type="button"
@@ -436,30 +444,7 @@ export default function YuAnatomy() {
           </button>
         </nav>
 
-        {preset === "dental" ? (
-          <div className="dental-sidebar-panel">
-            <div className="dental-sidebar-card">
-              <div className="dental-card-badge">FDI 恒牙专科模式</div>
-              <p className="dental-card-desc">
-                已聚焦 28 颗恒牙立体解剖。请使用视窗下方的 <strong>FDI 牙位盘</strong> 快速定位指定牙位，或直接在 3D 模型表面点击任意牙齿查看解剖考点与牙体形态。
-              </p>
-              <div className="dental-card-stats">
-                <div className="stat-item">
-                  <span className="stat-val">28</span>
-                  <span className="stat-lbl">标准恒牙</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-val">4</span>
-                  <span className="stat-lbl">解剖象限</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-val">FDI</span>
-                  <span className="stat-lbl">两位数标注</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
+        {preset !== "dental" && (
           <>
             <label className="search-box">
               <Search size={15} />
@@ -514,11 +499,6 @@ export default function YuAnatomy() {
             </div>
           </>
         )}
-
-        <div className="sidebar-footer">
-          <span className="live-dot" />
-          <span>{preset === "dental" ? "28 颗恒牙已就绪" : `${visible} 个部件已显示`}</span>
-        </div>
       </aside>
 
       {drawer && (
@@ -534,8 +514,7 @@ export default function YuAnatomy() {
          ===================================================================== */}
       <section className="viewer" aria-label="三维视窗">
         <header className="viewer-heading">
-          <div><span className="workspace-kicker">学习工作台</span><h1>{state.canalMode ? "根管分型" : state.fascialMode ? "颌面间隙" : PRESETS.find((p) => p.id === preset)?.name ?? "头颈解剖"}</h1></div>
-          <span className="viewer-status"><span className="live-dot" />{state.canalMode ? "三维示意" : "三维解剖"}</span>
+          <h1>{state.canalMode ? "根管分型" : state.fascialMode ? "颌面间隙" : PRESETS.find((p) => p.id === preset)?.name ?? "头颈解剖"}</h1>
         </header>
         <div className="canvas-wrap">
           {atlas && (
@@ -570,32 +549,6 @@ export default function YuAnatomy() {
             </div>
           )}
 
-          {/* Dental Unfold Coordinated Rotation Caption */}
-          {preset === "dental" && state.explode > 0.85 && (
-            <div className="dental-unfold-caption">
-              <div className="dental-unfold-caption-title">
-                <strong>{state.clipping?.enabled ? "3D 象限协同旋转 · 深度剖切已开启" : "3D 象限协同旋转"}</strong>
-                <button
-                  type="button"
-                  className="dental-unfold-reset-chip"
-                  onClick={() => setState((prev) => ({ ...prev, reset: prev.reset + 1 }))}
-                  title="重置牙齿旋转角度"
-                >
-                  重置角度
-                </button>
-              </div>
-              <span>
-                {state.clipping?.enabled
-                  ? "唇面朝前时为纵切牙面；旋转至𬌗面朝前时为横截面 · 可直接在上方控制栏微调深度"
-                  : "左右拖动：近中 / 远中旋转 · 上下拖动：𬌗面 / 根尖翻转 · 双击重置"}
-              </span>
-            </div>
-          )}
-
-          <div className="orientation">
-            上 / 颅侧 (Superior)<span>↑</span>
-            <small>{state.canalMode ? "髓室在上 · 根尖在下" : "成年男性解剖参考"}</small>
-          </div>
 
           {progress < 100 && !error && (
             <div className="loading" role="status">
@@ -981,17 +934,6 @@ export default function YuAnatomy() {
                   </button>
                 </>
               )}
-
-              <button
-                type="button"
-                className="help-button"
-                onClick={() => setHelpOpen(true)}
-                title="操作帮助说明"
-                aria-label="操作帮助说明"
-              >
-                <HelpCircle size={15} />
-                <span>操作帮助</span>
-              </button>
             </div>
           </div>
 
@@ -1153,7 +1095,6 @@ export default function YuAnatomy() {
           state.rulerMode ? (
             <div className="ruler-detail-card">
               <div className="detail-top">
-                <span className="eyebrow">三维解剖测距</span>
                 <button
                   type="button"
                   className="icon-button"
@@ -1253,7 +1194,6 @@ export default function YuAnatomy() {
           state.fascialMode && activeFascialSpace ? (
             <div className="fascial-detail-card">
               <div className="detail-top">
-                <span className="eyebrow">颌面筋膜间隙 · 专科考点</span>
                 <button
                   type="button"
                   className="icon-button"
@@ -1376,7 +1316,6 @@ export default function YuAnatomy() {
           state.clipping?.enabled && (!chosen || inspectorTab === "clipping") ? (
             <div className="clipping-detail-card">
               <div className="detail-top">
-                <span className="eyebrow">工具 · 动态解剖剖切</span>
                 <button
                   type="button"
                   className="icon-button"
@@ -1500,7 +1439,6 @@ export default function YuAnatomy() {
           chosen ? (
             <>
               <div className="detail-top">
-                <span className="eyebrow">结构详情</span>
                 <button
                   type="button"
                   className="icon-button"
@@ -1691,35 +1629,6 @@ export default function YuAnatomy() {
                     {entry?.summary ??
                       "可单独显示当前结构以便仔细观察，也可隐藏它，查看被遮挡的深层解剖。"}
                   </p>
-
-                  {/* Reference source folded */}
-                  {entry?.source && (
-                    <details className="disclosure-section">
-                      <summary>▸ 参考出处</summary>
-                      <div className="disclosure-body">{entry.source}</div>
-                    </details>
-                  )}
-
-                  {/* Technical Data Details folded */}
-                  <details className="disclosure-section data-details">
-                    <summary>▸ 数据详情</summary>
-                    <div className="disclosure-body">
-                      <div className="data-meta-row">
-                        <span>概念编码：</span>
-                        <code>{chosen.id}</code>
-                      </div>
-                      <div className="data-meta-row">
-                        <span>构件数量：</span>
-                        <span>{chosen.elements.length} 个部件</span>
-                      </div>
-                      {entry?.chapter && (
-                        <div className="data-meta-row">
-                          <span>教材章节：</span>
-                          <span>{entry.chapter}</span>
-                        </div>
-                      )}
-                    </div>
-                  </details>
                 </div>
               )}
             </>
@@ -1727,7 +1636,6 @@ export default function YuAnatomy() {
             /* Case 6: Calm, minimal empty state */
             <div className="selection-empty">
               <span className="empty-selection-icon"><Focus size={28} strokeWidth={1.4} /></span>
-              <h2>结构详情</h2>
               <p className="empty-hint">点击模型查看结构</p>
             </div>
           )}

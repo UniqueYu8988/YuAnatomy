@@ -60,13 +60,13 @@
 .workspace .orientation { left: 20px; bottom: 16px; font-size: 11px; letter-spacing: 0; }
 .workspace .orientation small { display: none; }
 .workspace .inspector { padding: 26px 24px; background: #fff; }
-.workspace .detail-top { margin-bottom: 16px; }
+.workspace .detail-top { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 12px; }
+.workspace .detail-top .icon-button { margin-left: auto; }
 .workspace .eyebrow { letter-spacing: .7px; font-size: 12px; font-weight: 500; }
 .workspace .detail-panel h2 { font-size: 25px; line-height: 1.4; letter-spacing: -.6px; margin: 0 0 8px; }
 .workspace .latin-subtitle { font-size: 14px; line-height: 1.65; color: #748079; margin-bottom: 22px; }
 .workspace .selection-empty { height: 100%; min-height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0 100px; }
-.empty-selection-icon { display: grid; place-items: center; width: 64px; height: 64px; border: 1px solid #e3eae5; border-radius: 20px; background: #f5f8f5; color: #739184; margin-bottom: 22px; }
-.workspace .selection-empty h2 { font-size: 18px; margin-bottom: 8px; }
+.empty-selection-icon { display: grid; place-items: center; width: 64px; height: 64px; border: 1px solid #e3eae5; border-radius: 20px; background: #f5f8f5; color: #739184; margin-bottom: 14px; }
 .workspace .empty-hint { font-size: 14px; color: var(--muted); }
 .workspace .structure-summary, .workspace .dental-feature-list, .workspace .pulp-info-row, .workspace .disclosure-body { font-size: 16px; line-height: 1.85; }
 .workspace .dental-feature-list li { padding-left: 2px; margin-bottom: 12px; }
