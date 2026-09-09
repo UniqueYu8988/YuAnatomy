@@ -97,66 +97,7 @@
   opacity: 0.85;
 }
 
-.workspace .module-content-panel {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  border-top: 1px solid #e2e8e4;
-  padding-top: 8px;
-}
 
-.workspace .module-quick-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-bottom: 8px;
-  flex-shrink: 0;
-}
-
-.workspace .quick-action-chip {
-  padding: 3.5px 8.5px;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 6px;
-  border: 1px solid #dce4df;
-  background: #ffffff;
-  color: #354e44;
-  cursor: pointer;
-  transition: all 0.12s ease;
-}
-
-.workspace .quick-action-chip:hover {
-  border-color: #216b5b;
-  color: #216b5b;
-  background: #f4f8f6;
-}
-
-.workspace .quick-action-chip.active {
-  border-color: #216b5b;
-  background: #216b5b;
-  color: #ffffff;
-}
-
-/* ==========================================================================
-   侧边栏板块快捷面板 (Module Quick Actions Panel)
-   ========================================================================== */
-.workspace .module-quick-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding-top: 10px;
-  border-top: 1px solid #e2e8e4;
-  margin-top: 4px;
-}
-
-.workspace .module-quick-title {
-  font-size: 11px;
-  font-weight: 600;
-  color: #7a8e84;
-  letter-spacing: 0.3px;
-  padding-left: 2px;
-}
 
 /* ==========================================================================
    右上角极简悬浮搜索 (Minimal Floating Search & Dropdown)

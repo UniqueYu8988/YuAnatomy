@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
+import type React from "react";
 import {
   RotateCcw,
   Camera,
@@ -9,6 +10,9 @@ import {
   Route,
   Focus,
   EyeOff,
+  GitBranch,
+  LayoutGrid,
+  Layers,
 } from "lucide-react";
 import type { Concept, SceneState, View } from "./anatomy";
 import type { PresetId } from "./study";
@@ -18,10 +22,15 @@ export interface NakedDockProps {
   state: SceneState;
   setState: React.Dispatch<React.SetStateAction<SceneState>>;
   preset: PresetId;
+  activeModuleId: string;
   onFullReset: () => void;
   chosen: Concept | null;
   onClearChosen: () => void;
   setInspectorTab: (tab: "knowledge" | "clipping") => void;
+  isFdiOpen?: boolean;
+  onToggleFdi?: () => void;
+  onOpenCanals?: () => void;
+  onChangePreset?: (id: PresetId) => void;
 }
 
 interface DockItem {
@@ -38,10 +47,15 @@ export default function NakedDock({
   state,
   setState,
   preset,
+  activeModuleId,
   onFullReset,
   chosen,
   onClearChosen,
   setInspectorTab,
+  isFdiOpen = false,
+  onToggleFdi,
+  onOpenCanals,
+  onChangePreset,
 }: NakedDockProps) {
   const dockRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -224,42 +238,97 @@ export default function NakedDock({
         if (willEnable) setInspectorTab("clipping");
       },
     },
-    {
-      id: "pulp",
-      label: state.rctMode ? "关闭髓腔透视" : "髓腔透视",
-      icon: <ScanLine size={18} />,
-      isActive: !!state.rctMode,
-      bloomColor: "emerald",
-      onClick: () => {
-        const next = !state.rctMode;
-        setState((s) => ({ ...s, rctMode: next }));
-      },
-    },
-    {
-      id: "fascial",
-      label: state.fascialMode ? "退出间隙感染" : "间隙感染",
-      icon: <Route size={18} />,
-      isActive: !!state.fascialMode,
-      bloomColor: "emerald",
-      onClick: () => {
-        const next = !state.fascialMode;
-        setState((s) => ({
-          ...s,
-          fascialMode: next,
-          explode: 0,
-          rotate: false,
-          rctMode: false,
-          rulerMode: false,
-          clipping: s.clipping ? { ...s.clipping, enabled: false } : s.clipping,
-          fascialPathId: s.fascialPathId || "wisdom-tooth-ramus",
-          fascialStageIndex: 0,
-          fascialActiveSpaceId:
-            (INFECTION_PATHWAYS.find((p) => p.id === s.fascialPathId) ?? INFECTION_PATHWAYS[0])
-              .stages[0]?.spaceId,
-        }));
-      },
-    },
   ];
+
+  // =========================================================================
+  // 教学板块专属功能 (Context-Aware Module-Specific Tools)
+  // 严格隔离：根据当前激活板块动态呈现专属功能，彻底清除不匹配项
+  // =========================================================================
+  if (activeModuleId === "dental" || (preset === "dental" && !state.fascialMode)) {
+    // 01 牙体与髓腔：专属集成 髓腔透视、3D根管分型、FDI牙位盘
+    // 严格禁止出现间隙感染等无关工具
+    items.push(
+      {
+        id: "pulp",
+        label: state.rctMode ? "关闭髓腔透视" : "髓腔透视",
+        icon: <ScanLine size={18} />,
+        isActive: !!state.rctMode,
+        bloomColor: "emerald",
+        onClick: () => {
+          const next = !state.rctMode;
+          setState((s) => ({ ...s, rctMode: next }));
+        },
+      },
+      {
+        id: "canals",
+        label: state.canalMode ? "退出3D根管分型" : "3D 根管分型",
+        icon: <GitBranch size={18} />,
+        isActive: !!state.canalMode,
+        bloomColor: "emerald",
+        onClick: () => {
+          if (onOpenCanals) onOpenCanals();
+        },
+      },
+      {
+        id: "fdi",
+        label: isFdiOpen ? "收起牙位盘" : "FDI 牙位盘",
+        icon: <LayoutGrid size={18} />,
+        isActive: isFdiOpen,
+        bloomColor: "emerald",
+        onClick: () => {
+          if (onToggleFdi) onToggleFdi();
+        },
+      },
+    );
+  } else if (
+    activeModuleId === "muscles_spaces" ||
+    preset === "oral" ||
+    preset === "mastication" ||
+    !!state.fascialMode
+  ) {
+    // 02 肌群与筋膜间隙：专属集成 8大间隙感染、咀嚼肌视图
+    // 严格禁止出现牙体与髓腔相关工具
+    const isMasticationActive = preset === "mastication" && !state.fascialMode;
+    items.push(
+      {
+        id: "fascial",
+        label: state.fascialMode ? "退出间隙感染" : "8大间隙感染",
+        icon: <Route size={18} />,
+        isActive: !!state.fascialMode,
+        bloomColor: "emerald",
+        onClick: () => {
+          const next = !state.fascialMode;
+          setState((s) => ({
+            ...s,
+            fascialMode: next,
+            explode: 0,
+            rotate: false,
+            rctMode: false,
+            rulerMode: false,
+            clipping: s.clipping ? { ...s.clipping, enabled: false } : s.clipping,
+            fascialPathId: s.fascialPathId || "wisdom-tooth-ramus",
+            fascialStageIndex: 0,
+            fascialActiveSpaceId:
+              (INFECTION_PATHWAYS.find((p) => p.id === s.fascialPathId) ?? INFECTION_PATHWAYS[0])
+                .stages[0]?.spaceId,
+          }));
+        },
+      },
+      {
+        id: "mastication",
+        label: isMasticationActive ? "恢复口底视图" : "咀嚼肌视图",
+        icon: <Layers size={18} />,
+        isActive: isMasticationActive,
+        bloomColor: "emerald",
+        onClick: () => {
+          if (onChangePreset) {
+            setState((s) => ({ ...s, fascialMode: false }));
+            onChangePreset(isMasticationActive ? "oral" : "mastication");
+          }
+        },
+      },
+    );
+  }
 
   // Contextual Selection actions (Isolate & Hide)
   if (chosen && !state.canalMode) {

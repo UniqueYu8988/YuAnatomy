@@ -595,55 +595,6 @@ export default function YuAnatomy() {
             );
           })}
         </nav>
-
-        {/* 当前板块专属快捷功能 */}
-        {activeModule.quickActions && activeModule.quickActions.length > 0 && (
-          <div className="module-quick-panel">
-            <div className="module-quick-title">板块快捷功能</div>
-            <div className="module-quick-actions">
-              {activeModule.quickActions.map((qa) => {
-                const isActionActive =
-                  qa.action === "toggle_pulp"
-                    ? !!state.rctMode
-                    : qa.action === "open_canals"
-                    ? !!state.canalMode
-                    : qa.action === "toggle_fdi"
-                    ? isFdiOpen
-                    : qa.action === "toggle_fascial"
-                    ? !!state.fascialMode
-                    : qa.action === "focus_mastication"
-                    ? preset === "mastication" && !state.fascialMode
-                    : qa.action === "focus_oral"
-                    ? preset === "oral" && !state.fascialMode
-                    : false;
-                return (
-                  <button
-                    key={qa.id}
-                    type="button"
-                    className={`quick-action-chip ${isActionActive ? "active" : ""}`}
-                    onClick={() => {
-                      if (qa.action === "toggle_pulp")
-                        setState((s) => ({ ...s, rctMode: !s.rctMode }));
-                      else if (qa.action === "open_canals") openCanals();
-                      else if (qa.action === "toggle_fdi") setIsFdiOpen((o) => !o);
-                      else if (qa.action === "toggle_fascial")
-                        setState((s) => ({ ...s, fascialMode: !s.fascialMode }));
-                      else if (qa.action === "focus_mastication") {
-                        setState((s) => ({ ...s, fascialMode: false }));
-                        changePreset("mastication");
-                      } else if (qa.action === "focus_oral") {
-                        setState((s) => ({ ...s, fascialMode: false }));
-                        changePreset("oral");
-                      }
-                    }}
-                  >
-                    {qa.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </aside>
 
       {drawer && (
@@ -957,10 +908,15 @@ export default function YuAnatomy() {
               state={state}
               setState={setState}
               preset={preset}
+              activeModuleId={activeModuleId}
               onFullReset={fullReset}
               chosen={chosen}
               onClearChosen={() => setChosen(null)}
               setInspectorTab={setInspectorTab}
+              isFdiOpen={isFdiOpen}
+              onToggleFdi={() => setIsFdiOpen((o) => !o)}
+              onOpenCanals={openCanals}
+              onChangePreset={changePreset}
             />
           )}
 
