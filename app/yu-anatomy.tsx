@@ -959,19 +959,6 @@ export default function YuAnatomy() {
               </div>
               <button
                 type="button"
-                className={`clipping-opt-btn ${state.clipping.inverted ? "active" : ""}`}
-                onClick={() =>
-                  setState((s) => ({
-                    ...s,
-                    clipping: s.clipping ? { ...s.clipping, inverted: !s.clipping.inverted } : undefined,
-                  }))
-                }
-                title="反转切面方向"
-              >
-                反向
-              </button>
-              <button
-                type="button"
                 className="clipping-close-btn"
                 onClick={() =>
                   setState((s) => ({

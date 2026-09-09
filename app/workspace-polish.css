@@ -476,99 +476,52 @@
   transform: scale(1.05);
 }
 
+/* 轻微分隔线：区分上方核心功能组与下方扩展组 */
+.naked-dock-divider {
+  width: 22px;
+  height: 1.5px;
+  background: rgba(33, 107, 91, 0.22);
+  border-radius: 9999px;
+  margin: 3px 0;
+  flex-shrink: 0;
+}
+
 /* ==========================================================================
-   侧边栏二级纯文字菜单 (Naked Sub Menu) - 彻底去除外壳，纯粗体文字竖向排版
+   原位状态切换提示微标 (In-situ Floating Badge) - 极简高质感微弹窗
    ========================================================================== */
-.naked-sub-menu {
+.naked-dock-in-situ-badge {
   position: absolute;
-  left: calc(100% + 28px);
+  left: calc(100% + 12px);
   top: 50%;
   transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 7px;
-  background: transparent;
-  border: 0;
-  padding: 4px 10px 4px 0;
-  box-shadow: none;
-  z-index: 40;
+  display: inline-flex;
+  align-items: center;
   white-space: nowrap;
-  pointer-events: auto;
-  animation: nakedSubIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* 鼠标从按钮滑向文字的透明桥接区，防止 hover 闪烁丢失 */
-.naked-sub-menu::before {
-  content: "";
-  position: absolute;
-  left: -38px;
-  top: -16px;
-  bottom: -16px;
-  width: 46px;
-  pointer-events: auto;
-}
-
-@keyframes nakedSubIn {
-  from {
-    opacity: 0;
-    transform: translate(-8px, -50%);
-  }
-  to {
-    opacity: 1;
-    transform: translate(0, -50%);
-  }
-}
-
-.naked-sub-item {
-  position: relative;
-  background: transparent;
-  border: 0;
-  padding: 4px 8px;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  color: #173b32;
-  cursor: pointer;
-  outline: none;
-  /* 高保真双层文字阴影，保证在任何复杂模型与背景下文字都清晰锐利 */
-  text-shadow:
-    0 1px 2px rgba(255, 255, 255, 0.95),
-    0 0 10px rgba(255, 255, 255, 0.9),
-    0 0 20px rgba(255, 255, 255, 0.8);
-  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
-  user-select: none;
-  white-space: nowrap;
-}
-
-.naked-sub-item:hover {
-  color: #173b32;
-  transform: translateX(3px);
-  text-shadow:
-    0 1px 3px rgba(255, 255, 255, 1),
-    0 0 12px rgba(255, 255, 255, 0.95);
-}
-
-.naked-sub-item:active {
-  transform: translateX(1px) scale(0.97);
-}
-
-.naked-sub-item.active {
-  color: #216b5b;
-  font-weight: 800;
-  position: relative;
-}
-
-.naked-sub-item.active::after {
-  content: "";
-  position: absolute;
-  bottom: 0px;
-  left: 6px;
-  right: 6px;
-  height: 2px;
+  padding: 6px 13px;
   border-radius: 9999px;
-  background: #216b5b;
-  box-shadow: 0 1px 4px rgba(33, 107, 91, 0.35);
+  background: rgba(22, 53, 44, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 18px rgba(18, 48, 40, 0.25);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  pointer-events: none;
+  z-index: 50;
+  animation: dockBadgePop 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes dockBadgePop {
+  0% {
+    opacity: 0;
+    transform: translate(-8px, -50%) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, -50%) scale(1);
+  }
 }
 
 /* ==========================================================================

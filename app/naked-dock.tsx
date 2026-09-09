@@ -2,17 +2,17 @@ import { useRef, useState, useEffect } from "react";
 import type React from "react";
 import {
   RotateCcw,
-  Camera,
   Boxes,
-  Ruler,
-  Slice,
   ScanLine,
-  Route,
-  Focus,
-  EyeOff,
+  Slice,
+  Camera,
+  Ruler,
   GitBranch,
   LayoutGrid,
+  Route,
   Layers,
+  Focus,
+  EyeOff,
 } from "lucide-react";
 import type { Concept, SceneState, View } from "./anatomy";
 import type { PresetId } from "./study";
@@ -40,8 +40,26 @@ interface DockItem {
   isActive: boolean;
   bloomColor: "emerald" | "cyan" | "amber" | "crimson" | "violet" | "teal";
   onClick: () => void;
-  hasFlyout?: boolean;
 }
+
+const VIEW_CYCLE: { view: View; label: string }[] = [
+  { view: "front", label: "正面" },
+  { view: "side", label: "侧面" },
+  { view: "back", label: "背面" },
+];
+
+const VIEW_LABEL_MAP: Record<string, string> = {
+  front: "正面",
+  side: "侧面",
+  back: "背面",
+  "three-quarter": "斜视",
+};
+
+const CLIPPING_STEPS: { axis: "z" | "x" | "y"; label: string }[] = [
+  { axis: "z", label: "冠状面" },
+  { axis: "x", label: "矢状面" },
+  { axis: "y", label: "水平面" },
+];
 
 export default function NakedDock({
   state,
@@ -61,51 +79,23 @@ export default function NakedDock({
   const btnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const [cursorY, setCursorY] = useState<number | null>(null);
   const [pressedId, setPressedId] = useState<string | null>(null);
-  const flyoutTimer = useRef<number | null>(null);
-  const [activeFlyout, setActiveFlyout] = useState<"view" | "clipping" | null>(null);
+
+  // 原位简洁徽标提示状态（点击后在按钮侧方弹出微标，1.3s 后自动淡出）
+  const [notification, setNotification] = useState<{ id: string; text: string } | null>(null);
+  const notifyTimerRef = useRef<number | null>(null);
+
+  const triggerNotification = (id: string, text: string) => {
+    if (notifyTimerRef.current) window.clearTimeout(notifyTimerRef.current);
+    setNotification({ id, text });
+    notifyTimerRef.current = window.setTimeout(() => {
+      setNotification(null);
+    }, 1300);
+  };
 
   useEffect(() => {
     return () => {
-      if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
+      if (notifyTimerRef.current) window.clearTimeout(notifyTimerRef.current);
     };
-  }, []);
-
-  const handlePointerEnterItem = (id: string) => {
-    if (id === "view" || id === "clipping") {
-      if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
-      setActiveFlyout(id);
-    }
-  };
-
-  const handlePointerLeaveItem = (id: string) => {
-    if (id === "view" || id === "clipping") {
-      if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
-      flyoutTimer.current = window.setTimeout(() => {
-        setActiveFlyout(null);
-      }, 260);
-    }
-  };
-
-  const handleFlyoutContainerEnter = () => {
-    if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
-  };
-
-  const handleFlyoutContainerLeave = () => {
-    if (flyoutTimer.current) window.clearTimeout(flyoutTimer.current);
-    flyoutTimer.current = window.setTimeout(() => {
-      setActiveFlyout(null);
-    }, 260);
-  };
-
-  // Close flyouts on outside pointerdown
-  useEffect(() => {
-    const handleDown = (e: PointerEvent) => {
-      if (dockRef.current && !dockRef.current.contains(e.target as Node)) {
-        setActiveFlyout(null);
-      }
-    };
-    window.addEventListener("pointerdown", handleDown);
-    return () => window.removeEventListener("pointerdown", handleDown);
   }, []);
 
   // Compute Fisheye Proximity Wave transform for a given item
@@ -148,7 +138,7 @@ export default function NakedDock({
     // Cosine proximity weighting: factor in [0, 1]
     const factor = Math.cos((dist / radius) * (Math.PI / 2));
     const tx = 10 * factor; // bulge towards content (+X)
-    const scale = 1.0 + 0.20 * factor; // scale up to 1.2x
+    const scale = 1.0 + 0.2 * factor; // scale up to 1.2x
 
     return {
       transform: `translateX(${tx.toFixed(1)}px) scale(${scale.toFixed(2)})`,
@@ -157,8 +147,12 @@ export default function NakedDock({
     };
   };
 
-  // Build items list with functionally intuitive icons
-  const items: DockItem[] = [
+  // =========================================================================
+  // 核心功能组 (Core Tools): 最上方为 重置、拆解、透视
+  // =========================================================================
+  const hasPulp = activeModuleId === "dental" || (preset === "dental" && !state.fascialMode);
+
+  const coreItems: DockItem[] = [
     {
       id: "reset",
       label: "重置全部解剖状态与视角",
@@ -167,17 +161,7 @@ export default function NakedDock({
       bloomColor: "emerald",
       onClick: () => {
         onFullReset();
-      },
-    },
-    {
-      id: "view",
-      label: "观察视角切换",
-      icon: <Camera size={18} />,
-      isActive: false,
-      bloomColor: "emerald",
-      hasFlyout: true,
-      onClick: () => {
-        setActiveFlyout((f) => (f === "view" ? null : "view"));
+        triggerNotification("reset", "已重置视角与解剖状态");
       },
     },
     {
@@ -194,6 +178,111 @@ export default function NakedDock({
           isolate: false,
           view: preset === "dental" ? "front" : s.view,
         }));
+        triggerNotification("explode", willExplode ? "解剖拆解：100%" : "解剖拆解：已复位");
+      },
+    },
+  ];
+
+  if (hasPulp) {
+    coreItems.push({
+      id: "pulp",
+      label: state.rctMode ? "关闭髓腔透视" : "髓腔透视",
+      icon: <ScanLine size={18} />,
+      isActive: !!state.rctMode,
+      bloomColor: "emerald",
+      onClick: () => {
+        const next = !state.rctMode;
+        setState((s) => ({ ...s, rctMode: next }));
+        triggerNotification("pulp", next ? "髓腔透视：已开启" : "髓腔透视：已关闭");
+      },
+    });
+  }
+
+  // =========================================================================
+  // 下方功能组 (Lower Tools): 解剖(剖切)、视角、测距、以及专有/上下文工具
+  // =========================================================================
+  const lowerItems: DockItem[] = [
+    {
+      id: "clipping",
+      label: state.clipping?.enabled
+        ? `解剖剖切 (当前: ${
+            CLIPPING_STEPS.find((s) => s.axis === state.clipping?.axis)?.label ?? "开启"
+          }，点击切换)`
+        : "解剖剖切",
+      icon: <Slice size={18} />,
+      isActive: !!state.clipping?.enabled,
+      bloomColor: "emerald",
+      onClick: () => {
+        // 单键自动按顺序循环形态：冠状面(Z) -> 矢状面(X) -> 水平面(Y) -> 关闭
+        const currentEnabled = !!state.clipping?.enabled;
+        const currentAxis = state.clipping?.axis ?? "z";
+
+        if (!currentEnabled) {
+          setState((s) => ({
+            ...s,
+            clipping: {
+              enabled: true,
+              axis: "z",
+              offset: s.clipping?.offset ?? 0,
+              inverted: false,
+              solidCap: s.clipping?.solidCap ?? true,
+            },
+          }));
+          setInspectorTab("clipping");
+          triggerNotification("clipping", "解剖剖切：冠状面");
+        } else if (currentAxis === "z") {
+          setState((s) => ({
+            ...s,
+            clipping: {
+              enabled: true,
+              axis: "x",
+              offset: s.clipping?.offset ?? 0,
+              inverted: false,
+              solidCap: s.clipping?.solidCap ?? true,
+            },
+          }));
+          setInspectorTab("clipping");
+          triggerNotification("clipping", "解剖剖切：矢状面");
+        } else if (currentAxis === "x") {
+          setState((s) => ({
+            ...s,
+            clipping: {
+              enabled: true,
+              axis: "y",
+              offset: s.clipping?.offset ?? 0,
+              inverted: false,
+              solidCap: s.clipping?.solidCap ?? true,
+            },
+          }));
+          setInspectorTab("clipping");
+          triggerNotification("clipping", "解剖剖切：水平面");
+        } else {
+          // 循环结束：关闭剖切
+          setState((s) => ({
+            ...s,
+            clipping: {
+              ...(s.clipping ?? { axis: "z", offset: 0, solidCap: true }),
+              enabled: false,
+              inverted: false,
+            },
+          }));
+          triggerNotification("clipping", "解剖剖切：已关闭");
+        }
+      },
+    },
+    {
+      id: "view",
+      label: `观察视角 (当前: ${VIEW_LABEL_MAP[state.view] || "正面"}，点击循环切换)`,
+      icon: <Camera size={18} />,
+      isActive: false,
+      bloomColor: "emerald",
+      onClick: () => {
+        // 单键自动按顺序循环形态（已删减斜视）：正面 -> 侧面 -> 背面
+        const currentIndex = VIEW_CYCLE.findIndex((v) => v.view === state.view);
+        const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % VIEW_CYCLE.length;
+        const next = VIEW_CYCLE[nextIndex];
+        setState((s) => ({ ...s, view: next.view, reset: s.reset + 1 }));
+        triggerNotification("view", `视角：${next.label}`);
       },
     },
     {
@@ -213,52 +302,14 @@ export default function NakedDock({
           fascialMode: false,
           clipping: s.clipping ? { ...s.clipping, solidCap: false } : s.clipping,
         }));
-      },
-    },
-    {
-      id: "clipping",
-      label: state.clipping?.enabled ? "退出解剖剖切" : "解剖剖切",
-      icon: <Slice size={18} />,
-      isActive: !!state.clipping?.enabled,
-      bloomColor: "emerald",
-      hasFlyout: true,
-      onClick: () => {
-        const willEnable = !state.clipping?.enabled;
-        const isUnfolded = preset === "dental" && state.explode > 0.85;
-        setState((s) => ({
-          ...s,
-          clipping: {
-            enabled: willEnable,
-            axis: willEnable ? (isUnfolded ? "z" : (s.clipping?.axis ?? "y")) : (s.clipping?.axis ?? "y"),
-            offset: s.clipping?.offset ?? 0,
-            inverted: s.clipping?.inverted ?? false,
-            solidCap: s.clipping?.solidCap ?? true,
-          },
-        }));
-        if (willEnable) setInspectorTab("clipping");
+        triggerNotification("ruler", next ? "测距标尺：已开启" : "测距标尺：已退出");
       },
     },
   ];
 
-  // =========================================================================
-  // 教学板块专属功能 (Context-Aware Module-Specific Tools)
-  // 严格隔离：根据当前激活板块动态呈现专属功能，彻底清除不匹配项
-  // =========================================================================
+  // 教学板块专属组件集成
   if (activeModuleId === "dental" || (preset === "dental" && !state.fascialMode)) {
-    // 01 牙体与髓腔：专属集成 髓腔透视、3D根管分型、FDI牙位盘
-    // 严格禁止出现间隙感染等无关工具
-    items.push(
-      {
-        id: "pulp",
-        label: state.rctMode ? "关闭髓腔透视" : "髓腔透视",
-        icon: <ScanLine size={18} />,
-        isActive: !!state.rctMode,
-        bloomColor: "emerald",
-        onClick: () => {
-          const next = !state.rctMode;
-          setState((s) => ({ ...s, rctMode: next }));
-        },
-      },
+    lowerItems.push(
       {
         id: "canals",
         label: state.canalMode ? "退出3D根管分型" : "3D 根管分型",
@@ -267,6 +318,7 @@ export default function NakedDock({
         bloomColor: "emerald",
         onClick: () => {
           if (onOpenCanals) onOpenCanals();
+          triggerNotification("canals", "3D 根管分型已打开");
         },
       },
       {
@@ -277,6 +329,7 @@ export default function NakedDock({
         bloomColor: "emerald",
         onClick: () => {
           if (onToggleFdi) onToggleFdi();
+          triggerNotification("fdi", isFdiOpen ? "已收起牙位盘" : "已展开牙位盘");
         },
       },
     );
@@ -286,10 +339,8 @@ export default function NakedDock({
     preset === "mastication" ||
     !!state.fascialMode
   ) {
-    // 02 肌群与筋膜间隙：专属集成 8大间隙感染、咀嚼肌视图
-    // 严格禁止出现牙体与髓腔相关工具
     const isMasticationActive = preset === "mastication" && !state.fascialMode;
-    items.push(
+    lowerItems.push(
       {
         id: "fascial",
         label: state.fascialMode ? "退出间隙感染" : "8大间隙感染",
@@ -312,6 +363,7 @@ export default function NakedDock({
               (INFECTION_PATHWAYS.find((p) => p.id === s.fascialPathId) ?? INFECTION_PATHWAYS[0])
                 .stages[0]?.spaceId,
           }));
+          triggerNotification("fascial", next ? "间隙感染：已开启" : "间隙感染：已退出");
         },
       },
       {
@@ -324,15 +376,19 @@ export default function NakedDock({
           if (onChangePreset) {
             setState((s) => ({ ...s, fascialMode: false }));
             onChangePreset(isMasticationActive ? "oral" : "mastication");
+            triggerNotification(
+              "mastication",
+              isMasticationActive ? "已恢复口底解剖" : "已切换至咀嚼肌视图",
+            );
           }
         },
       },
     );
   }
 
-  // Contextual Selection actions (Isolate & Hide)
+  // 上下文选中操作（单独显示与隐藏）
   if (chosen && !state.canalMode) {
-    items.push(
+    lowerItems.push(
       {
         id: "isolate",
         label: state.isolate ? "恢复周围结构" : "单独显示该结构",
@@ -342,6 +398,7 @@ export default function NakedDock({
         onClick: () => {
           const next = !state.isolate;
           setState((s) => ({ ...s, isolate: next, explode: 0, reset: s.reset + 1 }));
+          triggerNotification("isolate", next ? "已单独显示该结构" : "已恢复周围结构");
         },
       },
       {
@@ -358,10 +415,45 @@ export default function NakedDock({
             isolate: false,
           }));
           onClearChosen();
+          triggerNotification("hide", "已隐藏当前结构");
         },
       },
     );
   }
+
+  const renderDockButton = (item: DockItem) => {
+    const isCurrentActive = item.isActive;
+    const waveStyle = getFisheyeStyle(item.id);
+
+    return (
+      <div key={item.id} className="naked-dock-item-wrapper">
+        <button
+          ref={(el) => {
+            if (el) btnRefs.current.set(item.id, el);
+            else btnRefs.current.delete(item.id);
+          }}
+          type="button"
+          className={`naked-dock-btn ${isCurrentActive ? `active bloom-${item.bloomColor}` : "dormant"}`}
+          style={waveStyle}
+          title={item.label}
+          aria-label={item.label}
+          aria-pressed={isCurrentActive}
+          onPointerDown={() => setPressedId(item.id)}
+          onPointerUp={() => setPressedId(null)}
+          onClick={item.onClick}
+        >
+          {item.icon}
+        </button>
+
+        {/* 简洁原位状态切换提示徽标 */}
+        {notification && notification.id === item.id && (
+          <div className="naked-dock-in-situ-badge" role="status" aria-live="polite">
+            {notification.text}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div
@@ -375,119 +467,14 @@ export default function NakedDock({
         setPressedId(null);
       }}
     >
-      {items.map((item) => {
-        const isCurrentActive = item.isActive;
-        const waveStyle = getFisheyeStyle(item.id);
+      {/* 上方核心功能组 */}
+      {coreItems.map(renderDockButton)}
 
-        return (
-          <div
-            key={item.id}
-            className="naked-dock-item-wrapper"
-            onPointerEnter={() => handlePointerEnterItem(item.id)}
-            onPointerLeave={() => handlePointerLeaveItem(item.id)}
-          >
-            <button
-              ref={(el) => {
-                if (el) btnRefs.current.set(item.id, el);
-                else btnRefs.current.delete(item.id);
-              }}
-              type="button"
-              className={`naked-dock-btn ${isCurrentActive ? `active bloom-${item.bloomColor}` : "dormant"}`}
-              style={waveStyle}
-              title={item.label}
-              aria-label={item.label}
-              aria-pressed={isCurrentActive}
-              onPointerDown={() => setPressedId(item.id)}
-              onPointerUp={() => setPressedId(null)}
-              onClick={item.onClick}
-            >
-              {item.icon}
-            </button>
+      {/* 轻微分隔线 */}
+      <div className="naked-dock-divider" role="separator" aria-orientation="horizontal" />
 
-            {/* Naked Bold Text Secondary Menu for View */}
-            {item.id === "view" && activeFlyout === "view" && (
-              <div
-                className="naked-sub-menu"
-                role="menu"
-                onPointerEnter={handleFlyoutContainerEnter}
-                onPointerLeave={handleFlyoutContainerLeave}
-              >
-                {(["front", "side", "three-quarter", "back"] as View[]).map((v, i) => {
-                  const label = ["正面", "侧面", "斜视", "背面"][i];
-                  const active = state.view === v;
-                  return (
-                    <button
-                      key={v}
-                      type="button"
-                      className={`naked-sub-item ${active ? "active" : ""}`}
-                      onClick={() => {
-                        setState((s) => ({ ...s, view: v, reset: s.reset + 1 }));
-                        setActiveFlyout(null);
-                      }}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Naked Bold Text Secondary Menu for Clipping */}
-            {item.id === "clipping" && activeFlyout === "clipping" && (
-              <div
-                className="naked-sub-menu"
-                role="menu"
-                onPointerEnter={handleFlyoutContainerEnter}
-                onPointerLeave={handleFlyoutContainerLeave}
-              >
-                {[
-                  { axis: "z" as const, label: "冠状面" },
-                  { axis: "y" as const, label: "水平面" },
-                  { axis: "x" as const, label: "矢状面" },
-                ].map(({ axis, label }) => {
-                  const active = state.clipping?.enabled && state.clipping?.axis === axis;
-                  return (
-                    <button
-                      key={axis}
-                      type="button"
-                      className={`naked-sub-item ${active ? "active" : ""}`}
-                      onClick={() => {
-                        setState((s) => ({
-                          ...s,
-                          clipping: {
-                            enabled: true,
-                            axis,
-                            offset: s.clipping?.offset ?? 0,
-                            inverted: s.clipping?.inverted ?? false,
-                            solidCap: s.clipping?.solidCap ?? true,
-                          },
-                        }));
-                        setActiveFlyout(null);
-                      }}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-                <button
-                  type="button"
-                  className={`naked-sub-item ${state.clipping?.inverted ? "active" : ""}`}
-                  onClick={() => {
-                    setState((s) => ({
-                      ...s,
-                      clipping: s.clipping
-                        ? { ...s.clipping, inverted: !s.clipping.inverted }
-                        : { enabled: true, axis: "y", offset: 0, inverted: true, solidCap: true },
-                    }));
-                  }}
-                >
-                  {state.clipping?.inverted ? "反向 ✓" : "反向"}
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      })}
+      {/* 下方功能与拓展组 */}
+      {lowerItems.map(renderDockButton)}
     </div>
   );
 }
