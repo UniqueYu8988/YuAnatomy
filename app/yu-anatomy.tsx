@@ -113,6 +113,11 @@ export default function YuAnatomy() {
   const [about, setAbout] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
 
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showAllInModule, setShowAllInModule] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
   const priorCanalState = useRef<SceneState | null>(null);
 
   const openCanals = () => {
@@ -186,8 +191,29 @@ export default function YuAnatomy() {
   }, []);
 
   useEffect(() => {
+    setShowAllInModule(false);
+  }, [activeModuleId]);
+
+  useEffect(() => {
+    const handlePointerDownOutside = (e: PointerEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSearchOpen(false);
+        setShowAllInModule(false);
+      }
+    };
+    window.addEventListener("pointerdown", handlePointerDownOutside);
+    return () => window.removeEventListener("pointerdown", handlePointerDownOutside);
+  }, []);
+
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        if (isSearchOpen) {
+          setIsSearchOpen(false);
+          setShowAllInModule(false);
+          searchInputRef.current?.blur();
+          return;
+        }
         if (about) {
           setAbout(false);
           return;
@@ -206,17 +232,17 @@ export default function YuAnatomy() {
       if (
         !about &&
         !helpOpen &&
-        e.key === "/" &&
+        (e.key === "/" || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k")) &&
         !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName)
       ) {
         e.preventDefault();
-        setDrawer(true);
-        setTimeout(() => document.querySelector<HTMLInputElement>("#structure-search")?.focus(), 0);
+        setIsSearchOpen(true);
+        setTimeout(() => searchInputRef.current?.focus(), 10);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [about, helpOpen, drawer]);
+  }, [about, helpOpen, drawer, isSearchOpen]);
 
   useEffect(() => {
     if (about) dialog.current?.showModal();
@@ -239,19 +265,60 @@ export default function YuAnatomy() {
   );
   const scopeSet = useMemo(() => new Set(scope), [scope]);
 
-  const results = useMemo(() => {
+  const matchedConcepts = useMemo(() => {
     if (!atlas) return [];
     const q = query.trim().toLowerCase();
-    return atlas.concepts.filter((c) => {
-      if (!c.elements.some((id) => scopeSet.has(id))) return false;
-      if (!q) return true;
+    if (!q) return [];
+    const matches = atlas.concepts.filter((c) => {
       const entry = getStudyEntry(c.id, c.elements);
       const matchName = c.name.toLowerCase().includes(q);
       const matchCn = entry?.displayName?.toLowerCase().includes(q);
       const matchAlias = entry?.aliases?.some((a) => a.toLowerCase().includes(q));
       return matchName || matchCn || matchAlias;
     });
+
+    return matches.sort((a, b) => {
+      const aInScope = a.elements.some((id) => scopeSet.has(id));
+      const bInScope = b.elements.some((id) => scopeSet.has(id));
+      if (aInScope && !bInScope) return -1;
+      if (!aInScope && bInScope) return 1;
+      return 0;
+    });
   }, [atlas, query, scopeSet]);
+
+  const matchedFascialSpaces = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return FASCIAL_SPACES.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.latinName.toLowerCase().includes(q) ||
+        s.clinical.symptoms.toLowerCase().includes(q),
+    );
+  }, [query]);
+
+  const handleSelectConcept = (c: Concept) => {
+    const tooth = getDentalToothByConcept(c.id);
+    if (tooth) {
+      if (preset !== "dental") setPreset("dental");
+      selectToothByFdi(tooth.fdi, false);
+    } else {
+      const inScope = c.elements.some((id) => scopeSet.has(id));
+      if (!inScope) {
+        setPreset("overview");
+      }
+      choose(c);
+    }
+    setIsSearchOpen(false);
+  };
+
+  const handleSelectFascialSpace = (spaceId: string) => {
+    if (!state.fascialMode) {
+      setState((s) => ({ ...s, fascialMode: true }));
+    }
+    selectSpace(spaceId);
+    setIsSearchOpen(false);
+  };
 
   const choose = (c: Concept) => {
     setChosen(c);
@@ -276,6 +343,8 @@ export default function YuAnatomy() {
     setPreset(id);
     setChosen(null);
     setQuery("");
+    setIsSearchOpen(false);
+    setShowAllInModule(false);
     setState((s) => ({
       ...initial,
       view: id === "dental" ? "front" : "three-quarter",
@@ -295,6 +364,8 @@ export default function YuAnatomy() {
     setPreset(mod.preset);
     setChosen(null);
     setQuery("");
+    setIsSearchOpen(false);
+    setShowAllInModule(false);
     setState((s) => ({
       ...initial,
       view: mod.preset === "dental" ? "front" : "three-quarter",
@@ -374,6 +445,8 @@ export default function YuAnatomy() {
   const fullReset = () => {
     setChosen(null);
     setQuery("");
+    setIsSearchOpen(false);
+    setShowAllInModule(false);
     setRulerMeasurement(null);
     setIsFdiOpen(false);
     setState((s) => ({
@@ -523,9 +596,10 @@ export default function YuAnatomy() {
           })}
         </nav>
 
-        {/* 当前板块专属内容与核心结构 */}
-        <div className="module-content-panel">
-          {activeModule.quickActions && activeModule.quickActions.length > 0 && !query && (
+        {/* 当前板块专属快捷功能 */}
+        {activeModule.quickActions && activeModule.quickActions.length > 0 && (
+          <div className="module-quick-panel">
+            <div className="module-quick-title">板块快捷功能</div>
             <div className="module-quick-actions">
               {activeModule.quickActions.map((qa) => {
                 const isActionActive =
@@ -568,79 +642,8 @@ export default function YuAnatomy() {
                 );
               })}
             </div>
-          )}
-
-          <div className="module-structures-list" role="listbox" aria-label="核心解剖结构">
-            {query ? (
-              results.length > 0 ? (
-                results.slice(0, 80).map((c) => {
-                  const e = getStudyEntry(c.id, c.elements);
-                  const isSel = chosen?.id === c.id;
-                  return (
-                    <button
-                      key={c.id}
-                      role="option"
-                      aria-selected={isSel}
-                      type="button"
-                      className={`structure-row ${isSel ? "selected" : ""}`}
-                      onClick={() => choose(c)}
-                    >
-                      <span className="struct-title">{e?.displayName ?? c.name}</span>
-                      <ChevronRight size={12} className="struct-arrow" />
-                    </button>
-                  );
-                })
-              ) : (
-                <p className="module-empty-hint">未找到匹配解剖结构</p>
-              )
-            ) : (
-              activeModule.structures.map((s) => {
-                const isSel =
-                  s.type === "tooth"
-                    ? selectedTooth?.fdi === s.param
-                    : s.type === "fascial"
-                    ? state.fascialActiveSpaceId === s.param
-                    : s.type === "concept"
-                    ? chosen?.id === s.param
-                    : false;
-                return (
-                  <button
-                    key={s.id}
-                    role="option"
-                    aria-selected={isSel}
-                    type="button"
-                    className={`structure-row ${isSel ? "selected" : ""}`}
-                    onClick={() => handleSelectStructure(s)}
-                  >
-                    <span className="struct-title">{s.name}</span>
-                    {s.tag && <span className="struct-tag">{s.tag}</span>}
-                  </button>
-                );
-              })
-            )}
           </div>
-
-          <div className="sidebar-search-wrap">
-            <Search size={14} className="search-icon" />
-            <input
-              id="structure-search"
-              value={query}
-              placeholder="快速检索结构或牙位..."
-              aria-label="搜索解剖结构"
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                className="search-clear-btn"
-                title="清除检索"
-              >
-                <X size={13} />
-              </button>
-            )}
-          </div>
-        </div>
+        )}
       </aside>
 
       {drawer && (
@@ -666,6 +669,159 @@ export default function YuAnatomy() {
           >
             {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
           </button>
+
+          {/* Top-Right Minimal Floating Search */}
+          <div className="floating-search-wrap" ref={searchContainerRef}>
+            <div
+              className={`floating-search-bar ${isSearchOpen ? "active" : ""}`}
+              onClick={() => {
+                setIsSearchOpen(true);
+                searchInputRef.current?.focus();
+              }}
+            >
+              <Search size={14} className="floating-search-icon" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                id="floating-structure-search"
+                className="floating-search-input"
+                value={query}
+                placeholder="搜索结构或牙位..."
+                aria-label="搜索解剖结构"
+                onFocus={() => setIsSearchOpen(true)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setIsSearchOpen(true);
+                }}
+              />
+              {query ? (
+                <button
+                  type="button"
+                  className="floating-search-clear"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setQuery("");
+                    searchInputRef.current?.focus();
+                  }}
+                  title="清除检索"
+                >
+                  <X size={13} />
+                </button>
+              ) : (
+                <kbd className="floating-search-kbd">⌘K</kbd>
+              )}
+            </div>
+
+            {isSearchOpen && (
+              <div
+                className="floating-search-dropdown"
+                role="listbox"
+                aria-label="解剖结构列表"
+              >
+                {!query.trim() ? (
+                  <>
+                    <div className="search-dropdown-header">
+                      <span>{activeModule.name} · 核心结构</span>
+                    </div>
+                    {(showAllInModule
+                      ? activeModule.structures
+                      : activeModule.structures.slice(0, 6)
+                    ).map((s) => {
+                      const isSel =
+                        s.type === "tooth"
+                          ? selectedTooth?.fdi === s.param
+                          : s.type === "fascial"
+                          ? state.fascialActiveSpaceId === s.param
+                          : s.type === "concept"
+                          ? chosen?.id === s.param
+                          : false;
+                      return (
+                        <button
+                          key={s.id}
+                          role="option"
+                          aria-selected={isSel}
+                          type="button"
+                          className={`search-dropdown-row ${isSel ? "selected" : ""}`}
+                          onClick={() => {
+                            handleSelectStructure(s);
+                            setIsSearchOpen(false);
+                          }}
+                        >
+                          <span className="search-row-title">{s.name}</span>
+                          {s.tag && <span className="search-row-tag">{s.tag}</span>}
+                        </button>
+                      );
+                    })}
+                    {activeModule.structures.length > 6 && (
+                      <button
+                        type="button"
+                        className="search-dropdown-more-row"
+                        onClick={() => setShowAllInModule((prev) => !prev)}
+                        title={showAllInModule ? "收起" : "展开当前板块更多结构"}
+                      >
+                        <span className="search-more-dots">···</span>
+                        <span className="search-more-text">
+                          {showAllInModule
+                            ? "收起部分结构"
+                            : `更多结构 (${activeModule.structures.length - 6})`}
+                        </span>
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="search-dropdown-header">
+                      <span>
+                        搜索结果 ({matchedFascialSpaces.length + matchedConcepts.length})
+                      </span>
+                    </div>
+                    {matchedFascialSpaces.length === 0 && matchedConcepts.length === 0 ? (
+                      <div className="search-dropdown-empty">
+                        未找到与 “{query}” 匹配的解剖结构
+                      </div>
+                    ) : (
+                      <>
+                        {matchedFascialSpaces.map((fs) => (
+                          <button
+                            key={fs.id}
+                            type="button"
+                            className="search-dropdown-row"
+                            onClick={() => handleSelectFascialSpace(fs.id)}
+                          >
+                            <span className="search-row-title">{fs.name}</span>
+                            <span className="search-row-tag">间隙</span>
+                            <ChevronRight size={12} className="search-row-arrow" />
+                          </button>
+                        ))}
+                        {matchedConcepts.slice(0, 20).map((c) => {
+                          const e = getStudyEntry(c.id, c.elements);
+                          const isSel = chosen?.id === c.id;
+                          const tooth = getDentalToothByConcept(c.id);
+                          const tag = tooth ? `牙位 ${tooth.fdi}` : e?.chapter ?? undefined;
+                          return (
+                            <button
+                              key={c.id}
+                              role="option"
+                              aria-selected={isSel}
+                              type="button"
+                              className={`search-dropdown-row ${isSel ? "selected" : ""}`}
+                              onClick={() => handleSelectConcept(c)}
+                            >
+                              <span className="search-row-title">
+                                {e?.displayName ?? c.name}
+                              </span>
+                              {tag && <span className="search-row-tag">{tag}</span>}
+                              <ChevronRight size={12} className="search-row-arrow" />
+                            </button>
+                          );
+                        })}
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
 
           {atlas && (
             <AnatomyScene
