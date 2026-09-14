@@ -108,6 +108,11 @@ export default function YuAnatomy() {
   const [query, setQuery] = useState("");
   const [chosen, setChosen] = useState<Concept | null>(null);
   const [progress, setProgress] = useState(0);
+  const [streamingStatus, setStreamingStatus] = useState<{
+    loading: boolean;
+    loaded: number;
+    total: number;
+  }>({ loading: false, loaded: 1, total: 12 });
   const [error, setError] = useState("");
   const [drawer, setDrawer] = useState(false);
   const [about, setAbout] = useState(false);
@@ -793,15 +798,22 @@ export default function YuAnatomy() {
               onProgress={setProgress}
               onMeasure={setRulerMeasurement}
               onSelectFascialSpace={selectSpace}
+              onStreamingStatus={setStreamingStatus}
             />
           )}
 
-
           {progress < 100 && !error && (
             <div className="loading" role="status">
-              <span className="eyebrow">正在加载高精度解剖模型</span>
+              <span className="eyebrow">正在加载牙体解剖模型</span>
               <strong>{progress}%</strong>
               <progress max="100" value={progress} />
+            </div>
+          )}
+
+          {progress === 100 && streamingStatus.loading && (activeModuleId !== "dental" || showJawBones) && (
+            <div className="streaming-load-badge" role="status" aria-live="polite">
+              <div className="streaming-spinner" />
+              <span>正在载入拓展解剖结构 ({streamingStatus.loaded}/{streamingStatus.total})</span>
             </div>
           )}
 

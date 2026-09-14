@@ -15,6 +15,12 @@ import { createPulpCavityGeometry, loadPulpData } from "./pulp-generator";
 import { FASCIAL_SPACES } from "./fascial-spaces";
 import { getDentalToothByMesh } from "./dental-data";
 
+export interface StreamingStatus {
+  loading: boolean;
+  loaded: number;
+  total: number;
+}
+
 interface Props {
   atlas: Atlas;
   state: SceneState;
@@ -23,6 +29,7 @@ interface Props {
   onError: (s: string) => void;
   onMeasure?: (measurement: RulerMeasurement | null) => void;
   onSelectFascialSpace?: (spaceId: string) => void;
+  onStreamingStatus?: (status: StreamingStatus) => void;
 }
 export default function AnatomyScene({
   atlas,
@@ -32,16 +39,33 @@ export default function AnatomyScene({
   onError,
   onMeasure,
   onSelectFascialSpace,
+  onStreamingStatus,
 }: Props) {
   const host = useRef<HTMLDivElement>(null),
     latest = useRef(state),
     select = useRef(onSelect),
     measure = useRef(onMeasure),
-    selectFascial = useRef(onSelectFascialSpace);
+    selectFascial = useRef(onSelectFascialSpace),
+    streamingStatusCb = useRef(onStreamingStatus),
+    expediteRef = useRef<(() => void) | null>(null);
+
   latest.current = state;
   select.current = onSelect;
   measure.current = onMeasure;
   selectFascial.current = onSelectFascialSpace;
+  streamingStatusCb.current = onStreamingStatus;
+
+  // 当用户切换到非牙体模块、开启颌骨或间隙感染时，立即全速追加载入剩余分块
+  useEffect(() => {
+    const s = state;
+    const needsFull =
+      (s.preset && s.preset !== "dental") ||
+      s.fascialMode ||
+      (s.scope && s.scope.length > 28);
+    if (needsFull) {
+      expediteRef.current?.();
+    }
+  }, [state.preset, state.fascialMode, state.scope]);
   useEffect(() => {
     const el = host.current!;
     let disposed = false,
@@ -617,7 +641,9 @@ export default function AnatomyScene({
       return m;
     };
     const mats = new Map(SYSTEMS.map((s) => [s.id, materialFor(s.id)]));
-    let loaded = 0;
+    const loadedChunks = new Set<number>();
+    const activeFetches = new Map<number, Promise<void>>();
+
     const loadChunk = async (ci: number) => {
       const chunk = atlas.chunks[ci],
         compressed = !!chunk.gzip && typeof DecompressionStream !== "undefined";
@@ -675,24 +701,90 @@ export default function AnatomyScene({
         stencilGroup.add(frontMesh);
       });
       lastState = null;
-      loaded++;
-      onProgress(Math.round((loaded / atlas.chunks.length) * 95));
       dirty = true;
     };
+
+    const fetchAndAssembleChunk = (ci: number): Promise<void> => {
+      if (loadedChunks.has(ci)) return Promise.resolve();
+      const existing = activeFetches.get(ci);
+      if (existing) return existing;
+
+      const p = (async () => {
+        try {
+          await loadChunk(ci);
+          if (!disposed) loadedChunks.add(ci);
+        } finally {
+          activeFetches.delete(ci);
+        }
+      })();
+      activeFetches.set(ci, p);
+      return p;
+    };
+
+    let isStreamingRemaining = false;
+
+    const loadRemainingChunks = async (concurrency = 2) => {
+      if (isStreamingRemaining || disposed || loadedChunks.size >= atlas.chunks.length) return;
+      isStreamingRemaining = true;
+      streamingStatusCb.current?.({
+        loading: true,
+        loaded: loadedChunks.size,
+        total: atlas.chunks.length,
+      });
+
+      try {
+        let cursor = 1;
+        await Promise.all(
+          Array.from({ length: concurrency }, async () => {
+            while (cursor < atlas.chunks.length && !disposed) {
+              const ci = cursor++;
+              if (!loadedChunks.has(ci)) {
+                await fetchAndAssembleChunk(ci);
+                if (!disposed) {
+                  streamingStatusCb.current?.({
+                    loading: loadedChunks.size < atlas.chunks.length,
+                    loaded: loadedChunks.size,
+                    total: atlas.chunks.length,
+                  });
+                }
+              }
+            }
+          }),
+        );
+      } catch (e) {
+        if (!disposed) console.warn("拓展分块加载异常:", e);
+      } finally {
+        isStreamingRemaining = false;
+        if (!disposed) {
+          streamingStatusCb.current?.({
+            loading: loadedChunks.size < atlas.chunks.length,
+            loaded: loadedChunks.size,
+            total: atlas.chunks.length,
+          });
+        }
+      }
+    };
+
+    expediteRef.current = () => {
+      loadRemainingChunks(3);
+    };
+
+    let idleTimer: number | null = null;
+
     (async () => {
       try {
-        let cursor = 0;
+        onProgress(20);
+        // 第一阶段（核心牙体与髓腔）：仅加载 chunk 0（28颗恒牙）+ 髓腔曲面 + 根管模型
         const [pulpData] = await Promise.all([
           loadPulpData(atlas, abort.signal),
           canalLoading,
-          ...Array.from({ length: 3 }, async () => {
-            while (cursor < atlas.chunks.length) {
-              const i = cursor++;
-              await loadChunk(i);
-            }
+          fetchAndAssembleChunk(0).then(() => {
+            if (!disposed) onProgress(65);
           }),
         ]);
+
         if (!disposed) {
+          onProgress(85);
           for (const part of pulpData.manifest.parts) {
             const index = atlas.parts.findIndex((p) => p.id === part.id);
             const group = createPulpCavityGeometry(part, pulpData.buffer);
@@ -712,10 +804,45 @@ export default function AnatomyScene({
             pulpGroups[index] = group;
             scene.add(group);
           }
+
           lastClippingKey = "";
           ready = true;
+          // 牙体与髓腔已完全就绪，立即关闭阻断式进度条
           onProgress(100);
           dirty = true;
+
+          streamingStatusCb.current?.({
+            loading: loadedChunks.size < atlas.chunks.length,
+            loaded: loadedChunks.size,
+            total: atlas.chunks.length,
+          });
+
+          // 检查当前状态是否直接需要拓展结构（例如初次挂载即处于非牙体板块或开启了颌骨）
+          const s = latest.current;
+          const needsFull =
+            (s.preset && s.preset !== "dental") ||
+            s.fascialMode ||
+            (s.scope && s.scope.length > 28);
+
+          if (needsFull) {
+            loadRemainingChunks(3);
+          } else {
+            // 在牙体工作台操作空闲 1.2 秒后，静默预载剩余分块
+            idleTimer = window.setTimeout(() => {
+              if (!disposed && loadedChunks.size < atlas.chunks.length) {
+                if (typeof window.requestIdleCallback !== "undefined") {
+                  window.requestIdleCallback(
+                    () => {
+                      if (!disposed) loadRemainingChunks(2);
+                    },
+                    { timeout: 3000 },
+                  );
+                } else {
+                  loadRemainingChunks(2);
+                }
+              }
+            }, 1200);
+          }
         }
       } catch (e) {
         if (!disposed) onError(e instanceof Error ? e.message : "模型加载失败，请刷新后重试。");
@@ -1519,6 +1646,8 @@ export default function AnatomyScene({
     renderer.domElement.addEventListener("webglcontextlost", contextLost);
     return () => {
       disposed = true;
+      if (idleTimer) window.clearTimeout(idleTimer);
+      expediteRef.current = null;
       abort.abort();
       cancelAnimationFrame(frame);
       observer.disconnect();
